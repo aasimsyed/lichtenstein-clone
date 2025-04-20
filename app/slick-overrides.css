@@ -1,0 +1,65 @@
+/* Override slick-carousel default styles */
+.slick-prev:before,
+.slick-next:before {
+  color: #333 !important;
+}
+
+.slick-dots li button:before {
+  color: #333 !important;
+}
+
+/* Override any other slick carousel white text */
+.slick-slider {
+  color: #333 !important;
+}
+
+/* Make sure carousel navigation elements have proper contrast */
+.slick-arrow {
+  background: rgba(200, 200, 200, 0.7) !important;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  background: rgba(180, 180, 180, 0.9) !important;
+}
+
+/* Ensure all dropdown menus and other components have dark text */
+select, option, 
+input, textarea,
+button, label,
+.ui-widget,
+.ui-menu-item,
+.ui-button,
+.dropdown-menu li,
+.ui-selectmenu-text,
+.ui-selectmenu-button,
+.ui-state-default,
+.ui-widget-content,
+.ui-widget-header {
+  color: #333 !important;
+}
+
+/* Ensure specific dropdown elements are properly colored */
+#sortingOption select,
+#viewingOption select,
+#noDisplayOption select,
+#searchNumSelect select,
+.ui-selectmenu-menu,
+.ui-menu {
+  color: #333 !important;
+  background-color: #fff !important;
+}
+
+/* Force all text elements to have dark color unless specifically excepted */
+div, span, p, a:not(.btn-primary), h1, h2, h3, h4, h5, h6, li {
+  color: #333 !important;
+}
+
+/* Override any explicitly white text with important */
+[style*="color: white"],
+[style*="color:#fff"],
+[style*="color: #fff"],
+[style*="color:#ffffff"],
+[style*="color: #ffffff"] {
+  color: #333 !important;
+} 
