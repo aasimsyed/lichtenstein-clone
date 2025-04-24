@@ -1,0 +1,98 @@
+/* Custom styles for Slick slider dots */
+.slick-dots {
+  display: flex !important;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  width: 100%;
+}
+
+/* Mobile-specific override to ensure correct positioning */
+@media (max-width: 768px) {
+  .slick-dots {
+    /* Remove position and bottom properties that might conflict */
+    position: absolute !important;
+    bottom: -40px !important;
+    top: auto !important;
+  }
+}
+
+.slick-dots li {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 5px;
+  padding: 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+.slick-dots li button {
+  font-size: 0; /* Hide the text */
+  line-height: 0;
+  display: block;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  margin: 4px auto;
+  cursor: pointer;
+  color: transparent;
+  border: 0;
+  border-radius: 50%;
+  outline: none;
+  background: #888 !important; /* Make the dots darker and ensure visibility */
+  opacity: 1 !important; /* Full opacity to ensure visibility */
+  transition: all 0.3s ease;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important; /* Add shadow for better visibility */
+}
+
+.slick-dots li button:hover {
+  opacity: 1 !important;
+  background: #666 !important;
+}
+
+.slick-dots li.slick-active button {
+  opacity: 1 !important;
+  background: #333 !important;
+  transform: scale(1.2); /* Slightly enlarge the active dot */
+}
+
+/* Override any inline styles from slick that would show numbers */
+.slick-dots li button.custom-dot {
+  font-size: 0 !important;
+  color: transparent !important;
+  text-indent: -9999px !important;
+  background: #888 !important; /* Ensure custom-dot also has a background */
+  border: 1px solid #666 !important; /* Add border for better visibility */
+}
+
+.slick-dots li.slick-active button.custom-dot {
+  background: #333 !important;
+}
+
+/* Make sure carousel container has proper spacing */
+.home-carousel-container {
+  /* Adjusted for mobile */
+  padding-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .home-carousel-container {
+    margin-bottom: 80px !important;
+    overflow: visible !important;
+  }
+}
+
+/* Remove the counter which was used for numbered dots */
+.slick-slider {
+  counter-reset: none;
+}
+
+/* Ensure no pseudo-elements are creating extra dots */
+.slick-dots li button:before,
+.slick-dots li button:after {
+  content: none !important;
+  display: none !important;
+} 

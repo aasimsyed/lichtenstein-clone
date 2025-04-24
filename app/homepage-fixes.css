@@ -1,0 +1,184 @@
+/* Direct DOM manipulation fix for slick-dots positioning */
+@media (max-width: 768px) {
+  /* Drop all other styling and focus only on the critical issue */
+  .slick-slider .slick-dots,
+  .home-carousel-container .slick-dots,
+  #homepage .slick-dots,
+  ul.slick-dots {
+    position: absolute !important;
+    bottom: -60px !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Add script to force the positioning after DOM loads */
+#homepage:after {
+  content: "" !important;
+  display: none !important;
+}
+
+/* Inject a style tag with higher priority */
+@media (max-width: 768px) {
+  /* Maximize forced control over styling */
+  #homepage .home-carousel-container {
+    margin-bottom: 70px !important;
+    position: relative !important;
+    overflow: visible !important;
+  }
+  
+  /* Extreme specificity to override any existing styles */
+  html body .slick-slider .slick-dots,
+  html body .slick-slider ul.slick-dots,
+  html body *[id] .slick-slider .slick-dots,
+  html body *[class] .slick-slider .slick-dots {
+    top: auto !important;
+    position: absolute !important;
+    bottom: -60px !important;
+    z-index: 100 !important;
+  }
+  
+  /* Target callout to ensure it's below dots */
+  #homepageCarouselCallout {
+    position: absolute !important;
+    bottom: -100px !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 5 !important;
+  }
+  
+  /* Ensure carousel height is constrained */
+  .homepageCarouselDiv {
+    height: 160px !important;
+    max-height: 160px !important;
+  }
+}
+
+/* Homepage carousel critical fixes - uses !important to force override other styles */
+@media (max-width: 768px) {
+  /* Ensure container has enough space for dots and callout */
+  #homepage #homepageCarouselWrapper.home-carousel-container {
+    margin-bottom: 100px !important;
+    max-height: 220px !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+  
+  /* Ensure carousel div is properly sized */
+  #homepage .homepageCarouselDiv {
+    height: 180px !important;
+    max-height: 180px !important;
+    overflow: hidden !important;
+  }
+  
+  /* Force caption to have correct position and z-index */
+  #homepage .homepageCarouseCaption {
+    position: absolute !important;
+    bottom: 0 !important;
+    z-index: 3 !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 8px 15px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    background: rgba(240,240,240,0.8) !important;
+  }
+  
+  /* Force dot navigation below the carousel content */
+  html body #homepage .slick-dots,
+  html body .home-carousel-container .slick-dots,
+  html body .slick-slider .slick-dots {
+    position: absolute !important;
+    bottom: -35px !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 10 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    top: auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure dot styling is consistent */
+  html body #homepage .slick-dots li,
+  html body .home-carousel-container .slick-dots li {
+    position: relative !important;
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 5px !important;
+    padding: 0 !important;
+  }
+  
+  html body #homepage .slick-dots li button,
+  html body .home-carousel-container .slick-dots li button {
+    font-size: 0 !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 5px auto !important;
+    background: #ccc !important;
+    border: none !important;
+    display: block !important;
+  }
+  
+  html body #homepage .slick-dots li.slick-active button,
+  html body .home-carousel-container .slick-dots li.slick-active button {
+    background: #555 !important;
+  }
+  
+  html body #homepage .slick-dots li button:before,
+  html body .home-carousel-container .slick-dots li button:before {
+    content: none !important;
+    display: none !important;
+  }
+  
+  html body #homepage .slick-dots li button:after,
+  html body .home-carousel-container .slick-dots li button:after {
+    content: none !important;
+    display: none !important;
+  }
+  
+  /* Force callout below the dots */
+  html body #homepage #homepageCarouselCallout {
+    position: absolute !important;
+    bottom: -95px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 4 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  html body #homepage #homepageCarouselWrapper #homepageCarouselCallout a,
+  html body #homepageCarouselCallout a {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    padding: 10px 35px 10px 10px !important;
+    margin: 0 !important;
+    background-color: rgba(255, 245, 204, 0.95) !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+  
+  /* Give extra space to selections container to prevent overlap */
+  .selections-carousel-container {
+    margin-top: 40px !important;
+    padding-top: 20px !important;
+  }
+} 

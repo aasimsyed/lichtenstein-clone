@@ -490,19 +490,25 @@ a:hover {
   margin-bottom: 40px;
   overflow: hidden;
   width: 100%;
-  max-height: 650px;
+  max-height: 600px;
 }
 
 .homepageCarouselDiv {
   position: relative;
   outline: none;
-  max-height: 600px;
+  height: 400px;
+  max-height: 400px;
+  overflow: hidden;
 }
 
 .image-wrapper {
   position: relative;
   width: 100%;
-  max-height: 400px;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .homepageCarouseCaption {
@@ -544,8 +550,8 @@ a:hover {
   color: #333;
   margin-left: 0px;
   padding: 30px 105px 30px 20px;
-  background-color: #e0e0e0;
-  opacity: 0.9;
+  background-color: rgba(255, 245, 204, 0.85);
+  opacity: 0.85;
   text-decoration: none;
   font-weight: 400;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
@@ -557,6 +563,7 @@ a:hover {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 #homepage #homepageCarouselWrapper #homepageCarouselCallout a:after,
@@ -567,15 +574,18 @@ a:hover {
   pointer-events: none;
   width: 30px;
   height: 15px;
-  background: transparent url(/img/arrow-white-next.svg) no-repeat center center;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Cpath d='M1 7.5h25M19 1l7 6.5-7 6.5' stroke='%23333' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center;
   background-size: contain;
   right: 20px;
   top: 50%;
   margin-top: -7px;
 }
 
+#homepage #homepageCarouselWrapper #homepageCarouselCallout a:hover,
 #homepageCarouselCallout a:hover {
-  opacity: 1;
+  opacity: 0.95;
+  background-color: rgba(255, 242, 179, 0.95);
+  transition: all 0.2s ease;
 }
 
 @media (min-width: 768px) {
@@ -1018,59 +1028,144 @@ footer {
     display: block;
   }
   
+  #homepage {
+    margin-top: 15px;
+    padding-bottom: 0;
+  }
+  
   .homepageCarouselImg {
-    height: 300px;
+    height: 220px;
   }
   
-  /* Fix for overlapping dots and callout banner */
   .home-carousel-container {
-    margin-bottom: 60px;
+    margin-bottom: 0 !important;
+    max-height: 220px !important;
+    padding-top: 10px;
+    position: relative;
+    overflow: visible !important;
   }
   
-  .slick-dots {
-    bottom: -35px;
-  }
-  
-  #homepageCarouselCallout {
-    position: static;
-    margin: 0;
-    width: 100%;
-    box-sizing: border-box;
-    max-width: 100%;
+  .homepageCarouselDiv {
+    height: 180px;
+    max-height: 180px;
     overflow: hidden;
-    margin-top: 40px;
+  }
+  
+  /* Force caption styling */
+  .homepageCarouseCaption {
+    position: absolute !important;
+    bottom: 0 !important;
+    z-index: 3 !important;
+    padding: 8px 15px;
+    font-size: 11px;
+    line-height: 1.2;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+  
+  /* Position dots tightly below carousel */
+  .slick-dots {
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-top: 10px !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    text-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    top: auto !important;
+  }
+  
+  .slick-dots li {
+    position: relative !important;
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 5px !important;
+    padding: 0 !important;
+  }
+  
+  .slick-dots li button {
+    font-size: 0 !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 5px auto !important;
+    background: #ccc !important;
+  }
+  
+  .slick-dots li.slick-active button {
+    background: #555 !important;
+  }
+  
+  .slick-dots li button:before {
+    content: none !important;
+    display: none !important;
+  }
+  
+  /* Position callout properly below dots */
+  #homepageCarouselCallout {
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    z-index: 4 !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    margin-top: 10px !important;
+    margin-bottom: 15px !important;
   }
 
   #homepage #homepageCarouselWrapper #homepageCarouselCallout a,
   #homepageCarouselCallout a {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    width: 100%;
-    max-width: 100%;
-    font-size: 16px;
-    line-height: 22px;
-    padding: 15px 50px 15px 15px;
-    margin: 0;
-    box-sizing: border-box;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    padding: 10px 35px 10px 10px !important;
+    margin: 0 !important;
+    background-color: rgba(255, 245, 204, 0.95) !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   #homepage #homepageCarouselWrapper #homepageCarouselCallout a:after,
   #homepageCarouselCallout a:after {
-    width: 20px;
-    height: 10px;
-    right: 15px;
-    margin-top: -5px;
+    content: '' !important;
+    position: absolute !important;
+    width: 14px !important;
+    height: 7px !important;
+    right: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-top: 0 !important;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 30 15'%3E%3Cpath d='M1 7.5h25M19 1l7 6.5-7 6.5' stroke='%23333' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center !important;
+    background-size: contain !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
   }
   
+  /* Reduce spacing between elements */
   .selections-carousel-container {
     padding: 0 10px;
+    margin-top: 5px !important;
   }
   
   .selections-title {
     font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
   }
   
   .carousel-slide {
@@ -1084,488 +1179,16 @@ footer {
   .artwork-date, .artwork-rlcr {
     font-size: 12px;
   }
-}
-
-/* Catalogue Page Styles */
-#mainBody {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 30px;
-}
-
-#pageTopMatter {
-  margin-bottom: 20px;
-}
-
-#pageTopMatter h1 {
-  font-size: 2rem;
-  font-weight: 400;
-  color: #333;
-}
-
-/* Browse section tools */
-#browseSectionTools {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 30px;
-  width: 100%;
-}
-
-#browseMobileControls {
-  display: none;
-}
-
-#searchFilterWrapper {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
-}
-
-#searchBoxesWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 280px;
-  margin-right: 20px;
-}
-
-#searcWrapper form, #searcNumWrapper form {
-  position: relative;
-  display: flex;
-}
-
-#searchbox, #searchNumBox {
-  width: 100%;
-  padding: 8px 30px 8px 8px;
-  border: 1px solid #ccc;
-  font-size: 0.9rem;
-}
-
-#seachBoxButton, #seachNumButton {
-  position: absolute;
-  right: 0;
-  top: 0;
-  border: none;
-  background: transparent url('/img/icon-search-small.svg') no-repeat center;
-  width: 30px;
-  height: 100%;
-  text-indent: -9999px;
-  cursor: pointer;
-}
-
-/* Remove searchNumSelect styles since we've removed that element */
-#searchNumSelect {
-  display: none;
-}
-
-#searchNumSelect span {
-  display: none;
-}
-
-#searchNumSelect select {
-  display: none;
-}
-
-/* Filter accordion */
-#filterSearchlinkWrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-#filterAccordion {
-  flex: 1;
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin-bottom: 10px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.filterCont {
-  margin-bottom: 10px;
-}
-
-.ui-accordion-header {
-  padding: 8px;
-  background-color: #f6f6f6;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 400;
-  position: relative;
-  color: #333;
-}
-
-.ui-accordion-header .ui-icon {
-  position: absolute;
-  left: 0.5em;
-  top: 50%;
-  margin-top: -8px;
-  width: 16px;
-  height: 16px;
-  color: #333;
-}
-
-.ui-icon-triangle-1-e:before {
-  content: "►";
-  font-size: 10px;
-}
-
-.ui-icon-triangle-1-s:before {
-  content: "▼";
-  font-size: 10px;
-}
-
-.ui-accordion-content {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-top: none;
-}
-
-.filterOptions {
-  padding: 10px;
-  margin-bottom: 10px;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-.filter {
-  margin-bottom: 5px;
-}
-
-.filter label {
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.filter input[type="radio"] {
-  margin-right: 5px;
-}
-
-.filetercount {
-  color: #777;
-  font-size: 0.85rem;
-}
-
-/* Advanced search */
-.advancedSearchLink {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
-
-#advancedSearchLinkTag {
-  color: #444;
-  text-decoration: underline;
-  font-size: 0.9rem;
-}
-
-#guidelink {
-  display: flex;
-  align-items: center;
-  color: #444;
-  font-size: 0.9rem;
-}
-
-#guidelink img {
-  height: 16px;
-  width: 16px;
-  margin-right: 5px;
-}
-
-#AdvancedSearchWrapper {
-  width: 100%;
-  background: #f9f9f9;
-  border: 1px solid #ddd;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-#AdvancedSearchWrapperInner {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.searchItemRows {
-  display: flex;
-  gap: 15px;
-}
-
-.searchItemRow {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.searchItemRow label {
-  font-size: 0.9rem;
-  margin-bottom: 5px;
-  color: #444;
-}
-
-.searchItemRow input[type="text"] {
-  padding: 8px;
-  border: 1px solid #ccc;
-  font-size: 0.9rem;
-}
-
-.searchItemRow.double {
-  flex: 2;
-}
-
-.dimSearchRow {
-  align-items: flex-end;
-}
-
-.dimSearchRow select {
-  margin-left: 5px;
-  padding: 2px;
-  border: 1px solid #ccc;
-}
-
-.advanced-search-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.advanced-search-buttons button {
-  padding: 8px 15px;
-  border: 1px solid #ccc;
-  background: #eee;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.advanced-search-buttons button:hover {
-  background: #ddd;
-}
-
-/* Select menus and options */
-#selectMenus {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 15px;
-  margin-top: 15px;
-}
-
-#otherOptions {
-  display: flex;
-  gap: 15px;
-}
-
-#otherOptions a {
-  color: #444;
-  text-decoration: underline;
-  font-size: 0.9rem;
-}
-
-#sortingOption, #viewingOption, #noDisplayOption {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-#sortingOption label, #viewingOption label, #noDisplayOption label {
-  font-size: 0.9rem;
-  color: #444;
-}
-
-#sortingOption select, #viewingOption select, #noDisplayOption select {
-  padding: 5px;
-  border: 1px solid #ccc;
-  font-size: 0.9rem;
-  min-width: 120px;
-}
-
-/* Results and filters */
-#restulsFiltersWrapper {
-  margin-bottom: 15px;
-}
-
-#restulsCont {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* Index container and gallery */
-#indexContainer {
-  margin-bottom: 30px;
-}
-
-.list-view-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.list-view-table th {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  font-weight: 500;
-  color: #444;
-}
-
-.list-view-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 0.9rem;
-}
-
-.list-view-table a {
-  color: #005;
-  text-decoration: none;
-}
-
-.list-view-table a:hover {
-  text-decoration: underline;
-}
-
-.catWorksCont {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.item {
-  position: relative;
-}
-
-.catWorksBookmark {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-
-.bookmarkLink {
-  display: block;
-  width: 24px;
-  height: 24px;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>') no-repeat center;
-  opacity: 0.3;
-}
-
-.bookmarkLink:hover {
-  opacity: 0.7;
-}
-
-.image {
-  display: block;
-  width: 100%;
-  cursor: pointer;
-}
-
-.item_catDetails {
-  margin-top: 10px;
-}
-
-.item_catDetails a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.item_title {
-  font-size: 0.9rem;
-  line-height: 1.3;
-  margin-bottom: 3px;
-  color: #333;
-}
-
-.item_date {
-  font-size: 0.85rem;
-  color: #555;
-  margin-bottom: 3px;
-}
-
-.item_catnum {
-  font-size: 0.85rem;
-  color: #777;
-}
-
-/* Pagination */
-#paginationBottom {
-  margin-top: 30px;
-}
-
-#pagiWrapper {
-  display: flex;
-  justify-content: center;
-}
-
-#pagiContentTop {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.nextprevspan {
-  display: flex;
-  align-items: center;
-}
-
-.nextprev {
-  color: #005;
-  text-decoration: none;
-  padding: 5px 8px;
-  border: 1px solid #ddd;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-}
-
-.nextprev:hover {
-  background: #f0f0f0;
-}
-
-.nextprev.disabled {
-  color: #aaa;
-  cursor: default;
-  border-color: #eee;
-}
-
-.arrow-right, .arrow-last {
-  margin-left: 5px;
-  font-size: 0.7rem;
-}
-
-.pageLink, .pageLinkCurrent {
-  padding: 5px 10px;
-  border: 1px solid #ddd;
-  margin: 0 2px;
-  font-size: 0.9rem;
-}
-
-.pageLink {
-  color: #005;
-  text-decoration: none;
-}
-
-.pageLink:hover {
-  background: #f0f0f0;
-}
-
-.pageLinkCurrent {
-  background: #e0e0e0;
-  color: #333;
-  font-weight: 500;
-}
-
-.pagenosDots {
-  font-size: 0.9rem;
-  color: #777;
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
+  
+  /* Rest of mobile styles are maintained below */
+  #headerMain {
+    display: none;
+  }
+  
+  #headerMoble {
+    display: flex;
+  }
+  
   #mainBody {
     padding: 0 15px;
     margin-top: 130px;
@@ -1623,17 +1246,6 @@ footer {
     display: flex;
   }
   
-  .hide-mobile {
-    display: none;
-  }
-  
-  .show-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  
   .catWorksCont {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 15px;
@@ -1643,144 +1255,21 @@ footer {
     flex-wrap: wrap;
     justify-content: center;
   }
-}
-
-/* jQuery UI overrides for catalogue page */
-.ui-widget-content {
-  color: #333 !important;
-}
-
-.ui-selectmenu-button span {
-  color: #333 !important;
-}
-
-.ui-selectmenu-menu .ui-menu {
-  background: #fff !important;
-  border: 1px solid #ccc !important;
-}
-
-.ui-menu .ui-menu-item,
-.ui-menu .ui-menu-item-wrapper {
-  color: #333 !important;
-}
-
-.ui-state-active,
-.ui-widget-content .ui-state-active {
-  background: #f0f0f0 !important;
-  color: #333 !important;
-}
-
-/* Ensure dark text for select dropdowns */
-select option {
-  color: #333 !important;
-  background-color: #fff !important;
-}
-
-/* Explicitly target dropdown items */
-#numDisplaySelect option,
-#sortSelect option,
-#viewSelect option {
-  color: #333 !important;
-  background-color: #fff !important;
-}
-
-/* Fix for Back to Works buttons - use very specific selectors with high specificity */
-.entryNavigation a.backToWorks,
-a.backToWorks,
-#entryContainer .entryNavigation a.backToWorks,
-#mainBody .entryNavigation a.backToWorks {
-  color: #ffffff !important;
-  background-color: #333333 !important;
-  text-decoration: none !important;
-  font-weight: 500 !important;
-}
-
-/* Force focus and hover states to maintain white text */
-.entryNavigation a.backToWorks:hover,
-a.backToWorks:hover,
-.entryNavigation a.backToWorks:focus,
-a.backToWorks:focus {
-  color: #ffffff !important;
-  background-color: #555555 !important;
-}
-
-/* Custom back to works button styling that overrides global styles */
-html body #mainBody #entryContainer .entryNavigation .backToWorks-custom,
-html body #mainBody #entryContainer .entryNavigation .backToWorks-custom span {
-  color: white !important;
-  background-color: #333333 !important;
-}
-
-.backToWorks-custom:hover {
-  background-color: #555555 !important;
-}
-
-/* Mobile Controls Styling */
-#browseMobileControls {
-  display: flex;
-  justify-content: space-around;
-  margin: 15px 0;
-  padding: 8px 0;
-  background: #f8f8f8;
-  border-radius: 4px;
-  border: 1px solid #eaeaea;
-}
-
-#browseMobileControls a {
-  text-decoration: none;
-  padding: 8px 15px;
-  background: #eee;
-  color: #333;
-  border-radius: 4px;
-  font-weight: bold;
-  text-align: center;
-  flex: 1;
-  margin: 0 8px;
-}
-
-.mobilePanel {
-  padding: 15px;
-  background: #f8f8f8;
-  border: 1px solid #eaeaea;
-  margin-bottom: 20px;
-  border-radius: 4px;
-}
-
-.mobilePanel .option-group {
-  margin-bottom: 15px;
-}
-
-.mobilePanel label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.mobilePanel select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  height: 40px;
-  line-height: 24px;
-  font-size: 14px;
-}
-
-/* Responsive utility classes */
-@media (max-width: 768px) {
+  
+  #homepageBottomGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+  }
+  
+  .footer-section {
+    margin-bottom: 20px;
+  }
+  
   .desktopOnly {
     display: none !important;
   }
 }
-
-@media (min-width: 769px) {
-  #browseMobileControls,
-  .mobilePanel {
-    display: none !important;
-  }
-}
-
-/* Check if there are other image containers with gray backgrounds */
-.image-container {
-  background-color: transparent;
-}
+  

@@ -48,6 +48,20 @@ export default function CatalogueContent() {
   const [seriesA, setSeriesA] = useState(false);
   const [seriesB, setSeriesB] = useState(false);
   const [seriesAll, setSeriesAll] = useState(true); // Default to All selected
+  
+  // New filename prefix filter states
+  const [filterAAA, setFilterAAA] = useState(false);
+  const [filterBBB, setFilterBBB] = useState(false);
+  const [filterBBC, setFilterBBC] = useState(false);
+  const [filterD, setFilterD] = useState(false);
+  const [filterRGG, setFilterRGG] = useState(false);
+  
+  // Additional category filter states
+  const [filterPreBetterBadges, setFilterPreBetterBadges] = useState(false);
+  const [filterPopArtKoop, setFilterPopArtKoop] = useState(false);
+  const [filterCatalogs, setFilterCatalogs] = useState(false);
+  const [filterZines, setFilterZines] = useState(false);
+  const [filterFlyers, setFilterFlyers] = useState(false);
 
   // Fix touch interaction to prevent unwanted window movement
   useEffect(() => {
@@ -146,6 +160,25 @@ export default function CatalogueContent() {
 
   // Apply series filtering first
   const seriesFilteredWorks = mockWorks.filter(work => {
+    // First check if any of the specific filename filters are active
+    if (filterAAA && work.imageUrl.includes('/AAA')) return true;
+    if (filterBBB && work.imageUrl.includes('/BBB')) return true;
+    if (filterBBC && work.imageUrl.includes('/BBC')) return true;
+    if (filterD && work.imageUrl.includes('/D')) return true;
+    if (filterRGG && work.imageUrl.includes('/RGG')) return true;
+    
+    // Check for additional category filters
+    if (filterPreBetterBadges && work.imageUrl.includes('/PreBetterBadges')) return true;
+    if (filterPopArtKoop && work.imageUrl.includes('/PopArtKoop')) return true;
+    if (filterCatalogs && work.imageUrl.includes('/Catalogs')) return true;
+    if (filterZines && work.imageUrl.includes('/Zines')) return true;
+    if (filterFlyers && work.imageUrl.includes('/Flyers')) return true;
+    
+    // If any of the specific filters are active but didn't match, filter out
+    if (filterAAA || filterBBB || filterBBC || filterD || filterRGG || 
+        filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines || filterFlyers) return false;
+    
+    // Otherwise apply the standard series filtering
     if (seriesAll) return true;
     if (seriesA && work.catalogueNumber.startsWith('A')) return true;
     if (seriesB && work.catalogueNumber.startsWith('B')) return true;
@@ -209,6 +242,18 @@ export default function CatalogueContent() {
   // Series filter handlers
   const handleSeriesAChange = () => {
     const newValue = !seriesA;
+    // Clear all filename filters when selecting a series
+    setFilterAAA(false);
+    setFilterBBB(false);
+    setFilterBBC(false);
+    setFilterD(false);
+    setFilterRGG(false);
+    setFilterPreBetterBadges(false);
+    setFilterPopArtKoop(false);
+    setFilterCatalogs(false);
+    setFilterZines(false);
+    setFilterFlyers(false);
+    
     if (newValue && seriesB) {
       // If both A and B are now selected, select All instead
       setSeriesA(false);
@@ -224,6 +269,18 @@ export default function CatalogueContent() {
 
   const handleSeriesBChange = () => {
     const newValue = !seriesB;
+    // Clear all filename filters when selecting a series
+    setFilterAAA(false);
+    setFilterBBB(false);
+    setFilterBBC(false);
+    setFilterD(false);
+    setFilterRGG(false);
+    setFilterPreBetterBadges(false);
+    setFilterPopArtKoop(false);
+    setFilterCatalogs(false);
+    setFilterZines(false);
+    setFilterFlyers(false);
+    
     if (newValue && seriesA) {
       // If both A and B are now selected, select All instead
       setSeriesA(false);
@@ -239,6 +296,18 @@ export default function CatalogueContent() {
 
   const handleSeriesAllChange = () => {
     const newValue = !seriesAll;
+    // Clear all filename filters when selecting All
+    setFilterAAA(false);
+    setFilterBBB(false);
+    setFilterBBC(false);
+    setFilterD(false);
+    setFilterRGG(false);
+    setFilterPreBetterBadges(false);
+    setFilterPopArtKoop(false);
+    setFilterCatalogs(false);
+    setFilterZines(false);
+    setFilterFlyers(false);
+    
     // If All is selected, unselect A and B
     if (newValue) {
       setSeriesA(false);
@@ -246,6 +315,203 @@ export default function CatalogueContent() {
     }
     setSeriesAll(newValue);
     setCurrentPage(0); // Reset to first page when changing filters
+  };
+
+  // Handle the new filename filters
+  const handleAAAChange = () => {
+    setFilterAAA(!filterAAA);
+    if (!filterAAA) {
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleBBBChange = () => {
+    setFilterBBB(!filterBBB);
+    if (!filterBBB) {
+      setFilterAAA(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleBBCChange = () => {
+    setFilterBBC(!filterBBC);
+    if (!filterBBC) {
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleDChange = () => {
+    setFilterD(!filterD);
+    if (!filterD) {
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleRGGChange = () => {
+    setFilterRGG(!filterRGG);
+    if (!filterRGG) {
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  // Add handlers for new filter options
+  const handlePreBetterBadgesChange = () => {
+    setFilterPreBetterBadges(!filterPreBetterBadges);
+    if (!filterPreBetterBadges) {
+      // Clear all other filters
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handlePopArtKoopChange = () => {
+    setFilterPopArtKoop(!filterPopArtKoop);
+    if (!filterPopArtKoop) {
+      // Clear all other filters
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleCatalogsChange = () => {
+    setFilterCatalogs(!filterCatalogs);
+    if (!filterCatalogs) {
+      // Clear all other filters
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterZines(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleZinesChange = () => {
+    setFilterZines(!filterZines);
+    if (!filterZines) {
+      // Clear all other filters
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterFlyers(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
+  };
+
+  const handleFlyersChange = () => {
+    setFilterFlyers(!filterFlyers);
+    if (!filterFlyers) {
+      // Clear all other filters
+      setFilterAAA(false);
+      setFilterBBB(false);
+      setFilterBBC(false);
+      setFilterD(false);
+      setFilterRGG(false);
+      setFilterPreBetterBadges(false);
+      setFilterPopArtKoop(false);
+      setFilterCatalogs(false);
+      setFilterZines(false);
+      setSeriesA(false);
+      setSeriesB(false);
+      setSeriesAll(false);
+    }
+    setCurrentPage(0);
   };
 
   // Calculate dynamic pagination values based on actual number of items
@@ -370,7 +636,7 @@ export default function CatalogueContent() {
                 {/* Series Filter */}
                 <div className="filter-section">
                   <h3 style={{ fontSize: '16px', margin: '15px 0 10px 0' }}>Series</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
                       <input
                         type="checkbox"
@@ -397,6 +663,96 @@ export default function CatalogueContent() {
                         style={{ marginRight: '8px' }}
                       />
                       B
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterAAA}
+                        onChange={handleAAAChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      AAA
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterBBB}
+                        onChange={handleBBBChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      BBB
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterBBC}
+                        onChange={handleBBCChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      BBC
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterD}
+                        onChange={handleDChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      D
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterRGG}
+                        onChange={handleRGGChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      RGG
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterPreBetterBadges}
+                        onChange={handlePreBetterBadgesChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Pre Better Badges
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterPopArtKoop}
+                        onChange={handlePopArtKoopChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Pop Art Koop
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterCatalogs}
+                        onChange={handleCatalogsChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Catalogs
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterZines}
+                        onChange={handleZinesChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Zines
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterFlyers}
+                        onChange={handleFlyersChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Flyers
                     </label>
                   </div>
                 </div>
@@ -499,36 +855,133 @@ export default function CatalogueContent() {
                 </div>
                 
                 {/* Desktop Series Filter */}
-                <div className="filter-section" style={{ marginTop: '20px' }}>
+                <div className="filter-section" style={{ marginTop: '20px', marginBottom: '10px', width: '100%' }}>
                   <h3 style={{ fontSize: '16px', margin: '0 0 10px 0' }}>Series</h3>
-                  <div style={{ display: 'flex', gap: '15px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
-                        checked={seriesAll}
-                        onChange={handleSeriesAllChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      All
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
-                        checked={seriesA}
-                        onChange={handleSeriesAChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      A
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
-                        checked={seriesB}
-                        onChange={handleSeriesBChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      B
-                    </label>
+                  <div style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '10px', width: '100%' }}>
+                    {/* First row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, auto)', gap: '20px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={seriesAll}
+                          onChange={handleSeriesAllChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        All
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={seriesA}
+                          onChange={handleSeriesAChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        A
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={seriesB}
+                          onChange={handleSeriesBChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        B
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterAAA}
+                          onChange={handleAAAChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        AAA
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterBBB}
+                          onChange={handleBBBChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        BBB
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterBBC}
+                          onChange={handleBBCChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        BBC
+                      </label>
+                    </div>
+                    
+                    {/* Second row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto auto auto auto', gap: '20px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterD}
+                          onChange={handleDChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        D
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterRGG}
+                          onChange={handleRGGChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        RGG
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterPreBetterBadges}
+                          onChange={handlePreBetterBadgesChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        Pre Better Badges
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterPopArtKoop}
+                          onChange={handlePopArtKoopChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        Pop Art Koop
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterCatalogs}
+                          onChange={handleCatalogsChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        Catalogs
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterZines}
+                          onChange={handleZinesChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        Zines
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                        <input
+                          type="checkbox"
+                          checked={filterFlyers}
+                          onChange={handleFlyersChange}
+                          style={{ marginRight: '8px' }}
+                        />
+                        Flyers
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

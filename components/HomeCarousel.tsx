@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,9 +40,38 @@ const carouselSlides: SlideProps[] = [
 ];
 
 export default function HomeCarousel() {
+  // We keep the isMobile state for future use even though it's currently only
+  // used in media queries. This is intentional as we might need responsive behavior later.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isMobile, setIsMobile] = useState(false);
+  const [showArrows, setShowArrows] = useState(false);
+  
+  useEffect(() => {
+    // Only run in browser environment
+    if (typeof window !== 'undefined') {
+      // Function to detect mobile view and set state
+      const checkIfMobile = () => {
+        const mobile = window.innerWidth <= 768;
+        setIsMobile(mobile);
+        setShowArrows(mobile); // Only show arrows on mobile
+      };
+
+      // Initial check
+      checkIfMobile();
+
+      // Add resize listener
+      window.addEventListener('resize', checkIfMobile);
+
+      // Cleanup
+      return () => {
+        window.removeEventListener('resize', checkIfMobile);
+      };
+    }
+  }, []);
+
   const settings = {
     dots: true,
-    arrows: true,
+    arrows: showArrows, // Control arrows based on screen size
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -50,12 +79,57 @@ export default function HomeCarousel() {
     autoplay: true,
     autoplaySpeed: 5000,
     cssEase: "linear",
-    adaptiveHeight: false
+    adaptiveHeight: true,
+    dotsClass: "slick-dots custom-dots-container",
+    appendDots: (dots: React.ReactNode) => (
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '10px',
+          left: '0',
+          right: '0',
+          display: 'flex !important',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '10px 0',
+          backgroundColor: 'rgba(255,255,255,0.7)',
+          zIndex: 10
+        }}
+      >
+        {dots}
+      </div>
+    ),
+    customPaging: function(i: number) {
+      return (
+        <button
+          aria-label={`Go to slide ${i + 1}`}
+          style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            background: '#888',
+            border: '1px solid #666',
+            display: 'block',
+            padding: 0,
+            margin: '0 5px',
+            boxShadow: '0 0 2px rgba(0, 0, 0, 0.5)',
+            cursor: 'pointer'
+          }}
+        />
+      );
+    }
   };
+
+  // Simple callout content
+  const calloutText = "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.";
 
   return (
     <div id="homepage">
-      <div id="homepageCarouselWrapper" className="home-carousel-container">
+      <div 
+        id="homepageCarouselWrapper" 
+        className="home-carousel-container" 
+        style={{ position: 'relative', paddingBottom: '80px' }}
+      >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (
             <div key={index} className="homepageCarouselDiv">
@@ -67,26 +141,182 @@ export default function HomeCarousel() {
                   height={600}
                   style={{
                     width: '100%',
-                    height: 'auto',
-                    maxHeight: '600px',
+                    height: '100%',
                     objectFit: 'contain',
                     objectPosition: 'center',
-                    backgroundColor: '#f0f0f0'
+                    backgroundColor: '#f5f5f5'
                   }}
                   priority={index === 0}
                 />
-                <div className="homepageCarouseCaption">{slide.caption}</div>
+                <div className="homepageCarouseCaption" style={{ position: 'relative', zIndex: 5, backgroundColor: 'rgba(255, 255, 255, 0.8)', padding: '5px' }}>
+                  {slide.caption}
+                </div>
               </div>
             </div>
           ))}
         </Slider>
         
-        <div id="homepageCarouselCallout" className="show">
-          <Link href="/catalogue/">
-            Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.
+        {/* Overlay callout on top of everything */}
+        <div className="callout-container">
+          <Link href="/catalogue/" className="callout-link">
+            {calloutText}
           </Link>
         </div>
       </div>
+      
+      {/* Simple CSS overrides */}
+      <style jsx global>{`
+        .home-carousel-container {
+          margin-bottom: 60px;
+        }
+        
+        .custom-dots-container {
+          position: absolute !important;
+          bottom: -75px !important;
+          left: 0 !important;
+          right: 0 !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 10px 0 !important;
+          z-index: 10 !important;
+          background-color: rgba(255,255,255,0.7) !important;
+          width: 100% !important;
+        }
+        
+        .custom-dots-container li {
+          display: inline-block !important;
+          margin: 0 5px !important;
+        }
+        
+        .custom-dots-container li.slick-active button {
+          background-color: #333 !important;
+          transform: scale(1.2) !important;
+        }
+        
+        /* Clean callout styling with no conflicting elements */
+        .callout-container {
+          position: absolute;
+          top: calc(50% + 35px);
+          right: 15%;
+          transform: translateY(-50%);
+          width: 30%;
+          z-index: 20;
+          background-color: rgba(255, 235, 132, 0.8);
+          padding: 15px 15px;
+          text-align: left;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          transition: background-color 0.3s ease;
+          display: flex;
+          align-items: center;
+        }
+        
+        .callout-container:hover {
+          background-color: rgba(255, 235, 132, 0.95);
+        }
+        
+        .callout-link {
+          color: #333;
+          text-decoration: none;
+          display: block;
+          width: 100%;
+          position: relative;
+          font-size: 1.05em;
+          line-height: 1.4;
+        }
+        
+        /* Arrow icon for the link */
+        .callout-link::after {
+          content: "→";
+          position: absolute;
+          right: 0;
+          bottom: -3px;
+          font-size: 1.2em;
+        }
+        
+        /* Responsiveness */
+        @media (max-width: 768px) {
+          .callout-container {
+            position: relative;
+            top: auto;
+            right: auto;
+            transform: none;
+            width: 90%;
+            margin: 55px auto 0;
+            padding: 12px 15px;
+          }
+          
+          .custom-dots-container {
+            position: absolute !important;
+            bottom: -70px !important; /* Force dots position in mobile */
+            left: 0 !important;
+            right: 0 !important;
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            padding: 8px 0 !important;
+            z-index: 999 !important;
+          }
+          
+          .home-carousel-container {
+            overflow: visible !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 100px !important; /* Ensure enough space for dots */
+          }
+          
+          .callout-link {
+            font-size: 0.9em;
+            line-height: 1.3;
+          }
+        }
+        
+        /* Add styling for the carousel arrows */
+        .slick-prev, .slick-next {
+          display: none !important; /* Hide arrows by default (desktop) */
+          position: absolute !important;
+          z-index: 15 !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          width: 30px !important;
+          height: 30px !important;
+          background-color: rgba(255, 255, 255, 0.7) !important;
+          border-radius: 50% !important;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        
+        .slick-prev {
+          left: 15px !important;
+        }
+        
+        .slick-next {
+          right: 15px !important;
+        }
+        
+        .slick-prev:before, .slick-next:before {
+          font-size: 20px !important;
+          opacity: 0.8 !important;
+          color: #333 !important;
+        }
+        
+        .slick-prev:hover, .slick-next:hover {
+          background-color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        @media (max-width: 768px) {
+          .slick-prev, .slick-next {
+            display: flex !important; /* Show arrows on mobile */
+          }
+          
+          .slick-prev {
+            left: 10px !important;
+          }
+          
+          .slick-next {
+            right: 10px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 

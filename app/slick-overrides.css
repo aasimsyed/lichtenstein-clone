@@ -8,6 +8,102 @@
   color: #333 !important;
 }
 
+/* CRITICAL FIX: Force slick dots to display with max-specificity and !important */
+html body ul.slick-dots,
+html body .slick-slider ul.slick-dots,
+html body #homepage ul.slick-dots,
+html body .home-carousel-container ul.slick-dots,
+ul[style*="display:block"].slick-dots,
+ul.slick-dots {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  min-height: 20px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+html body ul.slick-dots li,
+html body .slick-slider ul.slick-dots li,
+html body #homepage ul.slick-dots li,
+ul.slick-dots li {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 5px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+html body ul.slick-dots li button,
+html body .slick-slider ul.slick-dots li button,
+html body #homepage ul.slick-dots li button,
+html body ul.slick-dots li button.custom-dot,
+ul.slick-dots li button,
+ul.slick-dots li button.custom-dot {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background-color: #888 !important;
+  border: 1px solid #666 !important;
+  margin: 4px auto !important;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+  position: relative !important;
+  font-size: 0px !important;
+  line-height: 0 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+html body ul.slick-dots li.slick-active button,
+html body .slick-slider ul.slick-dots li.slick-active button,
+html body #homepage ul.slick-dots li.slick-active button,
+html body ul.slick-dots li.slick-active button.custom-dot,
+ul.slick-dots li.slick-active button,
+ul.slick-dots li.slick-active button.custom-dot {
+  background-color: #333 !important;
+}
+
+/* Ensure slick dots are visible */
+.slick-dots {
+  display: flex !important;
+  justify-content: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.slick-dots li {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.slick-dots li button,
+.slick-dots li button.custom-dot {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border: 1px solid #666 !important;
+  background: #888 !important;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.slick-dots li.slick-active button,
+.slick-dots li.slick-active button.custom-dot {
+  background: #333 !important;
+}
+
 /* Override any other slick carousel white text */
 .slick-slider {
   color: #333 !important;
