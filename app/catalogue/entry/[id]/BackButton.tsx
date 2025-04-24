@@ -19,15 +19,16 @@ export default function BackButton() {
         display: 'inline-block',
         padding: '8px 16px',
         marginBottom: '20px',
-        color: 'white',
-        backgroundColor: '#333333',
-        border: 'none',
+        color: '#333333',
+        backgroundColor: '#f0f0f0',
+        border: '1px solid #dddddd',
         fontWeight: 500,
         cursor: 'pointer',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        borderRadius: '3px'
       }}
     >
-      <span style={{ color: 'white' }}>Back to Works</span>
+      <span>← Back to Works</span>
     </a>
   );
 } 

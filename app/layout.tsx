@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   title: "Better Badges: A Catalogue Raisonné",
   description: "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  other: {
+    'apple-mobile-web-app-capable': 'yes',
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
 };
 
 export default function RootLayout({
@@ -35,6 +40,20 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${openSans.variable} ${roboto_mono.variable}`}>
       <head>
         {/* Removed inline CSS for carousel dot positioning */}
+        <link 
+          rel="preload" 
+          href="/fonts/OpenSans-Regular.woff2" 
+          as="font" 
+          type="font/woff2" 
+          crossOrigin="anonymous" 
+        />
+        
+        {/* DNS prefetching */}
+        <link rel="dns-prefetch" href="//res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        
+        {/* Cache control */}
+        <meta httpEquiv="Cache-Control" content="public, max-age=3600, stale-while-revalidate=86400" />
       </head>
       <body>
         <AnalyticsProvider>

@@ -678,4 +678,261 @@
       overflow-x: hidden;
     }
   }
+}
+
+/* Zoomable image styles */
+.zoomable-image-container {
+  position: relative;
+  cursor: zoom-in;
+}
+
+.zoom-hint {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: #ffeb3b; /* Bright yellow */
+  color: #000000;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 700;
+  border: 2px solid #000000;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  letter-spacing: 0.5px;
+}
+
+.zoom-icon {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+/* Remove the hover effect since the hint is now always visible */
+.zoomable-image-container:hover .zoom-hint {
+  opacity: 0.95;
+}
+
+/* Image modal styles */
+.image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.98);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.image-modal-content {
+  position: relative;
+  width: 90%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #ffffff;
+  border: none;
+  color: #000000;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1010;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.image-modal-close:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.05);
+}
+
+.image-modal-image-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-modal-image {
+  max-width: none;
+  max-height: none;
+  transform-origin: center !important;
+  will-change: transform;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: transform 0.05s linear;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.image-modal-image.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.image-modal-instructions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #000000;
+  background-color: #ffffff;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 1010;
+}
+
+/* Mobile-specific modal adjustments */
+@media (max-width: 768px) {
+  .image-modal-content {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .image-modal-close {
+    top: 120px; /* Positioned far below the header with ample space */
+    right: 15px;
+    width: 40px; /* Slightly larger for better touch target */
+    height: 40px;
+    font-size: 24px;
+    z-index: 1050; /* Ensure it's above other elements */
+  }
+  
+  .zoom-hint {
+    display: none; /* Hide hint on mobile, use more obvious cue */
+  }
+  
+  .zoomable-image-container::after {
+    content: '🔍';
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: #ffeb3b;
+    color: #000000;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    border: 2px solid #000000;
+  }
+}
+
+/* Image modal controls */
+.image-modal-controls {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  z-index: 1010;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+}
+
+.image-modal-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: #2196F3;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.image-modal-button:hover:not(:disabled) {
+  background-color: #0d8bf2;
+}
+
+.image-modal-button:disabled {
+  background-color: #e0e0e0;
+  color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.image-modal-button.reset {
+  width: auto;
+  border-radius: 20px;
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: #FF5722;
+  color: white;
+}
+
+.image-modal-button.reset:hover:not(:disabled) {
+  background-color: #e64a19;
+}
+
+.image-modal-zoom-level {
+  color: #000000;
+  font-size: 18px;
+  min-width: 60px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Update existing mobile styles */
+@media (max-width: 768px) {
+  .image-modal-controls {
+    border-radius: 25px;
+    padding: 8px 15px;
+    bottom: 70px;
+  }
+  
+  .image-modal-instructions {
+    font-size: 14px;
+    padding: 10px;
+  }
+  
+  .image-modal-button {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .image-modal-zoom-level {
+    font-size: 16px;
+    min-width: 50px;
+  }
 } 

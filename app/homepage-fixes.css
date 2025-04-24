@@ -182,3 +182,16 @@
     padding-top: 20px !important;
   }
 } 
+
+/* Entry page image positioning fixes */
+.entryImageContainer {
+  margin-top: -100px !important;
+  position: relative !important;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .entryImageContainer {
+    margin-top: -30px !important; /* Less negative margin on mobile */
+  }
+} 

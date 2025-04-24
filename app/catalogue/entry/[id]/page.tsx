@@ -1,9 +1,9 @@
 // This must be a Server Component (no 'use client' directive)
 import React from 'react';
-import SmoothImage from '../../../components/SmoothImage';
 import { parseFilename } from '../../../utils/filename-utils';
 import { fetchCloudinaryImages } from '../../../utils/cloudinary-utils';
 import BackButton from './BackButton';
+import ZoomableImage from './ZoomableImage';
 
 interface Artwork {
   id: number;
@@ -97,24 +97,13 @@ export default async function EntryPage(props) {
             </div>
 
             <div className="entryImageContainer">
-              <SmoothImage
+              <ZoomableImage 
                 src={artwork.imageUrl}
                 alt={artwork.title}
-                width={800}
+                width={800} 
                 height={800}
-                className="entryMainImage"
-                priority
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  objectFit: 'contain'
-                }}
               />
             </div>
-          </div>
-
-          <div className="entryNavigation">
-            <BackButton />
           </div>
         </div>
       </div>
