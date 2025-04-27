@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import SmoothImage from '../app/components/SmoothImage';
-import { parseFilename } from '../app/utils/filename-utils';
 import { useCloudinaryImages } from '../context/CloudinaryContext';
 
 // Define the Artwork interface
@@ -18,6 +17,17 @@ interface Artwork {
   artist: string;
   size: string;
   imageUrl: string;
+}
+
+// API response interface
+interface SearchResponse {
+  works: Artwork[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }
 }
 
 // Define the component
@@ -39,10 +49,10 @@ export default function CatalogueContent() {
   
   // State for search results
   const [filteredWorks, setFilteredWorks] = useState<Artwork[]>([]);
+  const [totalResults, setTotalResults] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Use router for navigation
-  const router = useRouter();
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
@@ -105,138 +115,103 @@ export default function CatalogueContent() {
     };
   }, [viewType]); // Only re-apply when the view type changes
 
-  // Create mock artwork data with dynamic Cloudinary images
-  const mockWorks: Artwork[] = useMemo(() => {
-    if (cloudinaryImages.length === 0) {
-      // Return empty array instead of placeholder data
-      return [];
-    }
-    
-    // Use the real Cloudinary images without repetition
-    const sortedWorks = cloudinaryImages.map((image, i) => {
-      const { catalogNumber, title, artist, size } = parseFilename(image.url);
-      return {
-        id: i + 1,
-        title: title,
-        date: '',  // No year information
-        medium: 'Oil and Magna on canvas',
-        dimensions: '68 x 56 in (172.7 x 142.2 cm)',
-        location: 'Private Collection',
-        catalogueNumber: catalogNumber,
-        artist: artist,
-        size: size,
-        imageUrl: image.url
-      };
-    });
-    
-    // Get the appropriate sort comparator based on the sortBy value
-    const getSortComparator = (sortOption: string) => {
-      switch (sortOption) {
-        case 'catno_ASC':
-          return (a: Artwork, b: Artwork) => 
-            a.catalogueNumber.localeCompare(b.catalogueNumber, undefined, { numeric: true, sensitivity: 'base' });
-        
-        case 'catno_DESC':
-          return (a: Artwork, b: Artwork) => 
-            b.catalogueNumber.localeCompare(a.catalogueNumber, undefined, { numeric: true, sensitivity: 'base' });
-        
-        case 'cattitle_ASC':
-          return (a: Artwork, b: Artwork) => 
-            a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
-        
-        case 'cattitle_DESC':
-          return (a: Artwork, b: Artwork) => 
-            b.title.localeCompare(a.title, undefined, { sensitivity: 'base' });
-        
-        default:
-          return (a: Artwork, b: Artwork) => 
-            a.catalogueNumber.localeCompare(b.catalogueNumber, undefined, { numeric: true, sensitivity: 'base' });
-      }
-    };
-    
-    // Sort works based on the selected sort option
-    return sortedWorks.sort(getSortComparator(sortBy));
-  }, [cloudinaryImages, sortBy]);
-
-  // Apply series filtering first
-  const seriesFilteredWorks = mockWorks.filter(work => {
-    // First check if any of the specific filename filters are active
-    if (filterAAA && work.imageUrl.includes('/AAA')) return true;
-    if (filterBBB && work.imageUrl.includes('/BBB')) return true;
-    if (filterBBC && work.imageUrl.includes('/BBC')) return true;
-    if (filterD && work.imageUrl.includes('/D')) return true;
-    if (filterRGG && work.imageUrl.includes('/RGG')) return true;
-    
-    // Check for additional category filters
-    if (filterPreBetterBadges && work.imageUrl.includes('/PreBetterBadges')) return true;
-    if (filterPopArtKoop && work.imageUrl.includes('/PopArtKoop')) return true;
-    if (filterCatalogs && work.imageUrl.includes('/Catalogs')) return true;
-    if (filterZines && work.imageUrl.includes('/Zines')) return true;
-    if (filterFlyers && work.imageUrl.includes('/Flyers')) return true;
-    
-    // If any of the specific filters are active but didn't match, filter out
-    if (filterAAA || filterBBB || filterBBC || filterD || filterRGG || 
-        filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines || filterFlyers) return false;
-    
-    // Otherwise apply the standard series filtering
-    if (seriesAll) return true;
-    if (seriesA && work.catalogueNumber.startsWith('A')) return true;
-    if (seriesB && work.catalogueNumber.startsWith('B')) return true;
-    return false;
-  });
-
-  // Process search query from URL on load
-  useEffect(() => {
-    const query = searchParams.get('search');
-    if (query) {
-      // Only update searchTerm if it's different from current value
-      if (searchTerm !== query) {
-        setSearchTerm(query);
+  // Function to fetch search results from API
+  const fetchSearchResults = useCallback(async (page = 0) => {
+    try {
+      setIsLoadingResults(true);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      
+      // Add search term if present
+      if (searchTerm.trim()) {
+        params.set('query', searchTerm.trim());
       }
       
-      // Only trigger search if we have images and aren't already searching with the same term
-      if (cloudinaryImages.length > 0 && (!isSearching || searchTerm !== query)) {
-        const searchTermLower = query.toLowerCase();
-        const results = seriesFilteredWorks.filter(work => 
-          work.title.toLowerCase().includes(searchTermLower) ||
-          work.medium.toLowerCase().includes(searchTermLower) ||
-          work.catalogueNumber.toLowerCase().includes(searchTermLower) ||
-          work.artist.toLowerCase().includes(searchTermLower) ||
-          work.size.toLowerCase().includes(searchTermLower)
-        );
-        setFilteredWorks(results);
-        setIsSearching(true);
-        setCurrentPage(0);
+      // Add filter parameters
+      params.set('seriesA', seriesA.toString());
+      params.set('seriesB', seriesB.toString());
+      params.set('seriesAll', seriesAll.toString());
+      params.set('filterAAA', filterAAA.toString());
+      params.set('filterBBB', filterBBB.toString());
+      params.set('filterBBC', filterBBC.toString());
+      params.set('filterD', filterD.toString());
+      params.set('filterRGG', filterRGG.toString());
+      params.set('filterPreBetterBadges', filterPreBetterBadges.toString());
+      params.set('filterPopArtKoop', filterPopArtKoop.toString());
+      params.set('filterCatalogs', filterCatalogs.toString());
+      params.set('filterZines', filterZines.toString());
+      params.set('filterFlyers', filterFlyers.toString());
+      
+      // Add sorting and pagination
+      params.set('sortBy', sortBy);
+      params.set('page', page.toString());
+      params.set('limit', resultsPerPage.toString());
+      
+      // Make the API request
+      const response = await fetch(`/api/search?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch search results');
       }
+      
+      const data: SearchResponse = await response.json();
+      
+      // Update state with results
+      setFilteredWorks(data.works);
+      setTotalResults(data.pagination.total);
+      setTotalPages(data.pagination.totalPages);
+      setIsLoadingResults(false);
+      
+      // Set isSearching based on whether we have a search term
+      setIsSearching(!!searchTerm.trim());
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setIsLoadingResults(false);
     }
-  }, [searchParams, cloudinaryImages, seriesFilteredWorks, searchTerm, isSearching]);
+  }, [searchTerm, seriesA, seriesB, seriesAll, filterAAA, filterBBB, filterBBC, filterD, filterRGG, 
+       filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines, filterFlyers, 
+       sortBy, resultsPerPage]);
+
+  // Fetch initial data when component mounts
+  useEffect(() => {
+    // Only fetch if we have cloudinary images
+    if (cloudinaryImages.length > 0 && !loading) {
+      fetchSearchResults(currentPage);
+    }
+  }, [cloudinaryImages, loading, fetchSearchResults, currentPage]);
+
+  // Fetch new results when filters change
+  useEffect(() => {
+    if (cloudinaryImages.length > 0 && !loading) {
+      setCurrentPage(0); // Reset to first page when filters change
+      fetchSearchResults(0);
+    }
+  }, [cloudinaryImages, loading, fetchSearchResults, seriesA, seriesB, seriesAll, 
+      filterAAA, filterBBB, filterBBC, filterD, filterRGG, filterPreBetterBadges, 
+      filterPopArtKoop, filterCatalogs, filterZines, filterFlyers, sortBy, resultsPerPage]);
+
+  // Process search query from URL on load (just to initialize the search term)
+  useEffect(() => {
+    const query = searchParams.get('search');
+    if (query && query !== searchTerm) {
+      setSearchTerm(query);
+    }
+  }, [searchParams, searchTerm]);
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCurrentPage(0); // Reset to first page on new search
-    
-    // Filter works based on search term
-    if (searchTerm.trim() === '') {
-      setFilteredWorks([]);
-      setIsSearching(false);
-      // Remove search parameter from URL when search is cleared
-      router.push('/catalogue');
-    } else {
-      const searchTermLower = searchTerm.toLowerCase();
-      // Apply search on top of series filtering
-      const results = seriesFilteredWorks.filter(work => 
-        work.title.toLowerCase().includes(searchTermLower) ||
-        work.medium.toLowerCase().includes(searchTermLower) ||
-        work.catalogueNumber.toLowerCase().includes(searchTermLower) ||
-        work.artist.toLowerCase().includes(searchTermLower) ||
-        work.size.toLowerCase().includes(searchTermLower)
-      );
-      setFilteredWorks(results);
-      setIsSearching(true);
-      // Update URL with search parameter
-      router.push(`/catalogue?search=${encodeURIComponent(searchTerm.trim())}`);
-    }
+    fetchSearchResults(0);
+  };
+
+  // Clear search and reset to show all results
+  const clearSearch = () => {
+    setSearchTerm('');
+    setIsSearching(false);
+    setCurrentPage(0);
+    fetchSearchResults(0);
   };
 
   // Series filter handlers
@@ -264,7 +239,6 @@ export default function CatalogueContent() {
       setSeriesA(newValue);
       setSeriesAll(false);
     }
-    setCurrentPage(0); // Reset to first page when changing filters
   };
 
   const handleSeriesBChange = () => {
@@ -291,7 +265,6 @@ export default function CatalogueContent() {
       setSeriesB(newValue);
       setSeriesAll(false);
     }
-    setCurrentPage(0); // Reset to first page when changing filters
   };
 
   const handleSeriesAllChange = () => {
@@ -314,7 +287,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
     }
     setSeriesAll(newValue);
-    setCurrentPage(0); // Reset to first page when changing filters
   };
 
   // Handle the new filename filters
@@ -334,7 +306,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleBBBChange = () => {
@@ -353,7 +324,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleBBCChange = () => {
@@ -372,7 +342,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleDChange = () => {
@@ -391,7 +360,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleRGGChange = () => {
@@ -410,7 +378,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   // Add handlers for new filter options
@@ -431,7 +398,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handlePopArtKoopChange = () => {
@@ -451,7 +417,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleCatalogsChange = () => {
@@ -471,7 +436,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleZinesChange = () => {
@@ -491,7 +455,6 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
   const handleFlyersChange = () => {
@@ -511,18 +474,15 @@ export default function CatalogueContent() {
       setSeriesB(false);
       setSeriesAll(false);
     }
-    setCurrentPage(0);
   };
 
-  // Calculate dynamic pagination values based on actual number of items
-  const displayedWorks = isSearching ? filteredWorks : seriesFilteredWorks;
-  const dynamicTotalResults = displayedWorks.length;
+  // Calculate dynamic pagination values based on API response
+  const dynamicTotalResults = totalResults;
   const dynamicStartResult = dynamicTotalResults === 0 ? 0 : currentPage * resultsPerPage + 1;
   const dynamicEndResult = Math.min((currentPage + 1) * resultsPerPage, dynamicTotalResults);
 
   // Generate page numbers for pagination
   const generatePageNumbers = useCallback(() => {
-    const totalPages = Math.ceil(dynamicTotalResults / resultsPerPage);
     const maxVisiblePages = 10;
     
     if (totalPages <= maxVisiblePages) {
@@ -539,18 +499,7 @@ export default function CatalogueContent() {
     }
     
     return [...Array(endPage - startPage + 1).keys()].map(i => i + startPage);
-  }, [currentPage, dynamicTotalResults, resultsPerPage]);
-
-  // Clear search and reset to show all results
-  const clearSearch = () => {
-    setSearchTerm('');
-    setIsSearching(false);
-    setFilteredWorks([]);
-    setCurrentPage(0);
-    
-    // Update URL to remove search parameter
-    router.push('/catalogue');
-  };
+  }, [currentPage, totalPages]);
 
   // Mobile controls toggle handlers
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -1099,74 +1048,90 @@ export default function CatalogueContent() {
           </div>
 
           <div id="indexContainer" className={viewType}>
-            {viewType === 'list' ? (
-              <table className="list-view-table">
-                <thead>
-                  <tr>
-                    <th>Catalogue No.</th>
-                    <th>Artist</th>
-                    <th>Title</th>
-                    <th>Size</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedWorks
-                    .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
-                    .map(work => (
-                    <tr key={work.id}>
-                      <td>{work.catalogueNumber}</td>
-                      <td>{work.artist}</td>
-                      <td><a href={`/catalogue/entry/${work.id}`}>{work.title}</a></td>
-                      <td>{work.size}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div id="catWorks" className="catWorksCont customCatWorks">
-                {displayedWorks
-                  .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
-                  .map(work => (
-                  <div className="item" key={work.id}>
-                    <div id={`work-${work.id}`}></div>
-                    <a href={`/catalogue/entry/${work.id}`} className="image">
-                      <SmoothImage
-                        src={work.imageUrl}
-                        alt={work.title}
-                        width={170}
-                        height={170}
-                        style={{
-                          objectFit: 'cover',
-                          width: '100%',
-                          height: 'auto',
-                          aspectRatio: '1',
-                          display: 'block'
-                        }}
-                      />
-                    </a>
-                    {viewType === 'gridA' && (
-                      <div className="item_catDetails">
-                        <a href={`/catalogue/entry/${work.id}`}>
-                          <div className="item_title"><em>{work.title}</em></div>
-                          <div className="item_date">{work.artist}</div>
-                          <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ))}
+            {isLoadingResults ? (
+              // Show loading indicator
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  border: '4px solid #f3f3f3', 
+                  borderTop: '4px solid #333', 
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
               </div>
+            ) : (
+              <>
+                {viewType === 'list' ? (
+                  <table className="list-view-table">
+                    <thead>
+                      <tr>
+                        <th>Catalogue No.</th>
+                        <th>Artist</th>
+                        <th>Title</th>
+                        <th>Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredWorks
+                        .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
+                        .map(work => (
+                        <tr key={work.id}>
+                          <td>{work.catalogueNumber}</td>
+                          <td>{work.artist}</td>
+                          <td><a href={`/catalogue/entry/${work.id}`}>{work.title}</a></td>
+                          <td>{work.size}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div id="catWorks" className="catWorksCont customCatWorks">
+                    {filteredWorks
+                      .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
+                      .map(work => (
+                      <div className="item" key={work.id}>
+                        <div id={`work-${work.id}`}></div>
+                        <a href={`/catalogue/entry/${work.id}`} className="image">
+                          <SmoothImage
+                            src={work.imageUrl}
+                            alt={work.title}
+                            width={170}
+                            height={170}
+                            style={{
+                              objectFit: 'cover',
+                              width: '100%',
+                              height: 'auto',
+                              aspectRatio: '1',
+                              display: 'block'
+                            }}
+                          />
+                        </a>
+                        {viewType === 'gridA' && (
+                          <div className="item_catDetails">
+                            <a href={`/catalogue/entry/${work.id}`}>
+                              <div className="item_title"><em>{work.title}</em></div>
+                              <div className="item_date">{work.artist}</div>
+                              <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
             
             {/* Pagination */}
-            {Math.ceil(dynamicTotalResults / resultsPerPage) > 1 && (
+            {totalPages > 1 && (
               <div id="paginationBottom">
                 <div id="pagiWrapper">
                   <div id="pagiContentTop">
                     {/* Calculate pagination flags */}
                     {(() => {
                       const isFirstPage = currentPage === 0;
-                      const isLastPage = currentPage >= Math.ceil(dynamicTotalResults / resultsPerPage) - 1;
+                      const isLastPage = currentPage >= totalPages - 1;
                       
                       return (
                         <>
@@ -1178,7 +1143,8 @@ export default function CatalogueContent() {
                                   href="#" 
                                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
                                     e.preventDefault(); 
-                                    setCurrentPage(0); 
+                                    setCurrentPage(0);
+                                    fetchSearchResults(0);
                                   }} 
                                   className="nextprev" 
                                   id="first" 
@@ -1192,7 +1158,9 @@ export default function CatalogueContent() {
                                   href="#" 
                                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
                                     e.preventDefault(); 
-                                    setCurrentPage(currentPage - 1); 
+                                    const newPage = currentPage - 1;
+                                    setCurrentPage(newPage);
+                                    fetchSearchResults(newPage);
                                   }} 
                                   className="nextprev" 
                                   id="prev" 
@@ -1215,7 +1183,8 @@ export default function CatalogueContent() {
                                   href="#" 
                                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
                                     e.preventDefault(); 
-                                    setCurrentPage(pageNum); 
+                                    setCurrentPage(pageNum);
+                                    fetchSearchResults(pageNum);
                                   }} 
                                   className="pageLink" 
                                   key={pageNum}
@@ -1225,7 +1194,7 @@ export default function CatalogueContent() {
                               )
                             ))}
                           </span>
-                          {dynamicTotalResults > resultsPerPage * 10 && <span className="pagenosDots">&nbsp;...</span>}
+                          {totalPages > 10 && <span className="pagenosDots">&nbsp;...</span>}
 
                           {/* Only show Next/Last when not on last page */}
                           {!isLastPage && (
@@ -1235,7 +1204,9 @@ export default function CatalogueContent() {
                                   href="#" 
                                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
                                     e.preventDefault(); 
-                                    setCurrentPage(currentPage + 1); 
+                                    const newPage = currentPage + 1;
+                                    setCurrentPage(newPage);
+                                    fetchSearchResults(newPage);
                                   }} 
                                   className="nextprev" 
                                   id="next" 
@@ -1249,7 +1220,9 @@ export default function CatalogueContent() {
                                   href="#" 
                                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
                                     e.preventDefault(); 
-                                    setCurrentPage(Math.ceil(dynamicTotalResults / resultsPerPage) - 1); 
+                                    const lastPage = totalPages - 1;
+                                    setCurrentPage(lastPage);
+                                    fetchSearchResults(lastPage);
                                   }} 
                                   className="nextprev" 
                                   id="last" 
