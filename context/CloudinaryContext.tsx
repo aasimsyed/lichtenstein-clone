@@ -9,6 +9,7 @@ interface CloudinaryContextType {
   loading: boolean;
   error: string | null;
   refreshImages: () => Promise<void>;
+  preloadNextImages: (currentIndex: number, count: number) => void;
 }
 
 // Create the context with default values
@@ -16,7 +17,8 @@ const CloudinaryContext = createContext<CloudinaryContextType>({
   images: [],
   loading: true,
   error: null,
-  refreshImages: async () => {}
+  refreshImages: async () => {},
+  preloadNextImages: () => {}
 });
 
 // Provider component that will wrap the app
@@ -60,12 +62,27 @@ export function CloudinaryProvider({ children }: { children: React.ReactNode }) 
     setInitialized(false);
   };
 
+  // Function to preload the next images
+  const preloadNextImages = (currentIndex: number, count: number) => {
+    if (!images.length) return;
+
+    // Preload the next 'count' images
+    for (let i = 1; i <= count; i++) {
+      const nextIndex = (currentIndex + i) % images.length;
+      if (nextIndex !== currentIndex && images[nextIndex]) {
+        const image = new Image();
+        image.src = images[nextIndex].url;
+      }
+    }
+  };
+
   // The value that will be provided to consumers of this context
   const value = {
     images,
     loading,
     error,
-    refreshImages
+    refreshImages,
+    preloadNextImages
   };
 
   return (

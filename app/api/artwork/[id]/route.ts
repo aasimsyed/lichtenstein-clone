@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchCloudinaryImages, getOptimizedServerUrl } from '../../../utils/cloudinary-server';
 import { parseFilename } from '../../../utils/filename-utils';
 
-type RouteParams = {
-  params: { id: string }
-}
+type Params = {
+  id: string;
+};
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<Params> }
 ) {
-  // NOTE: Follow Next.js requirements for handling dynamic route params
-  const id = params.id;
-  
   try {
+    // Await the params to resolve the Promise
+    const { id } = await params;
+    
     // Validate ID
     if (!id || isNaN(parseInt(id))) {
       return NextResponse.json(

@@ -9,16 +9,6 @@ cloudinary.config({
   secure: true
 });
 
-// Define the types for Cloudinary resources
-interface CloudinaryResource {
-  public_id: string;
-  secure_url: string;
-  width: number;
-  height: number;
-  format: string;
-  created_at: string;
-}
-
 // Server-side function to fetch Cloudinary images
 async function fetchImages() {
   try {
@@ -31,9 +21,9 @@ async function fetchImages() {
 
     // Return the resources directly
     return result.resources;
-  } catch (error) {
-    console.error('Error fetching from Cloudinary:', error);
-    throw error;
+  } catch (err) {
+    console.error('Error fetching from Cloudinary:', err);
+    throw err;
   }
 }
 
@@ -42,7 +32,7 @@ export async function GET() {
   try {
     const resources = await fetchImages();
     return NextResponse.json({ images: resources });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch Cloudinary images' },
       { status: 500 }

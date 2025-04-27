@@ -187,9 +187,14 @@ export default function CatalogueContent() {
       setCurrentPage(0); // Reset to first page when filters change
       fetchSearchResults(0);
     }
-  }, [cloudinaryImages, loading, fetchSearchResults, seriesA, seriesB, seriesAll, 
-      filterAAA, filterBBB, filterBBC, filterD, filterRGG, filterPreBetterBadges, 
-      filterPopArtKoop, filterCatalogs, filterZines, filterFlyers, sortBy, resultsPerPage]);
+  }, [cloudinaryImages, loading, fetchSearchResults]);
+
+  // Effect for handling pagination changes
+  useEffect(() => {
+    if (cloudinaryImages.length > 0 && !loading) {
+      window.scrollTo(0, 0); // Scroll back to top when page changes
+    }
+  }, [currentPage, cloudinaryImages, loading]);
 
   // Process search query from URL on load (just to initialize the search term)
   useEffect(() => {
@@ -806,131 +811,129 @@ export default function CatalogueContent() {
                 {/* Desktop Series Filter */}
                 <div className="filter-section" style={{ marginTop: '20px', marginBottom: '10px', width: '100%' }}>
                   <h3 style={{ fontSize: '16px', margin: '0 0 10px 0' }}>Series</h3>
-                  <div style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '10px', width: '100%' }}>
-                    {/* First row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, auto)', gap: '20px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={seriesAll}
-                          onChange={handleSeriesAllChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        All
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={seriesA}
-                          onChange={handleSeriesAChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        A
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={seriesB}
-                          onChange={handleSeriesBChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        B
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterAAA}
-                          onChange={handleAAAChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        AAA
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterBBB}
-                          onChange={handleBBBChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        BBB
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterBBC}
-                          onChange={handleBBCChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        BBC
-                      </label>
-                    </div>
-                    
-                    {/* Second row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto auto auto auto', gap: '20px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterD}
-                          onChange={handleDChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        D
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterRGG}
-                          onChange={handleRGGChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        RGG
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterPreBetterBadges}
-                          onChange={handlePreBetterBadgesChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        Pre Better Badges
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterPopArtKoop}
-                          onChange={handlePopArtKoopChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        Pop Art Koop
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterCatalogs}
-                          onChange={handleCatalogsChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        Catalogs
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterZines}
-                          onChange={handleZinesChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        Zines
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                        <input
-                          type="checkbox"
-                          checked={filterFlyers}
-                          onChange={handleFlyersChange}
-                          style={{ marginRight: '8px' }}
-                        />
-                        Flyers
-                      </label>
-                    </div>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(6, 1fr)',
+                    gap: '10px', 
+                    width: '100%'
+                  }}>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={seriesAll}
+                        onChange={handleSeriesAllChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      All
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={seriesA}
+                        onChange={handleSeriesAChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      A
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={seriesB}
+                        onChange={handleSeriesBChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      B
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterAAA}
+                        onChange={handleAAAChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      AAA
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterBBB}
+                        onChange={handleBBBChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      BBB
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterBBC}
+                        onChange={handleBBCChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      BBC
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterD}
+                        onChange={handleDChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      D
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterRGG}
+                        onChange={handleRGGChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      RGG
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterPreBetterBadges}
+                        onChange={handlePreBetterBadgesChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Pre Better Badges
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterPopArtKoop}
+                        onChange={handlePopArtKoopChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Pop Art Koop
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterCatalogs}
+                        onChange={handleCatalogsChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Catalogs
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterZines}
+                        onChange={handleZinesChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Zines
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                      <input
+                        type="checkbox"
+                        checked={filterFlyers}
+                        onChange={handleFlyersChange}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Flyers
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1073,9 +1076,7 @@ export default function CatalogueContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredWorks
-                        .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
-                        .map(work => (
+                      {filteredWorks.map(work => (
                         <tr key={work.id}>
                           <td>{work.catalogueNumber}</td>
                           <td>{work.artist}</td>
@@ -1087,9 +1088,7 @@ export default function CatalogueContent() {
                   </table>
                 ) : (
                   <div id="catWorks" className="catWorksCont customCatWorks">
-                    {filteredWorks
-                      .slice(currentPage * resultsPerPage, (currentPage + 1) * resultsPerPage)
-                      .map(work => (
+                    {filteredWorks.map(work => (
                       <div className="item" key={work.id}>
                         <div id={`work-${work.id}`}></div>
                         <a href={`/catalogue/entry/${work.id}`} className="image">
@@ -1188,8 +1187,10 @@ export default function CatalogueContent() {
                           <button 
                             onClick={() => { 
                               const newPage = currentPage + 1;
-                              setCurrentPage(newPage);
-                              fetchSearchResults(newPage);
+                              if (newPage < totalPages) {
+                                setCurrentPage(newPage);
+                                fetchSearchResults(newPage);
+                              }
                             }} 
                             className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
                             disabled={isLastPage}
@@ -1264,8 +1265,8 @@ export default function CatalogueContent() {
                   }
                   
                   .pagination-number.active {
-                    background-color: #333;
-                    color: white;
+                    background-color: #ededed;
+                    color: #333;
                     border-color: #333;
                     font-weight: 500;
                   }

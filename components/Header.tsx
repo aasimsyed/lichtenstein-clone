@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
@@ -87,7 +88,7 @@ export default function Header() {
         <div id="headerMain">
           <div className="logo">
             <Link href="/">
-              <img src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width="280" height="40" />
+              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={280} height={40} />
             </Link>
           </div>
           
@@ -103,7 +104,7 @@ export default function Header() {
         <div id="headerMoble">
           <div className="mobile-logo">
             <Link href="/">
-              <img src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width="160" height="24" />
+              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={160} height={24} />
             </Link>
           </div>
           <div className="mobile-toggle" onClick={toggleMobileMenu}>
