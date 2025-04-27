@@ -20,13 +20,27 @@ export default function Header() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const handleGlobalSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleGlobalSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchValue.trim()) {
-      // Navigate to catalogue page with search param
-      router.push(`/catalogue?search=${encodeURIComponent(searchValue.trim())}`);
+    
+    try {
+      // Make API call without waiting for the result
+      fetch('/api/catalogue', {
+        method: 'GET',
+      }).catch(error => {
+        console.error('Error calling catalogue API:', error);
+      });
+      
+      // Navigate to catalogue page without query parameters
+      router.push('/catalogue');
       setSearchOpen(false); // Close search box after submitting
       setSearchValue(''); // Clear the input
+    } catch (error) {
+      console.error('Error in global search:', error);
+      // Still navigate even if there's an error
+      router.push('/catalogue');
+      setSearchOpen(false);
+      setSearchValue('');
     }
   };
 
@@ -78,17 +92,11 @@ export default function Header() {
         </form>
       </div>
       
-      <header>
-        <div id="headerTopBand">
-          <div id="login_bookmarks" style={{ opacity: searchOpen ? 0 : 1, visibility: searchOpen ? 'hidden' : 'visible' }}>
-            <a href="#" id="globalSearachTrigger" onClick={(e) => { e.preventDefault(); toggleSearch(); }}>Search</a>
-          </div>
-        </div>
-        
+      <header>        
         <div id="headerMain">
           <div className="logo">
             <Link href="/">
-              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={280} height={40} />
+              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={550} height={40} priority />
             </Link>
           </div>
           
@@ -104,7 +112,7 @@ export default function Header() {
         <div id="headerMoble">
           <div className="mobile-logo">
             <Link href="/">
-              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={160} height={24} />
+              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={450} height={24} />
             </Link>
           </div>
           <div className="mobile-toggle" onClick={toggleMobileMenu}>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import SmoothImage from '../../../components/SmoothImage';
 
 interface ZoomableImageProps {
@@ -16,6 +16,13 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(0.75); // Initial zoom level (75%)
+  
+  // Refs for pinch-to-zoom
+  const touchStartRef = useRef<{ x: number, y: number, distance: number | null }>({
+    x: 0,
+    y: 0,
+    distance: null
+  });
   
   const openModal = () => {
     setIsModalOpen(true);
@@ -51,23 +58,93 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
     setIsDragging(false);
   };
   
+  // Calculate distance between two touch points
+  const getDistance = (touches: React.TouchList): number => {
+    if (touches.length < 2) return 0;
+    
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+  
+  // Get midpoint between two touch points
+  const getMidpoint = (touches: React.TouchList): { x: number, y: number } => {
+    if (touches.length < 2) {
+      return { x: touches[0].clientX, y: touches[0].clientY };
+    }
+    
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2
+    };
+  };
+  
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    const touch = e.touches[0];
-    setDragStart({
-      x: touch.clientX - position.x,
-      y: touch.clientY - position.y
-    });
+    if (e.touches.length === 1) {
+      // Single touch - dragging
+      setIsDragging(true);
+      const touch = e.touches[0];
+      setDragStart({
+        x: touch.clientX - position.x,
+        y: touch.clientY - position.y
+      });
+      
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        distance: null
+      };
+    } else if (e.touches.length === 2) {
+      // Two touches - pinching
+      e.preventDefault();
+      const distance = getDistance(e.touches);
+      const midpoint = getMidpoint(e.touches);
+      
+      touchStartRef.current = {
+        x: midpoint.x,
+        y: midpoint.y,
+        distance: distance
+      };
+    }
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging) {
+    e.preventDefault(); // Prevent page scrolling
+    
+    if (e.touches.length === 1 && isDragging) {
+      // Single touch - dragging
       const touch = e.touches[0];
       setPosition({
         x: touch.clientX - dragStart.x,
         y: touch.clientY - dragStart.y
       });
-      e.preventDefault(); // Prevent page scrolling while dragging
+    } else if (e.touches.length === 2 && touchStartRef.current.distance !== null) {
+      // Two touches - pinching
+      const currentDistance = getDistance(e.touches);
+      const initialDistance = touchStartRef.current.distance;
+      
+      // Calculate new zoom based on pinch gesture
+      const scaleFactor = currentDistance / initialDistance;
+      const newZoom = Math.min(Math.max(zoomLevel * scaleFactor, 0.5), 8);
+      
+      // Update the zoom level
+      if (newZoom >= 0.5 && newZoom <= 8) {
+        setZoomLevel(newZoom);
+        
+        // Update midpoint position for smoother zooming
+        const midpoint = getMidpoint(e.touches);
+        setDragStart({
+          x: midpoint.x - position.x,
+          y: midpoint.y - position.y
+        });
+      }
+      
+      // Update touch reference for next move event
+      touchStartRef.current = {
+        x: getMidpoint(e.touches).x,
+        y: getMidpoint(e.touches).y,
+        distance: currentDistance
+      };
     }
   };
   

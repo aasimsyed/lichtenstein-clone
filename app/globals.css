@@ -382,7 +382,7 @@ a:hover {
 }
 
 #headerMoble .mobile-logo {
-  max-width: 160px;
+  max-width: 300px;
 }
 
 #headerMoble .mobile-logo img {
@@ -1021,15 +1021,15 @@ footer {
 
 @media (max-width: 768px) {
   .hide-mobile {
-    display: none;
+    display: none !important;
   }
   
   .show-mobile {
-    display: block;
+    display: block !important;
   }
   
   #homepage {
-    margin-top: 15px;
+    margin-top: 45px;
     padding-bottom: 0;
   }
   
@@ -1043,6 +1043,7 @@ footer {
     padding-top: 10px;
     position: relative;
     overflow: visible !important;
+    margin-top: 20px;
   }
   
   .homepageCarouselDiv {
@@ -1191,7 +1192,7 @@ footer {
   
   #mainBody {
     padding: 0 15px;
-    margin-top: 130px;
+    margin-top: 20px;
   }
   
   #pageTopMatter {

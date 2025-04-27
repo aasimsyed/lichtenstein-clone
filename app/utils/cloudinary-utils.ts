@@ -94,7 +94,7 @@ export async function fetchCloudinaryImages(ignoreCache = false): Promise<Cloudi
     const result = await cloudinary.search
       .expression('folder:rupture/badges')
       .sort_by('created_at', 'desc')
-      .max_results(100)
+      .max_results(50000)
       .execute();
 
     // Transform the resources

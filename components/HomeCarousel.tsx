@@ -128,7 +128,7 @@ export default function HomeCarousel() {
       <div 
         id="homepageCarouselWrapper" 
         className="home-carousel-container" 
-        style={{ position: 'relative', paddingBottom: '80px' }}
+        style={{ position: 'relative', paddingBottom: '80px', marginTop: isMobile ? '30px' : '0' }}
       >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (

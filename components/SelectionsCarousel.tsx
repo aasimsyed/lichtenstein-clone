@@ -62,6 +62,14 @@ export default function SelectionsCarousel() {
     return null;
   }
 
+  // Function to get proper artwork ID for linking
+  const getArtworkId = (image) => {
+    // Find the index of this image in the original images array
+    const originalIndex = images.findIndex(img => img.id === image.id);
+    // Return the index + 1 as that's how the entry page finds images
+    return originalIndex >= 0 ? originalIndex + 1 : 1;
+  };
+
   return (
     <div className="selections-carousel-container">
       <h2 className="selections-title">Featured Badges</h2>
@@ -69,10 +77,11 @@ export default function SelectionsCarousel() {
         <Slider {...settings}>
           {selections.map((image, index) => {
             const { catalogNumber, title, artist, size } = parseFilename(image.url);
+            const artworkId = getArtworkId(image);
             return (
               <div key={index} className="carousel-slide">
                 <div className="slide-inner">
-                  <Link href={`/catalogue/entry/${index + 1}`} className="artwork-link">
+                  <Link href={`/catalogue/entry/${artworkId}`} className="artwork-link">
                     <div className="image-container">
                       <Image 
                         src={image.url} 

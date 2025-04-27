@@ -57,10 +57,8 @@ export default function CatalogueContent() {
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
   const [seriesB, setSeriesB] = useState(false);
-  const [seriesAll, setSeriesAll] = useState(true); // Default to All selected
   
   // New filename prefix filter states
-  const [filterAAA, setFilterAAA] = useState(false);
   const [filterBBB, setFilterBBB] = useState(false);
   const [filterBBC, setFilterBBC] = useState(false);
   const [filterD, setFilterD] = useState(false);
@@ -71,7 +69,6 @@ export default function CatalogueContent() {
   const [filterPopArtKoop, setFilterPopArtKoop] = useState(false);
   const [filterCatalogs, setFilterCatalogs] = useState(false);
   const [filterZines, setFilterZines] = useState(false);
-  const [filterFlyers, setFilterFlyers] = useState(false);
 
   // Fix touch interaction to prevent unwanted window movement
   useEffect(() => {
@@ -131,8 +128,6 @@ export default function CatalogueContent() {
       // Add filter parameters
       params.set('seriesA', seriesA.toString());
       params.set('seriesB', seriesB.toString());
-      params.set('seriesAll', seriesAll.toString());
-      params.set('filterAAA', filterAAA.toString());
       params.set('filterBBB', filterBBB.toString());
       params.set('filterBBC', filterBBC.toString());
       params.set('filterD', filterD.toString());
@@ -141,7 +136,6 @@ export default function CatalogueContent() {
       params.set('filterPopArtKoop', filterPopArtKoop.toString());
       params.set('filterCatalogs', filterCatalogs.toString());
       params.set('filterZines', filterZines.toString());
-      params.set('filterFlyers', filterFlyers.toString());
       
       // Add sorting and pagination
       params.set('sortBy', sortBy);
@@ -169,8 +163,8 @@ export default function CatalogueContent() {
       console.error('Error fetching search results:', error);
       setIsLoadingResults(false);
     }
-  }, [searchTerm, seriesA, seriesB, seriesAll, filterAAA, filterBBB, filterBBC, filterD, filterRGG, 
-       filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines, filterFlyers, 
+  }, [searchTerm, seriesA, seriesB, filterBBB, filterBBC, filterD, filterRGG, 
+       filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines, 
        sortBy, resultsPerPage]);
 
   // Fetch initial data when component mounts
@@ -221,264 +215,45 @@ export default function CatalogueContent() {
 
   // Series filter handlers
   const handleSeriesAChange = () => {
-    const newValue = !seriesA;
-    // Clear all filename filters when selecting a series
-    setFilterAAA(false);
-    setFilterBBB(false);
-    setFilterBBC(false);
-    setFilterD(false);
-    setFilterRGG(false);
-    setFilterPreBetterBadges(false);
-    setFilterPopArtKoop(false);
-    setFilterCatalogs(false);
-    setFilterZines(false);
-    setFilterFlyers(false);
-    
-    if (newValue && seriesB) {
-      // If both A and B are now selected, select All instead
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(true);
-    } else {
-      // Otherwise toggle A and ensure All is unselected
-      setSeriesA(newValue);
-      setSeriesAll(false);
-    }
+    setSeriesA(!seriesA);
   };
 
   const handleSeriesBChange = () => {
-    const newValue = !seriesB;
-    // Clear all filename filters when selecting a series
-    setFilterAAA(false);
-    setFilterBBB(false);
-    setFilterBBC(false);
-    setFilterD(false);
-    setFilterRGG(false);
-    setFilterPreBetterBadges(false);
-    setFilterPopArtKoop(false);
-    setFilterCatalogs(false);
-    setFilterZines(false);
-    setFilterFlyers(false);
-    
-    if (newValue && seriesA) {
-      // If both A and B are now selected, select All instead
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(true);
-    } else {
-      // Otherwise toggle B and ensure All is unselected
-      setSeriesB(newValue);
-      setSeriesAll(false);
-    }
-  };
-
-  const handleSeriesAllChange = () => {
-    const newValue = !seriesAll;
-    // Clear all filename filters when selecting All
-    setFilterAAA(false);
-    setFilterBBB(false);
-    setFilterBBC(false);
-    setFilterD(false);
-    setFilterRGG(false);
-    setFilterPreBetterBadges(false);
-    setFilterPopArtKoop(false);
-    setFilterCatalogs(false);
-    setFilterZines(false);
-    setFilterFlyers(false);
-    
-    // If All is selected, unselect A and B
-    if (newValue) {
-      setSeriesA(false);
-      setSeriesB(false);
-    }
-    setSeriesAll(newValue);
+    setSeriesB(!seriesB);
   };
 
   // Handle the new filename filters
-  const handleAAAChange = () => {
-    setFilterAAA(!filterAAA);
-    if (!filterAAA) {
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
-  };
-
   const handleBBBChange = () => {
     setFilterBBB(!filterBBB);
-    if (!filterBBB) {
-      setFilterAAA(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handleBBCChange = () => {
     setFilterBBC(!filterBBC);
-    if (!filterBBC) {
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handleDChange = () => {
     setFilterD(!filterD);
-    if (!filterD) {
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handleRGGChange = () => {
     setFilterRGG(!filterRGG);
-    if (!filterRGG) {
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   // Add handlers for new filter options
   const handlePreBetterBadgesChange = () => {
     setFilterPreBetterBadges(!filterPreBetterBadges);
-    if (!filterPreBetterBadges) {
-      // Clear all other filters
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handlePopArtKoopChange = () => {
     setFilterPopArtKoop(!filterPopArtKoop);
-    if (!filterPopArtKoop) {
-      // Clear all other filters
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handleCatalogsChange = () => {
     setFilterCatalogs(!filterCatalogs);
-    if (!filterCatalogs) {
-      // Clear all other filters
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterZines(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   const handleZinesChange = () => {
     setFilterZines(!filterZines);
-    if (!filterZines) {
-      // Clear all other filters
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterFlyers(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
-  };
-
-  const handleFlyersChange = () => {
-    setFilterFlyers(!filterFlyers);
-    if (!filterFlyers) {
-      // Clear all other filters
-      setFilterAAA(false);
-      setFilterBBB(false);
-      setFilterBBC(false);
-      setFilterD(false);
-      setFilterRGG(false);
-      setFilterPreBetterBadges(false);
-      setFilterPopArtKoop(false);
-      setFilterCatalogs(false);
-      setFilterZines(false);
-      setSeriesA(false);
-      setSeriesB(false);
-      setSeriesAll(false);
-    }
   };
 
   // Calculate dynamic pagination values based on API response
@@ -594,15 +369,6 @@ export default function CatalogueContent() {
                     <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
                       <input
                         type="checkbox"
-                        checked={seriesAll}
-                        onChange={handleSeriesAllChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      All
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
                         style={{ marginRight: '8px' }}
@@ -617,15 +383,6 @@ export default function CatalogueContent() {
                         style={{ marginRight: '8px' }}
                       />
                       B
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
-                        checked={filterAAA}
-                        onChange={handleAAAChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      AAA
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
                       <input
@@ -698,15 +455,6 @@ export default function CatalogueContent() {
                         style={{ marginRight: '8px' }}
                       />
                       Zines
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-                      <input
-                        type="checkbox"
-                        checked={filterFlyers}
-                        onChange={handleFlyersChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      Flyers
                     </label>
                   </div>
                 </div>
@@ -820,15 +568,6 @@ export default function CatalogueContent() {
                     <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
                       <input
                         type="checkbox"
-                        checked={seriesAll}
-                        onChange={handleSeriesAllChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      All
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                      <input
-                        type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
                         style={{ marginRight: '8px' }}
@@ -843,15 +582,6 @@ export default function CatalogueContent() {
                         style={{ marginRight: '8px' }}
                       />
                       B
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                      <input
-                        type="checkbox"
-                        checked={filterAAA}
-                        onChange={handleAAAChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      AAA
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
                       <input
@@ -923,16 +653,7 @@ export default function CatalogueContent() {
                         onChange={handleZinesChange}
                         style={{ marginRight: '8px' }}
                       />
-                      Zines
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
-                      <input
-                        type="checkbox"
-                        checked={filterFlyers}
-                        onChange={handleFlyersChange}
-                        style={{ marginRight: '8px' }}
-                      />
-                      Flyers
+                      Flyers & Zines
                     </label>
                   </div>
                 </div>
@@ -1077,11 +798,35 @@ export default function CatalogueContent() {
                     </thead>
                     <tbody>
                       {filteredWorks.map(work => (
-                        <tr key={work.id}>
-                          <td>{work.catalogueNumber}</td>
-                          <td>{work.artist}</td>
-                          <td><a href={`/catalogue/entry/${work.id}`}>{work.title}</a></td>
-                          <td>{work.size}</td>
+                        <tr 
+                          key={work.id} 
+                          onClick={() => window.location.href = `/catalogue/entry/${work.id}`}
+                          style={{ cursor: 'pointer' }}
+                          className="clickable-row"
+                        >
+                          <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
+                              work.catalogueNumber.startsWith('FZ') ? 'Flyer/Zine' : 
+                              work.catalogueNumber}</td>
+                          <td>{work.catalogueNumber === 'AD' ? '' : 
+                              work.catalogueNumber.startsWith('FZ') ? '' : 
+                              work.artist}</td>
+                          <td>
+                            {work.catalogueNumber === 'AD' ? (
+                              <>Catalog</>
+                            ) : work.catalogueNumber.startsWith('FZ') ? (
+                              <>
+                                {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
+                              </>
+                            ) : (
+                              work.title
+                            )}
+                            {work.catalogueNumber.startsWith('FZ') && (
+                              <div style={{ fontSize: '0.85em', color: '#666' }}>Flyer/Zine</div>
+                            )}
+                          </td>
+                          <td>{work.catalogueNumber === 'AD' ? '' : 
+                              work.catalogueNumber.startsWith('FZ') ? '' : 
+                              work.size}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1109,9 +854,29 @@ export default function CatalogueContent() {
                         {viewType === 'gridA' && (
                           <div className="item_catDetails">
                             <a href={`/catalogue/entry/${work.id}`}>
-                              <div className="item_title"><em>{work.title}</em></div>
-                              <div className="item_date">{work.artist}</div>
-                              <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
+                              <div className="item_title">
+                                <em>
+                                  {work.catalogueNumber === 'AD' ? (
+                                    <>Catalog</>
+                                  ) : work.catalogueNumber.startsWith('FZ') ? (
+                                    <>
+                                      {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
+                                    </>
+                                  ) : (
+                                    work.title
+                                  )}
+                                </em>
+                              </div>
+                              {work.catalogueNumber === 'AD' ? (
+                                <div className="item_catnum">Catalog</div>
+                              ) : work.catalogueNumber.startsWith('FZ') ? (
+                                <div className="item_catnum">Flyer/Zine</div>
+                              ) : (
+                                <>
+                                  <div className="item_date">{work.artist}</div>
+                                  <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
+                                </>
+                              )}
                             </a>
                           </div>
                         )}
@@ -1291,6 +1056,10 @@ export default function CatalogueContent() {
                     color: #666;
                     font-size: 14px;
                     margin-bottom: 1rem;
+                  }
+                  
+                  .clickable-row:hover {
+                    background-color: #f5f5f5;
                   }
                   
                   @media (max-width: 768px) {

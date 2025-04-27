@@ -25,10 +25,8 @@ export async function GET(request: NextRequest) {
     // Get filter parameters
     const seriesA = searchParams.get('seriesA') === 'true';
     const seriesB = searchParams.get('seriesB') === 'true';
-    const seriesAll = searchParams.get('seriesAll') === 'true' || (!seriesA && !seriesB);
     
     // Get additional filters
-    const filterAAA = searchParams.get('filterAAA') === 'true';
     const filterBBB = searchParams.get('filterBBB') === 'true';
     const filterBBC = searchParams.get('filterBBC') === 'true';
     const filterD = searchParams.get('filterD') === 'true';
@@ -37,7 +35,11 @@ export async function GET(request: NextRequest) {
     const filterPopArtKoop = searchParams.get('filterPopArtKoop') === 'true';
     const filterCatalogs = searchParams.get('filterCatalogs') === 'true';
     const filterZines = searchParams.get('filterZines') === 'true';
-    const filterFlyers = searchParams.get('filterFlyers') === 'true';
+    
+    // Check if any filters are active
+    const anyFilterActive = seriesA || seriesB || filterBBB || 
+                            filterBBC || filterD || filterRGG || filterPreBetterBadges || 
+                            filterPopArtKoop || filterCatalogs || filterZines;
     
     // Get sorting parameters
     const sortBy = searchParams.get('sortBy') || 'catno_ASC';
@@ -52,11 +54,22 @@ export async function GET(request: NextRequest) {
     // Map to artwork objects
     const artworks: Artwork[] = images.map((image, i) => {
       const { catalogNumber, title, artist, size } = parseFilename(image.secure_url);
+      
+      // Special handling for FZ items (Flyers/Zines)
+      let processedTitle = title;
+      if (catalogNumber.startsWith('FZ_')) {
+        // Extract title from the catalog ID format: FZ_Title_IssueNumber
+        const parts = catalogNumber.split('_');
+        if (parts.length >= 2) {
+          processedTitle = parts[1].replace(/\./g, ' ');
+        }
+      }
+      
       return {
         id: i + 1,
-        title,
+        title: processedTitle,
         date: '',
-        medium: 'Oil and Magna on canvas',
+        medium: catalogNumber.startsWith('FZ_') ? 'Flyer/Zine' : 'Oil and Magna on canvas',
         dimensions: '68 x 56 in (172.7 x 142.2 cm)',
         location: 'Private Collection',
         catalogueNumber: catalogNumber,
@@ -66,33 +79,59 @@ export async function GET(request: NextRequest) {
       };
     });
     
-    // Apply series filtering
-    let filteredWorks = artworks.filter(work => {
-      // Check specific filename filters first
-      if (filterAAA && work.imageUrl.includes('/AAA')) return true;
-      if (filterBBB && work.imageUrl.includes('/BBB')) return true;
-      if (filterBBC && work.imageUrl.includes('/BBC')) return true;
-      if (filterD && work.imageUrl.includes('/D')) return true;
-      if (filterRGG && work.imageUrl.includes('/RGG')) return true;
-      
-      // Check additional category filters
-      if (filterPreBetterBadges && work.imageUrl.includes('/PreBetterBadges')) return true;
-      if (filterPopArtKoop && work.imageUrl.includes('/PopArtKoop')) return true;
-      if (filterCatalogs && work.imageUrl.includes('/Catalogs')) return true;
-      if (filterZines && work.imageUrl.includes('/Zines')) return true;
-      if (filterFlyers && work.imageUrl.includes('/Flyers')) return true;
-      
-      // If any of the specific filters are active but didn't match, filter out
-      if (filterAAA || filterBBB || filterBBC || filterD || filterRGG || 
-          filterPreBetterBadges || filterPopArtKoop || filterCatalogs || 
-          filterZines || filterFlyers) return false;
-      
-      // Apply standard series filtering
-      if (seriesAll) return true;
-      if (seriesA && work.catalogueNumber.startsWith('A')) return true;
-      if (seriesB && work.catalogueNumber.startsWith('B')) return true;
-      return false;
-    });
+    // Apply filtering with union logic (show items matching ANY selected filter)
+    let filteredWorks = artworks;
+    
+    if (anyFilterActive) {
+      filteredWorks = artworks.filter(work => {
+        // Array to collect all filter match results - explicitly typed as boolean[]
+        const filterMatches: boolean[] = [];
+        
+        // Add results for each filter check
+        if (seriesA) {
+          filterMatches.push(/^A\d+$/.test(work.catalogueNumber) || work.catalogueNumber === 'A');
+        }
+        
+        if (seriesB) {
+          filterMatches.push(/^B\d+$/.test(work.catalogueNumber) || work.catalogueNumber === 'B');
+        }
+        
+        if (filterBBB) {
+          filterMatches.push(work.catalogueNumber.startsWith('BBB'));
+        }
+        
+        if (filterBBC) {
+          filterMatches.push(work.catalogueNumber.startsWith('BBC'));
+        }
+        
+        if (filterD) {
+          filterMatches.push(work.catalogueNumber.startsWith('D'));
+        }
+        
+        if (filterRGG) {
+          filterMatches.push(work.catalogueNumber.startsWith('JAH'));
+        }
+        
+        if (filterPreBetterBadges) {
+          filterMatches.push(work.catalogueNumber.startsWith('FF'));
+        }
+        
+        if (filterPopArtKoop) {
+          filterMatches.push(work.catalogueNumber.startsWith('BIG'));
+        }
+        
+        if (filterCatalogs) {
+          filterMatches.push(work.catalogueNumber.startsWith('AD'));
+        }
+        
+        if (filterZines) {
+          filterMatches.push(work.catalogueNumber.startsWith('FZ'));
+        }
+        
+        // If any filter matched (union/OR logic), include this artwork
+        return filterMatches.some(match => match === true);
+      });
+    }
     
     // Apply search term filtering if search term exists
     if (searchTerm) {

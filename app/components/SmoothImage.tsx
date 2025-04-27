@@ -105,7 +105,7 @@ export default function SmoothImage(props: SmoothImageProps) {
           unoptimized={unoptimized}
           fetchPriority={preload ? "high" : "auto"}
           ref={imageRef}
-          onLoadingComplete={(result) => {
+          onLoad={(event) => {
             // No delay for faster perception
             setIsLoaded(true);
             
@@ -115,7 +115,7 @@ export default function SmoothImage(props: SmoothImageProps) {
             }
             
             if (props.onLoadingComplete) {
-              props.onLoadingComplete(result);
+              props.onLoadingComplete(event.currentTarget);
             }
           }}
         />

@@ -28,6 +28,17 @@ export const parseFilename = (url: string): {
   
   const parts = filename.split('_');
   
+  // Special handling for FZ catalog IDs (Flyers/Zines)
+  if (parts[0] === 'FZ') {
+    // Format: FZ_Title_IssueNumber
+    return {
+      catalogNumber: filename, // Use the full filename as the catalogNumber to preserve for display
+      size: 'Flyer/Zine',
+      artist: 'Flyer/Zine',
+      title: parts.length > 1 ? parts[1].replace(/\./g, ' ') : 'Unknown'
+    };
+  }
+  
   // Handle different filename patterns
   if (parts.length < 3) {
     return { 
