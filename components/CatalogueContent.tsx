@@ -1126,118 +1126,184 @@ export default function CatalogueContent() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div id="paginationBottom">
-                <div id="pagiWrapper">
-                  <div id="pagiContentTop">
-                    {/* Calculate pagination flags */}
-                    {(() => {
-                      const isFirstPage = currentPage === 0;
-                      const isLastPage = currentPage >= totalPages - 1;
-                      
-                      return (
-                        <>
-                          {/* Only show First/Previous when not on first page */}
-                          {!isFirstPage && (
-                            <>
-                              <span className="nextprevspan pageFirst">
-                                <a 
-                                  href="#" 
-                                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
-                                    e.preventDefault(); 
-                                    setCurrentPage(0);
-                                    fetchSearchResults(0);
-                                  }} 
-                                  className="nextprev" 
-                                  id="first" 
-                                  title="first"
-                                >
-                                  <span className="arrow-first">◀◀</span>first
-                                </a>
-                              </span>
-                              <span className="nextprevspan pagePrev">
-                                <a 
-                                  href="#" 
-                                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
-                                    e.preventDefault(); 
-                                    const newPage = currentPage - 1;
-                                    setCurrentPage(newPage);
-                                    fetchSearchResults(newPage);
-                                  }} 
-                                  className="nextprev" 
-                                  id="prev" 
-                                  title="previous"
-                                >
-                                  <span className="arrow-left">◀</span>previous
-                                </a>
-                              </span>
-                            </>
+                <div className="pagination-container">
+                  {(() => {
+                    const isFirstPage = currentPage === 0;
+                    const isLastPage = currentPage >= totalPages - 1;
+                    
+                    return (
+                      <>
+                        {/* First/Previous buttons */}
+                        <div className="pagination-nav">
+                          <button 
+                            onClick={() => { 
+                              setCurrentPage(0);
+                              fetchSearchResults(0);
+                            }} 
+                            className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
+                            disabled={isFirstPage}
+                            aria-label="First page"
+                          >
+                            <span aria-hidden="true">«</span>
+                          </button>
+                          
+                          <button 
+                            onClick={() => { 
+                              const newPage = currentPage - 1;
+                              setCurrentPage(newPage);
+                              fetchSearchResults(newPage);
+                            }} 
+                            className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
+                            disabled={isFirstPage}
+                            aria-label="Previous page"
+                          >
+                            <span aria-hidden="true">‹</span>
+                          </button>
+                        </div>
+                        
+                        {/* Page numbers */}
+                        <div className="pagination-pages">
+                          {generatePageNumbers().map((pageNum) => (
+                            <button 
+                              key={pageNum}
+                              onClick={() => { 
+                                setCurrentPage(pageNum);
+                                fetchSearchResults(pageNum);
+                              }} 
+                              className={`pagination-number ${pageNum === currentPage ? 'active' : ''}`}
+                              aria-label={`Page ${pageNum + 1}`}
+                              aria-current={pageNum === currentPage ? 'page' : undefined}
+                            >
+                              {pageNum + 1}
+                            </button>
+                          ))}
+                          
+                          {totalPages > 10 && (
+                            <span className="pagination-ellipsis">…</span>
                           )}
-
-                          {/* Always show page numbers */}
-                          &nbsp;
-                          <span className="pagenos">
-                            {generatePageNumbers().map((pageNum) => (
-                              pageNum === currentPage ? (
-                                <span className="pageLinkCurrent" key={pageNum}>{pageNum + 1}</span>
-                              ) : (
-                                <a 
-                                  href="#" 
-                                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
-                                    e.preventDefault(); 
-                                    setCurrentPage(pageNum);
-                                    fetchSearchResults(pageNum);
-                                  }} 
-                                  className="pageLink" 
-                                  key={pageNum}
-                                >
-                                  {pageNum + 1}
-                                </a>
-                              )
-                            ))}
-                          </span>
-                          {totalPages > 10 && <span className="pagenosDots">&nbsp;...</span>}
-
-                          {/* Only show Next/Last when not on last page */}
-                          {!isLastPage && (
-                            <>
-                              <span className="nextprevspan pageNext">
-                                <a 
-                                  href="#" 
-                                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
-                                    e.preventDefault(); 
-                                    const newPage = currentPage + 1;
-                                    setCurrentPage(newPage);
-                                    fetchSearchResults(newPage);
-                                  }} 
-                                  className="nextprev" 
-                                  id="next" 
-                                  title="next"
-                                >
-                                  next<span className="arrow-right">▶</span>
-                                </a>
-                              </span>
-                              <span className="nextprevspan pageLast">
-                                <a 
-                                  href="#" 
-                                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { 
-                                    e.preventDefault(); 
-                                    const lastPage = totalPages - 1;
-                                    setCurrentPage(lastPage);
-                                    fetchSearchResults(lastPage);
-                                  }} 
-                                  className="nextprev" 
-                                  id="last" 
-                                  title="last"
-                                >
-                                  last<span className="arrow-last">▶▶</span>
-                                </a>
-                              </span>
-                            </>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
+                        </div>
+                        
+                        {/* Next/Last buttons */}
+                        <div className="pagination-nav">
+                          <button 
+                            onClick={() => { 
+                              const newPage = currentPage + 1;
+                              setCurrentPage(newPage);
+                              fetchSearchResults(newPage);
+                            }} 
+                            className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
+                            disabled={isLastPage}
+                            aria-label="Next page"
+                          >
+                            <span aria-hidden="true">›</span>
+                          </button>
+                          
+                          <button 
+                            onClick={() => { 
+                              const lastPage = totalPages - 1;
+                              setCurrentPage(lastPage);
+                              fetchSearchResults(lastPage);
+                            }} 
+                            className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
+                            disabled={isLastPage}
+                            aria-label="Last page"
+                          >
+                            <span aria-hidden="true">»</span>
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
+                
+                {/* Add pagination summary */}
+                <div className="pagination-summary">
+                  Page {currentPage + 1} of {totalPages}
+                </div>
+
+                {/* Add inline styles for pagination */}
+                <style jsx global>{`
+                  .pagination-container {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 2rem 0;
+                    gap: 8px;
+                  }
+                  
+                  .pagination-nav {
+                    display: flex;
+                    gap: 4px;
+                  }
+                  
+                  .pagination-pages {
+                    display: flex;
+                    gap: 4px;
+                    align-items: center;
+                  }
+                  
+                  .pagination-button, .pagination-number {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 36px;
+                    height: 36px;
+                    padding: 0 8px;
+                    border: 1px solid #ddd;
+                    background: white;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    color: #333;
+                  }
+                  
+                  .pagination-button:hover, .pagination-number:hover {
+                    background-color: #f5f5f5;
+                    border-color: #ccc;
+                  }
+                  
+                  .pagination-number.active {
+                    background-color: #333;
+                    color: white;
+                    border-color: #333;
+                    font-weight: 500;
+                  }
+                  
+                  .pagination-button.disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    pointer-events: none;
+                  }
+                  
+                  .pagination-ellipsis {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 36px;
+                    height: 36px;
+                    color: #666;
+                  }
+                  
+                  .pagination-summary {
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                    margin-bottom: 1rem;
+                  }
+                  
+                  @media (max-width: 768px) {
+                    .pagination-container {
+                      flex-wrap: wrap;
+                    }
+                    
+                    .pagination-button, .pagination-number {
+                      min-width: 32px;
+                      height: 32px;
+                      font-size: 13px;
+                    }
+                  }
+                `}</style>
               </div>
             )}
           </div>
