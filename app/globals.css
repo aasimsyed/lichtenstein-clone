@@ -286,12 +286,12 @@ a:hover {
   padding-left: 20px;
   padding-right: 20px;
   --layout: 'Block-LG';
-  margin-bottom: 40px;
+  margin-bottom: 5px;
   display: flex;
   position: relative;
   z-index: 1000;
   border-bottom: 1px solid #e0e0e0;
-  margin-top: 10px;
+  margin-top: 0px;
   padding-top: 30px;
   padding-bottom: 20px;
 }
@@ -371,7 +371,7 @@ a:hover {
 #headerMoble {
   display: none;
   position: fixed;
-  top: 40px;
+  top: 15px;
   right: 0;
   left: 0;
   z-index: 2000;
@@ -1019,6 +1019,16 @@ footer {
   display: none;
 }
 
+/* Hide browseMobileControls by default on desktop */
+#browseMobileControls {
+  display: none;
+}
+
+/* Hide mobile filters panel on desktop */
+#mobileFiltersPanel {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .hide-mobile {
     display: none !important;
@@ -1196,11 +1206,11 @@ footer {
   }
   
   #pageTopMatter {
-    padding-top: 60px;
+    padding-top: 70px;
   }
   
   #browseMobileControls {
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     margin-bottom: 15px;
   }
@@ -1271,6 +1281,11 @@ footer {
   
   .desktopOnly {
     display: none !important;
+  }
+
+  /* Show mobile filters panel on mobile */
+  #mobileFiltersPanel {
+    display: block;
   }
 }
   
