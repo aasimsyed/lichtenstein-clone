@@ -42,42 +42,30 @@ interface Artwork {
 
 async function getArtworkData(id: string): Promise<Artwork | null> {
   try {
-    // Use the utility function to fetch all images from R2 directly
-    const images = await getOptimizedR2Images(true); // Force ignore cache to get fresh data
-    
-    // Try to find the image by both numeric index and by matching the ID in the public_id
-    const numericId = parseInt(id);
-    let image;
-    
-    // First try finding by index
-    if (!isNaN(numericId) && numericId > 0 && numericId <= images.length) {
-      image = images[numericId - 1];
-    }
-    
-    // If not found by index, try finding by matching the ID in the public_id
+    // Use the utility function to fetch all images from R2 directly, ignoring cache
+    const images = await getOptimizedR2Images(true);
+
+    // Find the image by matching the ID directly
+    // generateStaticParams should ensure 'id' is a valid image ID from this list
+    const image = images.find(img => img.id === id);
+
     if (!image) {
-      image = images.find(img => {
-        const imgId = img.id.split('/').pop(); // Get last part of the path
-        return imgId === id || img.id.includes(`/${id}`) || img.id.endsWith(id);
-      });
-    }
-    
-    // If still not found, look for anything that might contain this ID
-    if (!image && !isNaN(numericId)) {
-      image = images.find(img => img.id.includes(id));
-    }
-    
-    if (!image) {
-      console.error(`Artwork with ID "${id}" not found. Available IDs:`, 
-        images.slice(0, 5).map(img => img.id)); // Log first 5 for debugging
+      // This theoretically shouldn't happen if generateStaticParams worked correctly
+      // Log the received ID and the first few available IDs for debugging
+      console.error(`Artwork with ID "${id}" not found during page generation, though generateStaticParams should have provided a valid ID. Available IDs start with:`, 
+        images.slice(0, 5).map(img => img.id)); 
       return null;
     }
-    
+
+    // Parse filename details (assuming parseFilename handles the URL correctly)
     const { catalogNumber, title, artist, size } = parseFilename(image.url);
-    
-    // Create artwork object
+
+    // Create artwork object - Attempt to parse ID as number for consistency, but handle potential NaN
+    const numericId = parseInt(id);
+    const artworkId = isNaN(numericId) ? 0 : numericId; // Use 0 or another indicator if ID isn't numeric
+
     return {
-      id: parseInt(id),
+      id: artworkId, // Store the numeric part if possible, or a placeholder
       title: title,
       date: '',  // No year information
       medium: '',  // Not displayed anymore
@@ -89,7 +77,7 @@ async function getArtworkData(id: string): Promise<Artwork | null> {
       imageUrl: image.url
     };
   } catch (err) {
-    console.error('Error fetching artwork:', err);
+    console.error(`Error fetching artwork data for ID "${id}":`, err);
     return null;
   }
 }
