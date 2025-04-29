@@ -47,28 +47,8 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       
       const data = await response.json();
       
-      // Ensure all image URLs are properly encoded
-      const encodedImages = (data.images || []).map((image: R2Image) => {
-        try {
-          // Parse URL and ensure the filename is properly encoded
-          const url = new URL(image.url);
-          const pathParts = url.pathname.split('/');
-          const filename = pathParts[pathParts.length - 1];
-          
-          // Reconstruct URL with encoded filename
-          url.pathname = url.pathname.substring(0, url.pathname.lastIndexOf('/')) + '/' + encodeURIComponent(filename);
-          
-          return {
-            ...image,
-            url: url.toString()
-          };
-        } catch (e) {
-          console.warn(`Failed to encode URL: ${image.url}`, e);
-          return image;
-        }
-      });
-      
-      setImages(encodedImages || []);
+      // Use the images directly, assuming URLs from the static API are correctly encoded
+      setImages(data.images || []);
       setError(null);
     } catch (err) {
       console.error('Error fetching R2 images:', err);
@@ -79,9 +59,34 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to manually refresh images
+  // Function to manually refresh images - now calls the live API
   const refreshImages = async () => {
-    setInitialized(false);
+    console.log('Refreshing images via live API...');
+    // Don't set initialized false, directly call fetch for live data
+    try {
+      setLoading(true);
+      const timestamp = new Date().getTime();
+      // Call the new dynamic endpoint
+      const response = await fetch(`/api/images/live?t=${timestamp}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch LIVE R2 images: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+       // Use the images directly from the live endpoint
+      setImages(data.images || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error refreshing R2 images:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error during refresh');
+       // Maybe keep existing images on refresh failure?
+       // setImages([]); 
+    } finally {
+      setLoading(false);
+       // Keep initialized as true, we just refreshed
+    }
   };
 
   // Function to preload the next images
