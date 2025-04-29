@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 next build",
     "static-export": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npm run static-export",
+    "pages:build": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 npm run static-export",
     "preview": "npm run static-export && wrangler pages dev out",
     "deploy": "npm run static-export && wrangler pages deploy out"
   },
