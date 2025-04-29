@@ -108,6 +108,72 @@ export default function SelectionsCarousel() {
           })}
         </Slider>
       </div>
+
+      {/* Additional styles to fix dot navigation overlap */}
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          /* Fix for dot navigation overlapping with info */
+          .selections-carousel .slick-list {
+            padding-bottom: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          
+          /* Info text container needs spacing and z-index */
+          .selections-carousel .info {
+            margin-bottom: 10px !important;
+            position: relative !important;
+            z-index: 5 !important;
+          }
+          
+          /* Push dots down */
+          .selections-carousel .slick-dots {
+            bottom: -20px !important;
+            position: absolute !important;
+          }
+          
+          /* Add background to ensure dots are more visible */
+          .selections-carousel .slick-dots li button {
+            background: #888 !important;
+            width: 10px !important;
+            height: 10px !important;
+            border-radius: 50% !important;
+          }
+          
+          /* Container needs to account for dot positioning */
+          .selections-carousel-container {
+            padding-bottom: 20px !important;
+            margin-bottom: 20px !important;
+            overflow: visible !important;
+            position: relative !important;
+            z-index: 1 !important;
+            clear: both !important;
+          }
+          
+          /* Ensure selections title is visible above the carousel */
+          .selections-title {
+            display: block !important;
+            position: relative !important;
+            z-index: 5 !important;
+            padding-top: 10px !important;
+            margin-top: 0 !important;
+            font-weight: 500 !important;
+            text-align: center !important;
+            font-size: 22px !important;
+            clear: both !important;
+            width: 100% !important;
+          }
+          
+          /* Force the callout to be properly positioned */
+          .callout-container {
+            margin-bottom: 50px !important;
+            position: relative !important;
+            display: block !important;
+            clear: both !important;
+            width: 100% !important;
+            float: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 

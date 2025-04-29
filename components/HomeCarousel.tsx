@@ -85,7 +85,7 @@ export default function HomeCarousel() {
       <div
         style={{
           position: 'absolute',
-          bottom: '10px',
+          bottom: '-40px', // Moved down below the image and caption
           left: '0',
           right: '0',
           display: 'flex !important',
@@ -128,7 +128,7 @@ export default function HomeCarousel() {
       <div 
         id="homepageCarouselWrapper" 
         className="home-carousel-container" 
-        style={{ position: 'relative', paddingBottom: '80px', marginTop: isMobile ? '30px' : '0' }}
+        style={{ position: 'relative', paddingBottom: '150px', marginTop: isMobile ? '30px' : '0' }} // Increased padding
       >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (
@@ -148,16 +148,29 @@ export default function HomeCarousel() {
                   }}
                   priority={index === 0}
                 />
-                <div className="homepageCarouseCaption" style={{ position: 'relative', zIndex: 5, backgroundColor: 'rgba(255, 255, 255, 0.8)', padding: '5px' }}>
-                  {slide.caption}
-                </div>
+              </div>
+              <div className="homepageCarouseCaption" id={`caption-${index}`}>
+                {slide.caption}
               </div>
             </div>
           ))}
         </Slider>
         
         {/* Overlay callout on top of everything */}
-        <div className="callout-container">
+        <div className="callout-container" style={{ 
+          position: 'absolute',
+          top: isMobile ? 'auto' : 'calc(70% + 35px)',
+          bottom: isMobile ? '10px' : 'auto',
+          right: isMobile ? 0 : '0%',
+          left: isMobile ? 0 : 'auto',
+          width: isMobile ? '100%' : '30%',
+          zIndex: 20,
+          backgroundColor: isMobile ? 'rgba(255, 235, 132, 0.95)' : 'rgba(255, 235, 132, 0.8)',
+          padding: '15px 15px',
+          textAlign: 'left',
+          transform: isMobile ? 'none' : 'translateY(-50%)',
+          borderRadius: isMobile ? 0 : '4px'
+        }}>
           <Link href="/catalogue/" className="callout-link">
             {calloutText}
           </Link>
@@ -170,9 +183,35 @@ export default function HomeCarousel() {
           margin-bottom: 60px;
         }
         
+        /* Fix caption display */
+        .homepageCarouseCaption {
+          position: relative !important;
+          z-index: 25 !important; /* Ensure it's above other elements */
+          display: block !important;
+          margin-top: 10px !important;
+          background: rgba(240, 240, 240, 0.8) !important;
+          padding: 0px 20px !important;
+          width: 100% !important;
+          text-align: left !important;
+          font-size: 13px !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Ensure there's space for the caption */
+        .homepageCarouselDiv {
+          overflow: visible !important;
+          height: auto !important;
+          padding-bottom: 10px !important;
+        }
+        
+        .image-wrapper {
+          height: 676px !important; /* Maintain image height */
+          overflow: hidden !important;
+        }
+        
         .custom-dots-container {
           position: absolute !important;
-          bottom: -75px !important;
+          bottom: -40px !important;
           left: 0 !important;
           right: 0 !important;
           display: flex !important;
@@ -197,15 +236,10 @@ export default function HomeCarousel() {
         /* Clean callout styling with no conflicting elements */
         .callout-container {
           position: absolute;
-          top: calc(50% + 35px);
-          right: 15%;
-          transform: translateY(-50%);
-          width: 30%;
           z-index: 20;
           background-color: rgba(255, 235, 132, 0.8);
-          padding: 15px 15px;
+          padding: 15px;
           text-align: left;
-          border-radius: 4px;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
           transition: background-color 0.3s ease;
           display: flex;
@@ -231,41 +265,103 @@ export default function HomeCarousel() {
           content: "→";
           position: absolute;
           right: 0;
-          bottom: -3px;
+          bottom: -13px;
           font-size: 1.2em;
         }
         
         /* Responsiveness */
         @media (max-width: 768px) {
-          .callout-container {
-            position: relative;
-            top: auto;
-            right: auto;
-            transform: none;
-            width: 90%;
-            margin: 55px auto 0;
-            padding: 12px 15px;
+          /* Fixed layout for consistent positioning */
+          #homepage #homepageCarouselWrapper {
+            position: relative !important;
+            min-height: 400px !important; /* Fixed minimum height for the entire carousel section */
+            padding-bottom: 180px !important; /* Increased space for caption, dots and callout */
+            margin-bottom: 30px !important;
           }
           
+          /* Caption with fixed height to prevent layout shifts */
+          .homepageCarouseCaption {
+            min-height: 40px !important; /* Fixed height accommodating 2 lines */
+            overflow: auto !important; /* Allow scrolling if needed */
+            margin-top: 8px !important;
+            padding: 8px 15px !important;
+            font-size: 12px !important;
+            line-height: 1.3 !important;
+            background: rgba(240,240,240,0.9) !important;
+            z-index: 50 !important;
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+          }
+          
+          /* Fixed positioning for callout */
+          .callout-container {
+            position: absolute !important;
+            bottom: 10px !important;
+            top: auto !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 12px 15px !important;
+            transform: none !important;
+            z-index: 20 !important;
+            display: block !important;
+            border-radius: 0 !important;
+          }
+          
+          /* Fixed positioning for dot navigation */
           .custom-dots-container {
             position: absolute !important;
-            bottom: -70px !important; /* Force dots position in mobile */
+            bottom: 70px !important; /* Fixed position from bottom */
             left: 0 !important;
             right: 0 !important;
             background-color: rgba(255, 255, 255, 0.9) !important;
             padding: 8px 0 !important;
-            z-index: 999 !important;
+            z-index: 30 !important;
+            width: 100% !important;
           }
           
+          /* Consistent container spacing */
           .home-carousel-container {
             overflow: visible !important;
-            margin-bottom: 0 !important;
-            padding-bottom: 100px !important; /* Ensure enough space for dots */
+            margin-bottom: 30px !important;
           }
           
+          /* Ensure link is styled properly */
           .callout-link {
             font-size: 0.9em;
             line-height: 1.3;
+          }
+          
+          /* Fix image wrapper height */
+          .image-wrapper {
+            height: 234px !important; /* Match mobile image height */
+            overflow: hidden !important;
+            margin-bottom: 0 !important;
+          }
+          
+          /* Proper carousel div setup */
+          .homepageCarouselDiv {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            padding-bottom: 0 !important; /* Remove padding to prevent shifts */
+            margin-bottom: 0 !important;
+          }
+          
+          /* Reduce whitespace between carousel and Featured Badges section */
+          .selections-carousel-container {
+            margin-top: 10px !important;
+            padding-top: 0 !important;
+          }
+          
+          /* Better spacing for title */
+          .selections-title {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            margin-bottom: 15px !important;
           }
         }
         

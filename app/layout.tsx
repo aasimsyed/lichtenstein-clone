@@ -7,6 +7,7 @@ import "./slick-overrides.css";
 import "./styles/slick-custom.css";
 import "./catalogue-styles.css";
 import "./homepage-fixes.css";
+import "./mobile-carousel-fix.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { CloudinaryProvider } from '../context/CloudinaryContext';

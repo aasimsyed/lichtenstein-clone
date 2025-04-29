@@ -16,6 +16,95 @@
     bottom: -40px !important;
     top: auto !important;
   }
+  
+  /* Fix for selections carousel specifically */
+  .selections-carousel .slick-dots {
+    bottom: -20px !important;
+    z-index: 1 !important;
+  }
+  
+  /* Add visual separation between info and dots */
+  .selections-carousel .info {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    padding: 6px !important;
+    margin-bottom: 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Fix callout and selections carousel display order */
+  #homepage {
+    overflow: visible !important;
+  }
+  
+  #homepage #mainBody {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Fixed positioning for homepage carousel elements */
+  #homepage #homepageCarouselWrapper {
+    position: relative !important;
+    min-height: 380px !important; /* Fixed height including space for all elements */
+    padding-bottom: 190px !important; /* Increased space for caption, dots and callout */
+  }
+  
+  /* Fixed height caption to prevent layout shifts */
+  #homepage .homepageCarouseCaption {
+    min-height: 32px !important; /* Fixed height accommodating 2 lines */
+    max-height: 32px !important;
+    overflow: auto !important; /* Allow scrolling if text is longer */
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+    padding: 8px 15px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    z-index: 50 !important;
+    position: relative !important;
+  }
+  
+  /* Ensure absolute positioning for dot navigation */
+  #homepage .custom-dots-container,
+  #homepage .slick-dots {
+    position: absolute !important;
+    bottom: 70px !important; /* Adjusted position from bottom */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+    z-index: 100 !important;
+  }
+  
+  /* Fixed callout positioning */
+  .callout-container {
+    position: absolute !important;
+    bottom: 20px !important; /* Adjusted position to be below dots */
+    left: 0 !important;
+    right: 0 !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+    z-index: 5 !important;
+    order: 1 !important;
+  }
+  
+  .selections-carousel-container {
+    margin-top: 30px !important; /* Space after callout */
+    position: relative !important;
+    z-index: 2 !important;
+    order: 2 !important;
+    clear: both !important;
+  }
+  
+  /* Ensure selections title is visible */
+  .selections-title {
+    padding-top: 15px !important;
+    clear: both !important;
+    display: block !important;
+    position: relative !important;
+    margin-top: 0 !important;
+    z-index: 5 !important;
+  }
 }
 
 .slick-dots li {
@@ -78,10 +167,45 @@
   padding-bottom: 0;
 }
 
+/* Ensure selections carousel has proper spacing */
+.selections-carousel {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+/* Add more spacing around selections carousel dots for clarity */
+.selections-carousel .slick-dots {
+  margin-top: 5px;
+}
+
 @media (max-width: 768px) {
   .home-carousel-container {
-    margin-bottom: 80px !important;
+    margin-bottom: 20px !important;
     overflow: visible !important;
+  }
+  
+  /* Force proper stacking of elements */
+  #homepage #homepageCarouselWrapper {
+    margin-bottom: 20px !important;
+  }
+  
+  /* Prevent callout from pushing content down */
+  .callout-container {
+    position: absolute !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Fixed carousel positions */
+  .homepageCarouselDiv {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Image wrapper with fixed height */
+  .image-wrapper {
+    height: 234px !important;
+    margin-bottom: 0 !important;
   }
 }
 
