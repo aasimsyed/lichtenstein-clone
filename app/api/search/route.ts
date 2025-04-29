@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchCloudinaryImages } from '../../utils/cloudinary-server';
+import { getOptimizedR2Images } from '../../utils/r2-server';
 import { parseFilename } from '../../utils/filename-utils';
+
+// Add force-static for compatibility with static export
+export const dynamic = 'force-static';
+
+// Remove Edge Runtime - this won't be available in static export
+// export const runtime = 'edge';
 
 // Define Artwork interface
 interface Artwork {
@@ -48,34 +54,41 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '0');
     const limit = parseInt(searchParams.get('limit') || '50');
     
-    // Fetch all images from Cloudinary
-    const images = await fetchCloudinaryImages();
+    // Fetch all images from R2
+    const r2Images = await getOptimizedR2Images();
     
-    // Map to artwork objects
-    const artworks: Artwork[] = images.map((image, i) => {
-      const { catalogNumber, title, artist, size } = parseFilename(image.secure_url);
+    // Map to artwork objects using parseFilename utility to ensure consistent parsing
+    const artworks: Artwork[] = r2Images.map((image, i) => {
+      // Use the utility function to parse the filename consistently
+      const { catalogNumber, size, artist, title } = parseFilename(image.url);
       
-      // Special handling for FZ items (Flyers/Zines)
-      let processedTitle = title;
-      if (catalogNumber.startsWith('FZ_')) {
-        // Extract title from the catalog ID format: FZ_Title_IssueNumber
-        const parts = catalogNumber.split('_');
-        if (parts.length >= 2) {
-          processedTitle = parts[1].replace(/\./g, ' ');
-        }
+      // Extract URL parts to ensure proper encoding
+      let imageUrl = image.url;
+      
+      // Ensure the URL is properly encoded
+      try {
+        const url = new URL(imageUrl);
+        const pathParts = url.pathname.split('/');
+        const filename = pathParts[pathParts.length - 1];
+        
+        // Reconstruct with explicit encoding
+        url.pathname = url.pathname.substring(0, url.pathname.lastIndexOf('/')) + '/' + encodeURIComponent(filename);
+        imageUrl = url.toString();
+      } catch (e) {
+        console.warn(`Failed to encode URL: ${imageUrl}`, e);
       }
       
       return {
         id: i + 1,
-        title: processedTitle,
+        title,
         date: '',
-        medium: catalogNumber.startsWith('FZ_') ? 'Flyer/Zine' : 'Oil and Magna on canvas',
+        medium: catalogNumber.startsWith('FZ') ? 'Flyer/Zine' : 'Oil and Magna on canvas',
         dimensions: '68 x 56 in (172.7 x 142.2 cm)',
         location: 'Private Collection',
         catalogueNumber: catalogNumber,
         artist,
         size,
-        imageUrl: image.secure_url
+        imageUrl: imageUrl
       };
     });
     

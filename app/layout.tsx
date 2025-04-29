@@ -10,7 +10,7 @@ import "./homepage-fixes.css";
 import "./mobile-carousel-fix.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { CloudinaryProvider } from '../context/CloudinaryContext';
+import { R2Provider } from '../context/R2Context';
 import { AnalyticsProvider } from './analytics';
 
 // Define fonts
@@ -50,15 +50,15 @@ export default function RootLayout({
         />
         
         {/* DNS prefetching */}
-        <link rel="dns-prefetch" href="//res.cloudinary.com" />
-        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="//r2-image-worker.aasim-ss.workers.dev" />
+        <link rel="preconnect" href="https://r2-image-worker.aasim-ss.workers.dev" crossOrigin="anonymous" />
         
         {/* Cache control */}
         <meta httpEquiv="Cache-Control" content="public, max-age=3600, stale-while-revalidate=86400" />
       </head>
       <body>
         <AnalyticsProvider>
-          <CloudinaryProvider>
+          <R2Provider>
             <div id="mainWrapperOuter">
               <div id="mainWrapperInner">
                 <Header />
@@ -68,7 +68,7 @@ export default function RootLayout({
                 <Footer />
               </div>
             </div>
-          </CloudinaryProvider>
+          </R2Provider>
         </AnalyticsProvider>
       </body>
     </html>

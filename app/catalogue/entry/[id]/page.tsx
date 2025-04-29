@@ -1,9 +1,31 @@
 // This must be a Server Component (no 'use client' directive)
 import React from 'react';
 import { parseFilename } from '../../../utils/filename-utils';
-import { fetchCloudinaryImages } from '../../../utils/cloudinary-utils';
+import { getOptimizedR2Images } from '../../../utils/r2-server';
 import BackButton from './BackButton';
 import ZoomableImage from './ZoomableImage';
+
+// Remove the edge runtime
+// export const runtime = 'edge';
+
+// Add generateStaticParams to pre-generate routes at build time
+export async function generateStaticParams() {
+  try {
+    // Fetch actual images to generate paths for all existing artworks
+    const images = await getOptimizedR2Images();
+    
+    // Generate params for each image based on its index
+    return images.map((_, index) => ({
+      id: (index + 1).toString(),
+    }));
+  } catch (error: unknown) {
+    console.error('Error generating static params for artwork entries:', error);
+    
+    // If we can't get real data, throw an error to fail the build so we're aware of the issue
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate static params for artwork entries: ${errorMessage}`);
+  }
+}
 
 interface Artwork {
   id: number;
@@ -20,8 +42,8 @@ interface Artwork {
 
 async function getArtworkData(id: string): Promise<Artwork | null> {
   try {
-    // Use the utility function to fetch all images from Cloudinary directly
-    const images = await fetchCloudinaryImages(true); // Force ignore cache to get fresh data
+    // Use the utility function to fetch all images from R2 directly
+    const images = await getOptimizedR2Images(true); // Force ignore cache to get fresh data
     
     // Try to find the image by both numeric index and by matching the ID in the public_id
     const numericId = parseInt(id);

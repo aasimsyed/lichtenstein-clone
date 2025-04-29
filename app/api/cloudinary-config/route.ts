@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
+// Add force-static for compatibility with static export
+export const dynamic = 'force-static';
+
+// Remove Edge Runtime
+// export const runtime = 'edge';
+
 // Configure Cloudinary on the server
 cloudinary.config({
   cloud_name: 'dujkb1y9j',

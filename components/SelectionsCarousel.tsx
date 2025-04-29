@@ -3,15 +3,15 @@
 import React, { useMemo } from 'react';
 import Slider from 'react-slick';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useCloudinaryImages } from '../context/CloudinaryContext';
+import SmoothImage from '../app/components/SmoothImage';
+import { useR2Images } from '../context/R2Context';
 import { parseFilename } from '../app/utils/filename-utils';
 
 export default function SelectionsCarousel() {
-  // Get images from Cloudinary context
-  const { images, loading } = useCloudinaryImages();
+  // Get images from R2 context
+  const { images, loading } = useR2Images();
 
-  // Select random images from the available Cloudinary images
+  // Select random images from the available R2 images
   const selections = useMemo(() => {
     if (!images || images.length === 0) {
       return [];
@@ -83,7 +83,7 @@ export default function SelectionsCarousel() {
                 <div className="slide-inner">
                   <Link href={`/catalogue/entry/${artworkId}`} className="artwork-link">
                     <div className="image-container">
-                      <Image 
+                      <SmoothImage 
                         src={image.url} 
                         alt={title} 
                         width={200}
@@ -94,6 +94,8 @@ export default function SelectionsCarousel() {
                           objectFit: 'contain',
                           backgroundColor: 'transparent'
                         }}
+                        quality={85}
+                        loadingColor="#f0f0f0"
                       />
                     </div>
                     <div className="info">

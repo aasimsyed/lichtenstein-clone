@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchCloudinaryImages, getOptimizedServerUrl } from '../../../utils/cloudinary-server';
 import { parseFilename } from '../../../utils/filename-utils';
 
+// Add force-static for compatibility with static export
+export const dynamic = 'force-static';
+
+// Add generateStaticParams to pre-generate routes at build time
+export async function generateStaticParams() {
+  try {
+    // Preventing runtime errors when building static export
+    return [{ id: '1' }, { id: '2' }, { id: '3' }]; // Add placeholder IDs for build time
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return []; // Return empty array if fetching fails
+  }
+}
+
+// Remove Edge Runtime - these API routes won't be available in the static export
+// They will need to be replaced by client-side data fetching or static generation
+// export const runtime = 'edge';
+
 type Params = {
   id: string;
 };
@@ -23,7 +41,7 @@ export async function GET(
     }
     
     // Use the server-side utility function to fetch images from Cloudinary
-    const images = await fetchCloudinaryImages();
+    const images = await fetchCloudinaryImages('rupture/badges');
     
     // Find the specific image by index
     const index = parseInt(id) - 1;

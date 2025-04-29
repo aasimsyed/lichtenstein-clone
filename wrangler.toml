@@ -1,0 +1,19 @@
+name = "r2-image-worker"
+main = "r2-worker.js"
+compatibility_date = "2023-10-01"
+
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "better-badges"
+preview_bucket_name = "better-badges"
+
+# Set environment variables that will be available to the Worker
+[vars]
+# This will be available as env.R2_ENDPOINT in the Worker
+R2_ENDPOINT = "https://950035267d1186d83269e8b8eb50e572.r2.cloudflarestorage.com"
+
+# Optional: Configure the worker to be a custom domain
+# Uncomment and replace with your domain when ready
+# [[routes]]
+# pattern = "images.better-badges.com/*"
+# zone_name = "better-badges.com"

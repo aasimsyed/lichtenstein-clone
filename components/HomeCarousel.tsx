@@ -42,7 +42,6 @@ const carouselSlides: SlideProps[] = [
 export default function HomeCarousel() {
   // We keep the isMobile state for future use even though it's currently only
   // used in media queries. This is intentional as we might need responsive behavior later.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobile, setIsMobile] = useState(false);
   const [showArrows, setShowArrows] = useState(false);
   

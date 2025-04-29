@@ -4,14 +4,11 @@
  */
 
 /**
- * Parses a Cloudinary image URL to extract details from filename
- * Examples: 
- * - For URL ending with "B1_55_Patti.Smith_Radio.Ethiopia_bswh94",
- *   returns { catalogNumber: "B1", size: "55mm", artist: "Patti Smith", title: "Radio Ethiopia" }
- * - For URL ending with "B20_32_Fare.Fight_lh0dzb",
- *   returns { catalogNumber: "B20", size: "32mm", artist: "Fare Fight", title: "Untitled" }
- * - For URL ending with "B19_Portobello.Rd_jsir0z.jpg",
- *   returns { catalogNumber: "B19", size: "Unknown", artist: "Portobello Rd", title: "Untitled" }
+ * Parses an image URL to extract details from filename
+ * Examples of R2 bucket filename patterns:
+ * - "BBC22_55_Patti.Smith_Radio.Ethiopia.jpg" -> catalogNumber: "BBC22", size: "55mm", artist: "Patti Smith", title: "Radio Ethiopia"
+ * - "BBC20_32_Fare.Fight.jpg" -> catalogNumber: "BBC20", size: "32mm", artist: "Fare Fight", title: "Untitled"
+ * - "FZ_Punk.Zine_2.jpg" -> catalogNumber: "FZ", size: "Flyer/Zine", artist: "Flyer/Zine", title: "Punk Zine #2"
  */
 export const parseFilename = (url: string): { 
   catalogNumber: string; 
@@ -26,26 +23,40 @@ export const parseFilename = (url: string): {
   const fullFilename = cleanUrl.split('/').pop() || '';
   const filename = fullFilename.replace(/\.(jpg|jpeg|png|gif)$/i, '');
   
+  // Debug the parsing process
+  // console.log(`Parsing filename: ${filename}`);
+  
   const parts = filename.split('_');
   
   // Special handling for FZ catalog IDs (Flyers/Zines)
   if (parts[0] === 'FZ') {
     // Format: FZ_Title_IssueNumber
+    let title = 'Unknown';
+    let issueNumber = '';
+    
+    if (parts.length > 1) {
+      title = parts[1].replace(/\./g, ' ');
+    }
+    
+    if (parts.length > 2) {
+      issueNumber = `#${parts[2]}`;
+    }
+    
     return {
-      catalogNumber: filename, // Use the full filename as the catalogNumber to preserve for display
+      catalogNumber: 'FZ',
       size: 'Flyer/Zine',
       artist: 'Flyer/Zine',
-      title: parts.length > 1 ? parts[1].replace(/\./g, ' ') : 'Unknown'
+      title: `${title} ${issueNumber}`.trim()
     };
   }
   
-  // Handle different filename patterns
-  if (parts.length < 3) {
+  // Handle basic or missing information
+  if (parts.length < 2) {
     return { 
-      catalogNumber: 'Unknown', 
+      catalogNumber: parts[0] || 'Unknown', 
       size: 'Unknown',
       artist: 'Unknown',
-      title: filename 
+      title: 'Untitled'
     };
   }
   
@@ -53,31 +64,38 @@ export const parseFilename = (url: string): {
   const catalogNumber = parts[0];
   
   // Different parsing logic based on number of parts
-  if (parts.length === 3) {
-    // Format: B19_Portobello.Rd_jsir0z
-    // Size is missing, 3rd part is an identifier
-    const artist = parts[1].replace(/\./g, ' ');
+  if (parts.length === 2) {
+    // Format with only size: "BBC22_55.jpg"
+    return {
+      catalogNumber,
+      size: `${parts[1]}mm`,
+      artist: 'Unknown',
+      title: 'Untitled'
+    };
+  }
+  else if (parts.length === 3) {
+    // Format: "BBC20_32_Fare.Fight.jpg"
+    // Size is second part, artist is third
+    const size = `${parts[1]}mm`;
+    const artist = parts[2].replace(/\./g, ' ');
     
     return {
       catalogNumber,
-      size: 'Unknown',
+      size,
       artist,
       title: 'Untitled'
     };
   } else {
-    // Format with size: B1_55_Patti.Smith_Radio.Ethiopia_bswh94
-    // or Format with size but no title: B20_32_Fare.Fight_lh0dzb
-    
-    // Parse size (second part) and add 'mm'
+    // Format with size and title: "BBC22_55_Patti.Smith_Radio.Ethiopia.jpg"
     const size = `${parts[1]}mm`;
-    
-    // Parse artist (third part) - replace dots with spaces
     const artist = parts[2].replace(/\./g, ' ');
+    const title = parts[3].replace(/\./g, ' ');
     
-    // Parse title (fourth part) - replace dots with spaces
-    // If there's no fourth part or it's the last part (likely an identifier), use "Untitled"
-    const title = (parts.length >= 5 && parts[3]) ? parts[3].replace(/\./g, ' ') : 'Untitled';
-    
-    return { catalogNumber, size, artist, title };
+    return { 
+      catalogNumber, 
+      size, 
+      artist, 
+      title 
+    };
   }
 }; 

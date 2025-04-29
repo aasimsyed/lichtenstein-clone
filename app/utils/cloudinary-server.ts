@@ -1,7 +1,8 @@
-// Mark this file as server-only to prevent client-side imports
-'use server';
+// This file contains server-side Cloudinary utilities
+// The 'use server' directive has been removed for static export compatibility
 
 import { v2 as cloudinary } from 'cloudinary';
+import { cache } from 'react';
 
 // Check if required Cloudinary environment variables are set
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -84,60 +85,69 @@ interface Transformation {
 let cachedImages: CloudinaryImage[] | null = null;
 
 /**
- * Fetch images from Cloudinary based on folder name
+ * Fetches images from Cloudinary from a specific folder
  */
-export async function fetchCloudinaryImages(folderName = 'rupture/badges'): Promise<CloudinaryResource[]> {
+export const fetchCloudinaryImages = cache(async (folder: string = 'rupture/badges'): Promise<CloudinaryResource[]> => {
+  // Validate credentials are set
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    console.warn('Cloudinary credentials not set');
+    return [];
+  }
+  
   try {
-    // Check if Cloudinary is properly configured
-    if (!CLOUDINARY_CLOUD_NAME) {
-      console.error('Cloudinary cloud_name is not configured');
-      throw new Error('Cloudinary cloud_name is not configured. Please check your environment variables.');
-    }
-
-    console.log(`Attempting to fetch images from Cloudinary account: ${CLOUDINARY_CLOUD_NAME}`);
-    console.log(`Folder name: "${folderName}"`);
-
-    // Get resources from Cloudinary using search instead of api.resources
-    // This matches the working implementation in cloudinary-utils.ts
-    const result = await cloudinary.search
-      .expression(`folder:${folderName}`)
-      .sort_by('created_at', 'desc')
-      .max_results(500)
-      .execute();
-
-    if (!result) {
-      console.error('No result returned from Cloudinary API');
-      return []; // Return empty array instead of throwing error
-    }
-
-    console.log('Cloudinary API response received:', {
-      hasResources: !!result.resources,
-      resourceCount: result.resources ? result.resources.length : 0
-    });
-
-    if (!result.resources || result.resources.length === 0) {
-      console.error('No resources found in Cloudinary folder:', folderName);
-      return []; // Return empty array instead of throwing error
-    }
-
-    console.log(`Found ${result.resources.length} resources in Cloudinary folder: ${folderName}`);
+    console.log(`Fetching images from Cloudinary: ${folder}`);
     
-    // Log the first resource for debugging (omit sensitive data)
+    // Fetch resources in the specified folder
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: folder,
+      max_results: 500, // Adjust based on your needs
+    });
+    
+    if (!result || !result.resources) {
+      console.warn('No resources found in Cloudinary response');
+      return [];
+    }
+    
+    console.log(`Found ${result.resources.length} resources in folder: ${folder}`);
+    
+    // Sample resource for debugging
     if (result.resources.length > 0) {
-      const firstResource = result.resources[0];
+      const sample = result.resources[0];
       console.log('Sample resource:', {
-        public_id: firstResource.public_id,
-        format: firstResource.format,
-        width: firstResource.width,
-        height: firstResource.height
+        public_id: sample.public_id,
+        format: sample.format,
+        width: sample.width,
+        height: sample.height
       });
     }
     
-    return result.resources as CloudinaryResource[];
+    return result.resources;
   } catch (error) {
-    console.error('Error fetching images from Cloudinary:', error);
-    return []; // Return empty array instead of throwing error
+    console.error('Error fetching from Cloudinary:', error);
+    return []; // Return empty array on error
   }
+});
+
+/**
+ * Formats a Cloudinary URL with transformation parameters
+ */
+export function getCloudinaryUrl(publicId: string, options = {}) {
+  const defaults = {
+    quality: 'auto',
+    format: 'auto',
+    crop: 'fill',
+    width: 800,
+    height: 600
+  };
+  
+  const params = { ...defaults, ...options };
+  
+  // Construct transformation string
+  const transformation = `q_${params.quality},f_${params.format},c_${params.crop},w_${params.width},h_${params.height}`;
+  
+  // Return the complete URL
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${transformation}/${publicId}`;
 }
 
 /**

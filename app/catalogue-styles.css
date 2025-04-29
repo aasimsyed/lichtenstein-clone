@@ -539,7 +539,9 @@
 } 
  
 .entryNavigation { 
-  margin: 20px 0; 
+  margin: 20px 0;
+  position: relative;
+  z-index: 2; /* Higher z-index to ensure it stays above zoomable image container */
 } 
  
 .backToWorks { 
@@ -551,6 +553,14 @@
   text-decoration: none; 
   font-weight: 500; 
 } 
+ 
+.backToWorks-custom {
+  position: relative;
+  z-index: 10; /* Very high z-index to ensure it's always on top */
+  display: inline-block !important;
+  margin-bottom: 30px !important; /* Increase margin to avoid overlap */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Add subtle shadow for better visibility */
+}
  
 .backToWorks:hover { 
   background-color: #555; 
@@ -691,7 +701,11 @@
 /* Zoomable image styles  */
 .zoomable-image-container { 
   position: relative; 
-  cursor: zoom-in; 
+  cursor: zoom-in;
+  z-index: 1; /* Lower z-index to prevent overlapping with navigation */
+  width: 100%; /* Ensure it stays within its container */
+  overflow: hidden; /* Prevent content from overflowing */
+  margin-top: 20px; /* Add margin to ensure no overlap with back button */
 } 
  
 .zoom-hint { 

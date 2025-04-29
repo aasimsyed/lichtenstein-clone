@@ -24,6 +24,7 @@ const imageCache = new Map<string, boolean>();
 export default function SmoothImage(props: SmoothImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isError, setIsError] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   
   const { 
@@ -61,6 +62,10 @@ export default function SmoothImage(props: SmoothImageProps) {
           imageCache.set(cacheKeyToUse, true);
         };
         
+        img.onerror = () => {
+          console.warn(`Failed to preload image: ${props.src}`);
+        };
+        
         img.src = props.src;
         
         // Add loading=eager hint for browser
@@ -92,6 +97,28 @@ export default function SmoothImage(props: SmoothImageProps) {
     ...((props.style as React.CSSProperties) || {}),
   };
 
+  // Create an error UI for when images fail to load
+  if (isError) {
+    return (
+      <div 
+        style={{
+          ...containerStyle,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f0f0f0',
+          color: '#666',
+          fontSize: '14px',
+          textAlign: 'center',
+          padding: '10px',
+          ...((props.style as React.CSSProperties) || {}),
+        }}
+      >
+        Image not available
+      </div>
+    );
+  }
+
   return (
     <div style={containerStyle} ref={ref}>
       {(isIntersecting || preload) && (
@@ -102,7 +129,7 @@ export default function SmoothImage(props: SmoothImageProps) {
           style={imageStyle}
           quality={quality}
           priority={preload}
-          unoptimized={unoptimized}
+          unoptimized={true} // Set to true to bypass Next.js image optimization for R2 images
           fetchPriority={preload ? "high" : "auto"}
           ref={imageRef}
           onLoad={(event) => {
@@ -117,6 +144,10 @@ export default function SmoothImage(props: SmoothImageProps) {
             if (props.onLoadingComplete) {
               props.onLoadingComplete(event.currentTarget);
             }
+          }}
+          onError={() => {
+            console.error(`Failed to load image: ${props.src}`);
+            setIsError(true);
           }}
         />
       )}

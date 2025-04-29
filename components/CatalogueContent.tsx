@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SmoothImage from '../app/components/SmoothImage';
-import { useCloudinaryImages } from '../context/CloudinaryContext';
+import { useR2Images } from '../context/R2Context';
 
 // Define the Artwork interface
 interface Artwork {
@@ -33,8 +33,8 @@ interface SearchResponse {
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  // Get Cloudinary images from context instead of local state
-  const { images: cloudinaryImages, loading, error, refreshImages } = useCloudinaryImages();
+  // Get R2 images from context instead of local state
+  const { images: r2Images, loading, error, refreshImages } = useR2Images();
   
   // View and sort states
   const [viewType, setViewType] = useState('gridA');
@@ -169,26 +169,26 @@ export default function CatalogueContent() {
 
   // Fetch initial data when component mounts
   useEffect(() => {
-    // Only fetch if we have cloudinary images
-    if (cloudinaryImages.length > 0 && !loading) {
+    // Only fetch if we have R2 images
+    if (r2Images.length > 0 && !loading) {
       fetchSearchResults(currentPage);
     }
-  }, [cloudinaryImages, loading, fetchSearchResults, currentPage]);
+  }, [r2Images, loading, fetchSearchResults, currentPage]);
 
   // Fetch new results when filters change
   useEffect(() => {
-    if (cloudinaryImages.length > 0 && !loading) {
+    if (r2Images.length > 0 && !loading) {
       setCurrentPage(0); // Reset to first page when filters change
       fetchSearchResults(0);
     }
-  }, [cloudinaryImages, loading, fetchSearchResults]);
+  }, [r2Images, loading, fetchSearchResults]);
 
   // Effect for handling pagination changes
   useEffect(() => {
-    if (cloudinaryImages.length > 0 && !loading) {
+    if (r2Images.length > 0 && !loading) {
       window.scrollTo(0, 0); // Scroll back to top when page changes
     }
-  }, [currentPage, cloudinaryImages, loading]);
+  }, [currentPage, r2Images, loading]);
 
   // Process search query from URL on load (just to initialize the search term)
   useEffect(() => {

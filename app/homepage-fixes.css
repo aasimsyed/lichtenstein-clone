@@ -239,14 +239,14 @@
 
 /* Entry page image positioning fixes */
 .entryImageContainer {
-  margin-top: -100px !important;
   position: relative !important;
+  margin-top: 0 !important; /* Removed negative margin that was causing overlap */
 }
 
 /* Media query for smaller screens */
 @media (max-width: 768px) {
   .entryImageContainer {
-    margin-top: -30px !important; /* Less negative margin on mobile */
+    margin-top: 0 !important; /* Removed negative margin on mobile */
   }
 } 
 
