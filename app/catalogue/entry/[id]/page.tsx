@@ -47,17 +47,20 @@ interface Artwork {
 
 async function getArtworkData(id: string): Promise<Artwork | null> {
   try {
+    // Decode the ID parameter in case it's URL-encoded (e.g., spaces become %20)
+    const decodedId = decodeURIComponent(id);
+
     // Use the utility function to fetch all images from R2 directly, ignoring cache
     const images = await getOptimizedR2Images(true);
 
-    // Find the image by matching the ID directly
-    // generateStaticParams should ensure 'id' is a valid image ID from this list
-    const image = images.find(img => img.id === id);
+    // Find the image by matching the DECODED ID directly
+    // generateStaticParams should ensure 'decodedId' is a valid image ID from this list
+    const image = images.find(img => img.id === decodedId);
 
     if (!image) {
       // This theoretically shouldn't happen if generateStaticParams worked correctly
-      // Log the received ID and the first few available IDs for debugging
-      console.error(`Artwork with ID "${id}" not found during page generation, though generateStaticParams should have provided a valid ID. Available IDs start with:`, 
+      // Log the original and decoded ID, and the first few available IDs for debugging
+      console.error(`Artwork not found during page generation. Original ID: "${id}", Decoded ID: "${decodedId}". Available IDs start with:`, 
         images.slice(0, 5).map(img => img.id)); 
       return null;
     }
@@ -65,8 +68,8 @@ async function getArtworkData(id: string): Promise<Artwork | null> {
     // Parse filename details (assuming parseFilename handles the URL correctly)
     const { catalogNumber, title, artist, size } = parseFilename(image.url);
 
-    // Create artwork object - Attempt to parse ID as number for consistency, but handle potential NaN
-    const numericId = parseInt(id);
+    // Create artwork object - Use the decoded ID for parsing if it's intended to be numeric
+    const numericId = parseInt(decodedId); // Try parsing the decoded ID
     const artworkId = isNaN(numericId) ? 0 : numericId; // Use 0 or another indicator if ID isn't numeric
 
     return {
@@ -82,7 +85,7 @@ async function getArtworkData(id: string): Promise<Artwork | null> {
       imageUrl: image.url
     };
   } catch (err) {
-    console.error(`Error fetching artwork data for ID "${id}":`, err);
+    console.error(`Error fetching artwork data for Original ID "${id}":`, err);
     return null;
   }
 }
