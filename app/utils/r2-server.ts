@@ -158,8 +158,10 @@ export async function getOptimizedR2Images(refresh = false): Promise<R2Image[]> 
       // Extract format from the file extension
       const format = resource.key.split('.').pop() || 'jpg';
       
-      // Generate a unique ID from the key
-      const id = resource.key.replace(/\.[^/.]+$/, ""); // Remove extension
+      // Generate a unique ID from the key, removing extension and replacing spaces with hyphens
+      const id = resource.key
+        .replace(/\.[^/.]+$/, "") // Remove extension
+        .replace(/\s+/g, '-');      // Replace spaces with hyphens
       
       return {
         id,
