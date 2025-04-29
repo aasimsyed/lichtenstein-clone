@@ -15,9 +15,14 @@ export async function generateStaticParams() {
     const images = await getOptimizedR2Images(); // Fetch the R2Image list
     
     // Generate params using the actual image ID
-    return images.map((image) => ({
+    const params = images.map((image) => ({
       id: image.id, // Use the actual image ID from R2Image
     }));
+
+    // Log the generated params for debugging
+    console.log('[generateStaticParams] Generated IDs:', JSON.stringify(params.map(p => p.id), null, 2));
+
+    return params;
   } catch (error: unknown) {
     console.error('Error generating static params for artwork entries:', error);
     
