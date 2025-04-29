@@ -21,6 +21,9 @@ const R2Context = createContext<R2ContextType>({
   preloadNextImages: () => {}
 });
 
+// Base URL for the R2 Worker - Define it here for direct fetching
+const R2_WORKER_BASE_URL = 'https://r2-image-worker.aasim-ss.workers.dev';
+
 // Provider component that will wrap the app
 export function R2Provider({ children }: { children: React.ReactNode }) {
   const [images, setImages] = useState<R2Image[]>([]);
@@ -36,22 +39,41 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
   }, [initialized]);
 
   const fetchImages = async () => {
+    console.log('Fetching initial images directly from R2 worker...');
     try {
       setLoading(true);
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/api/images?t=${timestamp}`);
-      
+      // Fetch directly from the worker URL
+      const response = await fetch(`${R2_WORKER_BASE_URL}/?list=true`);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch R2 images');
+        throw new Error(`Failed to fetch initial images from R2 worker: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
-      // Use the images directly, assuming URLs from the static API are correctly encoded
-      setImages(data.images || []);
+
+      // Process worker response (assuming data.objects format)
+      const formattedImages = (data.objects || []).map((obj: any) => { // Use any temporarily if R2WorkerObject not available
+         const key = obj.key || obj.name || '';
+         const encodedKey = encodeURIComponent(key);
+         const format = key.split('.').pop() || 'jpg';
+         const id = key.replace(/\.[^/.]+$/, "");
+         return {
+              id,
+              url: `${R2_WORKER_BASE_URL}/${encodedKey}`,
+              width: 1000, // Placeholder
+              height: 1200, // Placeholder
+              format,
+              created: obj.uploaded || new Date().toISOString(),
+              // Add key back if needed by parseFilename or other logic
+              key: key
+            };
+      });
+
+      // Use the formatted images directly from the worker
+      setImages(formattedImages || []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching R2 images:', err);
+      console.error('Error fetching R2 images directly:', err);
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
@@ -61,31 +83,43 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
 
   // Function to manually refresh images - now calls the live API
   const refreshImages = async () => {
-    console.log('Refreshing images via live API...');
-    // Don't set initialized false, directly call fetch for live data
+    console.log('Refreshing images directly from R2 worker...');
     try {
       setLoading(true);
-      const timestamp = new Date().getTime();
-      // Call the new dynamic endpoint
-      const response = await fetch(`/api/images/live?t=${timestamp}`);
-      
+      // Fetch directly from the worker URL
+      const response = await fetch(`${R2_WORKER_BASE_URL}/?list=true`);
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch LIVE R2 images: ${response.statusText}`);
+        throw new Error(`Failed to fetch refreshed images from R2 worker: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
-       // Use the images directly from the live endpoint
-      setImages(data.images || []);
+
+      // Process worker response (assuming data.objects format)
+      const formattedImages = (data.objects || []).map((obj: any) => {
+         const key = obj.key || obj.name || '';
+         const encodedKey = encodeURIComponent(key);
+         const format = key.split('.').pop() || 'jpg';
+         const id = key.replace(/\.[^/.]+$/, "");
+          return {
+              id,
+              url: `${R2_WORKER_BASE_URL}/${encodedKey}`,
+              width: 1000, // Placeholder
+              height: 1200, // Placeholder
+              format,
+              created: obj.uploaded || new Date().toISOString(),
+              key: key
+            };
+      });
+
+      // Use the formatted images directly from the worker
+      setImages(formattedImages || []);
       setError(null);
     } catch (err) {
-      console.error('Error refreshing R2 images:', err);
+      console.error('Error refreshing R2 images directly:', err);
       setError(err instanceof Error ? err.message : 'Unknown error during refresh');
-       // Maybe keep existing images on refresh failure?
-       // setImages([]); 
     } finally {
       setLoading(false);
-       // Keep initialized as true, we just refreshed
     }
   };
 
