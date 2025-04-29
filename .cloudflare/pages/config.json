@@ -1,0 +1,17 @@
+{
+  "build": {
+    "command": "./cloudflare-build.sh",
+    "output_directory": "out",
+    "environment_variables": {
+      "NODE_VERSION": "20",
+      "NEXT_DISABLE_ESLINT": "1",
+      "NEXT_DISABLE_TYPE_CHECKS": "1"
+    }
+  },
+  "routes": [
+    { "pattern": "/_next/*", "cache": { "edge": { "maxAgeSeconds": 31536000 } } },
+    { "pattern": "/static/*", "cache": { "edge": { "maxAgeSeconds": 31536000 } } },
+    { "pattern": "/api/*", "script": "src/api.js" },
+    { "pattern": "/*", "cache": { "bypass_on_cookie": "cf-edge-cache=bypass" } }
+  ]
+} 

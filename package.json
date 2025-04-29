@@ -9,9 +9,10 @@
     "static-export": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 npm run static-export",
-    "preview": "npm run static-export && wrangler pages dev out",
-    "deploy": "npm run static-export && wrangler pages deploy out"
+    "pages:build": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 npm run static-export && cp _redirects out/_redirects || true",
+    "preview": "npm run static-export && wrangler pages dev out --port 3000",
+    "deploy": "npm run static-export && wrangler pages deploy out",
+    "deploy:pages": "npm run static-export && wrangler pages publish out"
   },
   "dependencies": {
     "cloudinary": "^2.6.0",
