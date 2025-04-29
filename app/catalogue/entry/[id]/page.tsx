@@ -12,11 +12,11 @@ import ZoomableImage from './ZoomableImage';
 export async function generateStaticParams() {
   try {
     // Fetch actual images to generate paths for all existing artworks
-    const images = await getOptimizedR2Images();
+    const images = await getOptimizedR2Images(); // Fetch the R2Image list
     
-    // Generate params for each image based on its index
-    return images.map((_, index) => ({
-      id: (index + 1).toString(),
+    // Generate params using the actual image ID
+    return images.map((image) => ({
+      id: image.id, // Use the actual image ID from R2Image
     }));
   } catch (error: unknown) {
     console.error('Error generating static params for artwork entries:', error);
