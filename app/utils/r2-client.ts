@@ -1,5 +1,3 @@
-'use client';
-
 // Define the types for R2 resources and images
 export interface R2Image {
   id: string;

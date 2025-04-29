@@ -30,14 +30,12 @@ fi
 # Create special directories/files required by Cloudflare Pages if needed
 mkdir -p out/_headers || true
 
-# Create a simple _headers file to ensure proper caching
-if [ ! -f "out/_headers" ]; then
-  echo "✓ Creating _headers file"
-  cat > out/_headers << EOL
+# Always attempt to create/overwrite the _headers file
+echo "✓ Ensuring _headers file exists with content"
+cat > out/_headers << EOL
 /*
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 EOL
-fi
 
 echo "✓ Build completed successfully!"
 ls -la out 

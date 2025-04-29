@@ -7,15 +7,15 @@ node_compat = true
 workers_dev = true
 
 # Specify Node.js compatibility version for Pages
-[build]
-node_version = "20"
-command = "./cloudflare-build.sh"
-output_directory = "out"
+# [build]
+# node_version = "20"
+# command = "./cloudflare-build.sh"
+# output_directory = "out"
 
 # For Cloudflare Pages integration
-[site]
-bucket = "out"
-pages_build_output_dir = "out"
+# [site]
+# bucket = "out"
+# pages_build_output_dir = "out"
 
 [triggers]
 crons = []
