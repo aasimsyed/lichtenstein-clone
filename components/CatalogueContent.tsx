@@ -4,37 +4,23 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SmoothImage from '../app/components/SmoothImage';
 import { useR2Images } from '../context/R2Context';
+import { R2Image as R2ContextImage } from '../app/utils/r2-client';
+import { parseFilename } from '../app/utils/filename-utils';
 
-// Define the Artwork interface
-interface Artwork {
-  id: number;
+// Extend the R2 image type from context with parsed metadata for easier handling
+interface ProcessedArtwork extends R2ContextImage {
+  artworkId: string;
   title: string;
-  date: string;
-  medium: string;
-  dimensions: string;
-  location: string;
   catalogueNumber: string;
   artist: string;
   size: string;
   imageUrl: string;
 }
 
-// API response interface
-interface SearchResponse {
-  works: Artwork[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }
-}
-
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  // Get R2 images from context instead of local state
-  const { images: r2Images, loading, error, refreshImages } = useR2Images();
+  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages } = useR2Images();
   
   // View and sort states
   const [viewType, setViewType] = useState('gridA');
@@ -47,12 +33,12 @@ export default function CatalogueContent() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(0);
   
-  // State for search results
-  const [filteredWorks, setFilteredWorks] = useState<Artwork[]>([]);
+  // State for processed and displayed artworks
+  const [processedArtworks, setProcessedArtworks] = useState<ProcessedArtwork[]>([]);
+  const [displayedArtworks, setDisplayedArtworks] = useState<ProcessedArtwork[]>([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-  const [isLoadingResults, setIsLoadingResults] = useState(false);
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
@@ -112,156 +98,184 @@ export default function CatalogueContent() {
     };
   }, [viewType]); // Only re-apply when the view type changes
 
-  // Function to fetch search results from API
-  const fetchSearchResults = useCallback(async (page = 0) => {
-    try {
-      setIsLoadingResults(true);
-      
-      // Build query parameters
-      const params = new URLSearchParams();
-      
-      // Add search term if present
-      if (searchTerm.trim()) {
-        params.set('query', searchTerm.trim());
+  // --- Client-Side Filtering, Sorting, and Pagination Logic ---
+  useEffect(() => {
+    if (contextLoading || !r2Images || r2Images.length === 0) {
+        // If context is loading or no images, clear results
+        setProcessedArtworks([]);
+        setDisplayedArtworks([]);
+        setTotalResults(0);
+        setTotalPages(0);
+        return;
+    }
+
+    // 1. Process R2 images to include parsed metadata
+    const processed = r2Images.map(img => {
+        // Use img.id primarily, fallback to an empty string if needed
+        const filenameSource = img.id || '';
+        const metadata = parseFilename(filenameSource);
+        return {
+            ...img,
+            artworkId: img.id,
+            imageUrl: img.url, // Ensure this is mapped
+            title: metadata.title || 'Untitled',
+            catalogueNumber: metadata.catalogNumber || 'N/A',
+            artist: metadata.artist || 'Unknown',
+            size: metadata.size || 'Unknown'
+        };
+    });
+
+    // 2. Filter based on active filters
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    setIsSearching(!!lowerSearchTerm);
+
+    const filtered = processed.filter(work => {
+      // Keyword Search (across multiple fields)
+      if (lowerSearchTerm && !(
+          work.title.toLowerCase().includes(lowerSearchTerm) ||
+          work.catalogueNumber.toLowerCase().includes(lowerSearchTerm) ||
+          work.artist.toLowerCase().includes(lowerSearchTerm) ||
+          work.id.toLowerCase().includes(lowerSearchTerm) // Search original ID too
+      )) {
+        return false;
       }
-      
-      // Add filter parameters
-      params.set('seriesA', seriesA.toString());
-      params.set('seriesB', seriesB.toString());
-      params.set('filterBBB', filterBBB.toString());
-      params.set('filterBBC', filterBBC.toString());
-      params.set('filterD', filterD.toString());
-      params.set('filterRGG', filterRGG.toString());
-      params.set('filterPreBetterBadges', filterPreBetterBadges.toString());
-      params.set('filterPopArtKoop', filterPopArtKoop.toString());
-      params.set('filterCatalogs', filterCatalogs.toString());
-      params.set('filterZines', filterZines.toString());
-      
-      // Add sorting and pagination
-      params.set('sortBy', sortBy);
-      params.set('page', page.toString());
-      params.set('limit', resultsPerPage.toString());
-      
-      // Make the API request
-      const response = await fetch(`/api/search?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch search results');
+
+      // --- Apply Checkbox Filters ---
+      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterD || filterRGG ||
+                              filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines;
+
+      if (anyFilterActive) {
+        let passesFilter = false;
+        // Use simple startsWith checks based on catalogueNumber
+        if (seriesA && work.catalogueNumber.startsWith('A')) passesFilter = true;
+        // Refined check for B series (starts with B, but not BBB or BBC)
+        if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC')) passesFilter = true;
+        if (filterBBB && work.catalogueNumber.startsWith('BBB')) passesFilter = true;
+        if (filterBBC && work.catalogueNumber.startsWith('BBC')) passesFilter = true;
+        if (filterD && work.catalogueNumber.startsWith('D')) passesFilter = true;
+        if (filterRGG && work.catalogueNumber.startsWith('RGG')) passesFilter = true;
+        // Add specific checks if prefixes differ or exact match is needed
+        if (filterPreBetterBadges && work.catalogueNumber.startsWith('PRE')) passesFilter = true; // Example prefix
+        if (filterPopArtKoop && work.catalogueNumber.startsWith('PAK')) passesFilter = true; // Example prefix
+        if (filterCatalogs && work.catalogueNumber === 'AD') passesFilter = true;
+        if (filterZines && work.catalogueNumber.startsWith('FZ')) passesFilter = true;
+
+        if (!passesFilter) return false;
       }
-      
-      const data: SearchResponse = await response.json();
-      
-      // Update state with results
-      setFilteredWorks(data.works);
-      setTotalResults(data.pagination.total);
-      setTotalPages(data.pagination.totalPages);
-      setIsLoadingResults(false);
-      
-      // Set isSearching based on whether we have a search term
-      setIsSearching(!!searchTerm.trim());
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-      setIsLoadingResults(false);
-    }
-  }, [searchTerm, seriesA, seriesB, filterBBB, filterBBC, filterD, filterRGG, 
-       filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines, 
-       sortBy, resultsPerPage]);
 
-  // Fetch initial data when component mounts
-  useEffect(() => {
-    // Only fetch if we have R2 images
-    if (r2Images.length > 0 && !loading) {
-      fetchSearchResults(currentPage);
-    }
-  }, [r2Images, loading, fetchSearchResults, currentPage]);
+      // If it passed all filters, include it
+      return true;
+    });
 
-  // Fetch new results when filters change
-  useEffect(() => {
-    if (r2Images.length > 0 && !loading) {
-      setCurrentPage(0); // Reset to first page when filters change
-      fetchSearchResults(0);
-    }
-  }, [r2Images, loading, fetchSearchResults]);
+    // 3. Sort based on sortBy state
+    const sorted = [...filtered].sort((a, b) => {
+      const [field, direction] = sortBy.split('_');
+      const valA = field === 'catno' ? a.catalogueNumber : a.title;
+      const valB = field === 'catno' ? b.catalogueNumber : b.title;
 
-  // Effect for handling pagination changes
+      const numA = parseInt(valA.match(/\d+/)?.[0] || '0', 10);
+      const numB = parseInt(valB.match(/\d+/)?.[0] || '0', 10);
+      const prefixA = valA.replace(/\d+.*/, '') || valA;
+      const prefixB = valB.replace(/\d+.*/, '') || valB;
+
+      let comparison = 0;
+      if (field === 'catno') {
+         if (prefixA < prefixB) comparison = -1;
+         else if (prefixA > prefixB) comparison = 1;
+         else if (numA < numB) comparison = -1;
+         else if (numA > numB) comparison = 1;
+      } else {
+          if (valA.toLowerCase() < valB.toLowerCase()) comparison = -1;
+          else if (valA.toLowerCase() > valB.toLowerCase()) comparison = 1;
+      }
+      return direction === 'ASC' ? comparison : -comparison;
+    });
+
+    // 4. Apply Pagination
+    const totalFilteredResults = sorted.length;
+    const calculatedTotalPages = Math.ceil(totalFilteredResults / resultsPerPage);
+    // Ensure currentPage is valid after filtering - use let now
+    let adjustedCurrentPage = Math.min(currentPage, Math.max(0, calculatedTotalPages - 1));
+    // If adjustedCurrentPage becomes NaN (e.g., totalPages is 0), default to 0
+    if(isNaN(adjustedCurrentPage)) adjustedCurrentPage = 0;
+
+    const startIndex = adjustedCurrentPage * resultsPerPage;
+    const endIndex = startIndex + resultsPerPage;
+    const paginatedResults = sorted.slice(startIndex, endIndex);
+
+    // 5. Update state
+    setProcessedArtworks(processed); // Keep full processed list if needed
+    setDisplayedArtworks(paginatedResults);
+    setTotalResults(totalFilteredResults);
+    setTotalPages(calculatedTotalPages);
+    if(currentPage !== adjustedCurrentPage) {
+        setCurrentPage(adjustedCurrentPage); // Adjust current page if it became invalid
+    }
+
+  }, [
+    r2Images, contextLoading, searchTerm,
+    seriesA, seriesB, filterBBB, filterBBC, filterD, filterRGG,
+    filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines,
+    sortBy, resultsPerPage, currentPage
+  ]);
+
+  // Effect for scrolling - Keep this
   useEffect(() => {
-    if (r2Images.length > 0 && !loading) {
+    if (r2Images.length > 0 && !contextLoading) {
       window.scrollTo(0, 0); // Scroll back to top when page changes
     }
-  }, [currentPage, r2Images, loading]);
+  }, [currentPage, r2Images, contextLoading]);
 
-  // Process search query from URL on load (just to initialize the search term)
+  // Process search query from URL on load - Keep this
   useEffect(() => {
     const query = searchParams.get('search');
     if (query && query !== searchTerm) {
       setSearchTerm(query);
+      // No need to fetch, the main useEffect will handle the filtering
     }
-  }, [searchParams, searchTerm]);
+     // Only run on initial mount based on searchParams
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
-  // Handle search submission
+  // Handle search submission - Update to only set state
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCurrentPage(0); // Reset to first page on new search
-    fetchSearchResults(0);
+    // Filtering is handled by the main useEffect
   };
 
-  // Clear search and reset to show all results
+  // Clear search and reset to show all results - Update to only set state
   const clearSearch = () => {
     setSearchTerm('');
     setIsSearching(false);
     setCurrentPage(0);
-    fetchSearchResults(0);
+     // Filtering is handled by the main useEffect
+  };
+
+  // Filter change handlers - Update to only set state
+  const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+      setter(prev => !prev);
+      setCurrentPage(0); // Reset page when filters change
   };
 
   // Series filter handlers
-  const handleSeriesAChange = () => {
-    setSeriesA(!seriesA);
-  };
+  const handleSeriesAChange = () => handleFilterChange(setSeriesA);
+  const handleSeriesBChange = () => handleFilterChange(setSeriesB);
+  const handleBBBChange = () => handleFilterChange(setFilterBBB);
+  const handleBBCChange = () => handleFilterChange(setFilterBBC);
+  const handleDChange = () => handleFilterChange(setFilterD);
+  const handleRGGChange = () => handleFilterChange(setFilterRGG);
+  const handlePreBetterBadgesChange = () => handleFilterChange(setFilterPreBetterBadges);
+  const handlePopArtKoopChange = () => handleFilterChange(setFilterPopArtKoop);
+  const handleCatalogsChange = () => handleFilterChange(setFilterCatalogs);
+  const handleZinesChange = () => handleFilterChange(setFilterZines);
 
-  const handleSeriesBChange = () => {
-    setSeriesB(!seriesB);
-  };
-
-  // Handle the new filename filters
-  const handleBBBChange = () => {
-    setFilterBBB(!filterBBB);
-  };
-
-  const handleBBCChange = () => {
-    setFilterBBC(!filterBBC);
-  };
-
-  const handleDChange = () => {
-    setFilterD(!filterD);
-  };
-
-  const handleRGGChange = () => {
-    setFilterRGG(!filterRGG);
-  };
-
-  // Add handlers for new filter options
-  const handlePreBetterBadgesChange = () => {
-    setFilterPreBetterBadges(!filterPreBetterBadges);
-  };
-
-  const handlePopArtKoopChange = () => {
-    setFilterPopArtKoop(!filterPopArtKoop);
-  };
-
-  const handleCatalogsChange = () => {
-    setFilterCatalogs(!filterCatalogs);
-  };
-
-  const handleZinesChange = () => {
-    setFilterZines(!filterZines);
-  };
-
-  // Calculate dynamic pagination values based on API response
+  // Calculate dynamic pagination values based on state
   const dynamicTotalResults = totalResults;
   const dynamicStartResult = dynamicTotalResults === 0 ? 0 : currentPage * resultsPerPage + 1;
   const dynamicEndResult = Math.min((currentPage + 1) * resultsPerPage, dynamicTotalResults);
 
-  // Generate page numbers for pagination
+  // Generate page numbers for pagination - Keep this
   const generatePageNumbers = useCallback(() => {
     const maxVisiblePages = 10;
     
@@ -281,7 +295,7 @@ export default function CatalogueContent() {
     return [...Array(endPage - startPage + 1).keys()].map(i => i + startPage);
   }, [currentPage, totalPages]);
 
-  // Mobile controls toggle handlers
+  // Mobile controls toggle handlers - Keep these
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
 
@@ -303,7 +317,7 @@ export default function CatalogueContent() {
         <h1>Browse the Works</h1>
       </div>
 
-      {loading ? (
+      {contextLoading ? (
         // Center loading indicator while waiting for images
         <div style={{ 
           display: 'flex', 
@@ -326,6 +340,16 @@ export default function CatalogueContent() {
               animation: 'spin 1s linear infinite'
             }}></div>
           </div>
+        </div>
+      ) : contextError ? (
+        <div className="error-message" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+          Error loading image data: {contextError}
+          <button
+            onClick={() => refreshImages()}
+            style={{ marginLeft: '10px', padding: '5px 10px' }}
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <>
@@ -470,7 +494,7 @@ export default function CatalogueContent() {
                     id="sortSelect"
                     aria-label="Sort results by"
                     value={sortBy} 
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e) => { setSortBy(e.target.value); setCurrentPage(0); }}
                     style={{ 
                       width: "100%",
                       height: "40px",
@@ -668,7 +692,7 @@ export default function CatalogueContent() {
                   id="sortSelect"
                   aria-label="Sort results by"
                   value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => { setSortBy(e.target.value); setCurrentPage(0); }}
                   style={{ 
                     minWidth: "280px", 
                     height: "auto", 
@@ -731,7 +755,7 @@ export default function CatalogueContent() {
 
           <div id="restulsFiltersWrapper">
             <div id="restulsCont">
-              RESULTS {dynamicStartResult} TO {dynamicEndResult} OF {dynamicTotalResults}
+              RESULTS {dynamicStartResult} TO {dynamicEndResult} OF {totalResults}
               {isSearching && (
                 <>
                   <span> (Filtered by: &ldquo;{searchTerm}&rdquo;)</span>
@@ -768,21 +792,12 @@ export default function CatalogueContent() {
                 ↻ Refresh Images
               </button>
             </div>
-            {error && <div className="error-message">{error}</div>}
           </div>
 
           <div id="indexContainer" className={viewType}>
-            {isLoadingResults ? (
-              // Show loading indicator
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  border: '4px solid #f3f3f3', 
-                  borderTop: '4px solid #333', 
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
+            {displayedArtworks.length === 0 && !contextLoading ? (
+              <div style={{ textAlign: 'center', padding: '50px 0', color: '#666' }}>
+                No artworks match the current filters.
               </div>
             ) : (
               <>
@@ -797,10 +812,10 @@ export default function CatalogueContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredWorks.map(work => (
+                      {displayedArtworks.map(work => (
                         <tr 
-                          key={work.id} 
-                          onClick={() => window.location.href = `/catalogue/entry/${work.id}`}
+                          key={work.artworkId} 
+                          onClick={() => window.location.href = `/catalogue/entry/${work.artworkId}`}
                           style={{ cursor: 'pointer' }}
                           className="clickable-row"
                         >
@@ -833,10 +848,10 @@ export default function CatalogueContent() {
                   </table>
                 ) : (
                   <div id="catWorks" className="catWorksCont customCatWorks">
-                    {filteredWorks.map(work => (
-                      <div className="item" key={work.id}>
-                        <div id={`work-${work.id}`}></div>
-                        <a href={`/catalogue/entry/${work.id}`} className="image">
+                    {displayedArtworks.map(work => (
+                      <div className="item" key={work.artworkId}>
+                        <div id={`work-${work.artworkId}`}></div>
+                        <a href={`/catalogue/entry/${work.artworkId}`} className="image">
                           <SmoothImage
                             src={work.imageUrl}
                             alt={work.title}
@@ -853,7 +868,7 @@ export default function CatalogueContent() {
                         </a>
                         {viewType === 'gridA' && (
                           <div className="item_catDetails">
-                            <a href={`/catalogue/entry/${work.id}`}>
+                            <a href={`/catalogue/entry/${work.artworkId}`}>
                               <div className="item_title">
                                 <em>
                                   {work.catalogueNumber === 'AD' ? (
@@ -900,10 +915,7 @@ export default function CatalogueContent() {
                         {/* First/Previous buttons */}
                         <div className="pagination-nav">
                           <button 
-                            onClick={() => { 
-                              setCurrentPage(0);
-                              fetchSearchResults(0);
-                            }} 
+                            onClick={() => setCurrentPage(0)}
                             className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
                             disabled={isFirstPage}
                             aria-label="First page"
@@ -912,11 +924,7 @@ export default function CatalogueContent() {
                           </button>
                           
                           <button 
-                            onClick={() => { 
-                              const newPage = currentPage - 1;
-                              setCurrentPage(newPage);
-                              fetchSearchResults(newPage);
-                            }} 
+                            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                             className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
                             disabled={isFirstPage}
                             aria-label="Previous page"
@@ -930,10 +938,7 @@ export default function CatalogueContent() {
                           {generatePageNumbers().map((pageNum) => (
                             <button 
                               key={pageNum}
-                              onClick={() => { 
-                                setCurrentPage(pageNum);
-                                fetchSearchResults(pageNum);
-                              }} 
+                              onClick={() => setCurrentPage(pageNum)}
                               className={`pagination-number ${pageNum === currentPage ? 'active' : ''}`}
                               aria-label={`Page ${pageNum + 1}`}
                               aria-current={pageNum === currentPage ? 'page' : undefined}
@@ -942,7 +947,7 @@ export default function CatalogueContent() {
                             </button>
                           ))}
                           
-                          {totalPages > 10 && (
+                          {totalPages > 10 && currentPage < totalPages - Math.floor(10 / 2) -1 && (
                             <span className="pagination-ellipsis">…</span>
                           )}
                         </div>
@@ -950,13 +955,7 @@ export default function CatalogueContent() {
                         {/* Next/Last buttons */}
                         <div className="pagination-nav">
                           <button 
-                            onClick={() => { 
-                              const newPage = currentPage + 1;
-                              if (newPage < totalPages) {
-                                setCurrentPage(newPage);
-                                fetchSearchResults(newPage);
-                              }
-                            }} 
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                             className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
                             disabled={isLastPage}
                             aria-label="Next page"
@@ -965,11 +964,7 @@ export default function CatalogueContent() {
                           </button>
                           
                           <button 
-                            onClick={() => { 
-                              const lastPage = totalPages - 1;
-                              setCurrentPage(lastPage);
-                              fetchSearchResults(lastPage);
-                            }} 
+                            onClick={() => setCurrentPage(totalPages - 1)}
                             className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
                             disabled={isLastPage}
                             aria-label="Last page"

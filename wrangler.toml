@@ -2,8 +2,6 @@ name = "r2-image-worker"
 main = "r2-worker.js"
 compatibility_date = "2022-11-30"
 compatibility_flags = ["nodejs_compat"]
-compatibility_version = "1"
-node_compat = true
 workers_dev = true
 
 # Specify Node.js compatibility version for Pages

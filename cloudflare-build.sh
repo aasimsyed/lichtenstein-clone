@@ -32,6 +32,7 @@ mkdir -p out/_headers || true
 
 # Always attempt to create/overwrite the _headers file
 echo "✓ Ensuring _headers file exists with content"
+rm -f out/_headers # Ensure it's not a directory
 cat > out/_headers << EOL
 /*
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
