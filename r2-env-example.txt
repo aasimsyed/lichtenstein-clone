@@ -1,5 +1,5 @@
 # Example R2 configuration
-R2_BUCKET_NAME=your-bucket-name
-R2_ACCOUNT_ID=your-cloudflare-account-id
-R2_ACCESS_KEY_ID=your-s3-access-key-id
-R2_SECRET_ACCESS_KEY=your-s3-secret-access-key
+R2_BUCKET_NAME=better-badges
+R2_ACCOUNT_ID=950035267d1186d83269e8b8eb50e572
+R2_ACCESS_KEY_ID=3e7a1e83bbf097422110496732f79c65
+R2_SECRET_ACCESS_KEY=3ea90af11d49df0835e860c7639c99d6e141586672f1c0ed2084b732ff1b2c50

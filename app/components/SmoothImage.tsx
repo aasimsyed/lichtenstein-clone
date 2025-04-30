@@ -37,9 +37,15 @@ export default function SmoothImage(props: SmoothImageProps) {
     cacheKey,
     lazyBoundary = '200px',
     quality = 85, // Default quality setting
-    unoptimized = false,
+    unoptimized = true, // Default to true for static export compatibility
     ...imageProps 
   } = props;
+
+  // Check if source is a data URI
+  const isDataUri = typeof props.src === 'string' && props.src.startsWith('data:');
+  
+  // If the image is a data URI, we need to use the unoptimized prop
+  const shouldUseUnoptimized = unoptimized || isDataUri;
 
   // Use IntersectionObserver for smarter loading
   const { ref, inView } = useInView({
@@ -119,6 +125,28 @@ export default function SmoothImage(props: SmoothImageProps) {
     );
   }
 
+  // For data URIs, we use a standard img tag
+  if (isDataUri) {
+    return (
+      <div style={containerStyle} ref={ref}>
+        {(isIntersecting || preload) && (
+          <img 
+            src={props.src as string}
+            alt={props.alt}
+            style={{
+              ...imageStyle,
+              opacity: 1, // Data URIs load immediately
+            }}
+            width={props.width}
+            height={props.height}
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setIsError(true)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={containerStyle} ref={ref}>
       {(isIntersecting || preload) && (
@@ -129,7 +157,7 @@ export default function SmoothImage(props: SmoothImageProps) {
           style={imageStyle}
           quality={quality}
           priority={preload}
-          unoptimized={true} // Set to true to bypass Next.js image optimization for R2 images
+          unoptimized={shouldUseUnoptimized} // Use unoptimized for all images in static export
           fetchPriority={preload ? "high" : "auto"}
           ref={imageRef}
           onLoad={(event) => {

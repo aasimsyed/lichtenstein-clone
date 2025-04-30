@@ -64,10 +64,13 @@ export default function SelectionsCarousel() {
 
   // Function to get proper artwork ID for linking
   const getArtworkId = (image) => {
-    // Find the index of this image in the original images array
+    // Always use the numeric ID (index+1) for consistency with static export
     const originalIndex = images.findIndex(img => img.id === image.id);
-    // Return the index + 1 as that's how the entry page finds images
     return originalIndex >= 0 ? originalIndex + 1 : 1;
+
+    // Alternative: use the image.id directly if you want to switch to using the original IDs
+    // Instead of having this fallback to numeric IDs
+    // return image.id;
   };
 
   return (
