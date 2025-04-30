@@ -25,10 +25,17 @@ export const metadata: Metadata = {
   title: "Better Badges: A Catalogue Raisonné",
   description: "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'msapplication-TileColor': '#f5f5f5',
+    'theme-color': '#f5f5f5'
   },
 };
 
@@ -40,6 +47,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${openSans.variable} ${roboto_mono.variable}`}>
       <head>
+        {/* Favicon */}
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="mask-icon" href="/favicon.svg" color="#cc3534" />
+        
         {/* Removed inline CSS for carousel dot positioning */}
         <link 
           rel="preload" 

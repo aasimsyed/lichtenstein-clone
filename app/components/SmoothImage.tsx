@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import NextImage, { ImageProps } from 'next/image';
 import { useInView } from 'react-intersection-observer';
 
@@ -21,11 +21,14 @@ interface SmoothImageProps extends Omit<ImageProps, 'placeholder'> {
 // Cache for preloaded images
 const imageCache = new Map<string, boolean>();
 
-export default function SmoothImage(props: SmoothImageProps) {
+const SmoothImage = forwardRef<HTMLImageElement, SmoothImageProps>((props, forwardedRef) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isError, setIsError] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const internalImageRef = useRef<HTMLImageElement>(null);
+  
+  // Combine refs - use forwardedRef if provided, otherwise use internalImageRef
+  const imageRef = forwardedRef || internalImageRef;
   
   const { 
     loadingColor = '#f0f0f0', 
@@ -100,6 +103,7 @@ export default function SmoothImage(props: SmoothImageProps) {
     objectFit: ((props.style as React.CSSProperties)?.objectFit as React.CSSProperties['objectFit']) || 'cover',
     width: '100%',
     height: '100%',
+    WebkitTapHighlightColor: 'transparent',
     ...((props.style as React.CSSProperties) || {}),
   };
 
@@ -141,6 +145,7 @@ export default function SmoothImage(props: SmoothImageProps) {
             height={props.height}
             onLoad={() => setIsLoaded(true)}
             onError={() => setIsError(true)}
+            ref={imageRef as React.RefObject<HTMLImageElement>}
           />
         )}
       </div>
@@ -159,7 +164,7 @@ export default function SmoothImage(props: SmoothImageProps) {
           priority={preload}
           unoptimized={shouldUseUnoptimized} // Use unoptimized for all images in static export
           fetchPriority={preload ? "high" : "auto"}
-          ref={imageRef}
+          ref={imageRef as React.RefObject<HTMLImageElement>}
           onLoad={(event) => {
             // No delay for faster perception
             setIsLoaded(true);
@@ -181,4 +186,9 @@ export default function SmoothImage(props: SmoothImageProps) {
       )}
     </div>
   );
-} 
+});
+
+// Add display name for debugging
+SmoothImage.displayName = 'SmoothImage';
+
+export default SmoothImage; 
