@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Open_Sans, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import "slick-carousel/slick/slick.css";
@@ -21,10 +21,15 @@ const roboto_mono = Roboto_Mono({
   variable: '--font-roboto-mono',
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "Better Badges: A Catalogue Raisonné",
   description: "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.",
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
