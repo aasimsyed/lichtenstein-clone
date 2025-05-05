@@ -14,16 +14,15 @@ export NEXT_DISABLE_TYPE_CHECKS=1
 # Run the build
 npm run build
 
-# For Cloudflare Pages with the Next.js App Router, we just need to ensure
-# the build completed successfully by checking for the .next directory
-if [ -d ".next" ]; then
-  echo "✓ Next.js build output directory (.next) exists"
+# For Cloudflare Pages with Next.js static export, we check for the 'out' directory
+if [ -d "out" ]; then
+  echo "✓ Next.js build output directory (out) exists"
   
   # Create any required Cloudflare files
-  mkdir -p .next/static
+  mkdir -p out/static
   
   # Add required Cloudflare headers
-  cat > .next/_headers << EOL
+  cat > out/_headers << EOL
 /*
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 EOL
@@ -31,15 +30,15 @@ EOL
   # Copy _redirects file if it exists
   if [ -f "_redirects" ]; then
     echo "✓ Copying _redirects file to output directory"
-    cp _redirects .next/
+    cp _redirects out/
   fi
 
   echo "✓ Build completed successfully!"
   echo "✓ Created Cloudflare _headers file"
   
   # List the output directory contents for debugging
-  echo "Contents of .next directory:"
-  ls -la .next
+  echo "Contents of out directory:"
+  ls -la out
 else
   echo "❌ Error: Next.js build output directory not found. Build may have failed."
   exit 1

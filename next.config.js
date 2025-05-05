@@ -2,9 +2,8 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export configuration is no longer needed with App Router
-  // We'll let Cloudflare handle the server-side rendering
-  // output: 'export', - removing this line
+  // Enable static export for Cloudflare Pages
+  output: 'export',
   
   // Images configuration
   images: {
