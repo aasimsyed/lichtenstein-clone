@@ -20,7 +20,7 @@ interface ProcessedArtwork extends R2ContextImage {
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages } = useR2Images();
+  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages } = useR2Images();
   
   // View and sort states
   const [viewType, setViewType] = useState('gridA');
@@ -33,8 +33,7 @@ export default function CatalogueContent() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(0);
   
-  // State for processed and displayed artworks
-  const [processedArtworks, setProcessedArtworks] = useState<ProcessedArtwork[]>([]);
+  // State for displayed artworks
   const [displayedArtworks, setDisplayedArtworks] = useState<ProcessedArtwork[]>([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -102,7 +101,6 @@ export default function CatalogueContent() {
   useEffect(() => {
     if (contextLoading || !r2Images || r2Images.length === 0) {
         // If context is loading or no images, clear results
-        setProcessedArtworks([]);
         setDisplayedArtworks([]);
         setTotalResults(0);
         setTotalPages(0);
@@ -204,7 +202,6 @@ export default function CatalogueContent() {
     const paginatedResults = sorted.slice(startIndex, endIndex);
 
     // 5. Update state
-    setProcessedArtworks(processed); // Keep full processed list if needed
     setDisplayedArtworks(paginatedResults);
     setTotalResults(totalFilteredResults);
     setTotalPages(calculatedTotalPages);
@@ -311,6 +308,65 @@ export default function CatalogueContent() {
     setShowMobileFilters(false);
   };
 
+  const renderGridAView = () => {
+    if (contextLoading && !displayedArtworks.length) {
+      return <div className="loading-indicator">Loading catalogue...</div>;
+    }
+
+    if (contextError) {
+      return <div className="error-message">Error loading catalogue: {contextError}</div>;
+    }
+
+    if (displayedArtworks.length === 0) {
+      return <div className="no-results">No artwork found matching your criteria.</div>;
+    }
+
+    return (
+      <div id="catWorks" className="catWorksCont">
+        {displayedArtworks.map((artwork, index) => (
+          <article
+            key={`${artwork.artworkId}-${index}`}
+            className="item"
+            style={{ contain: 'content', willChange: 'opacity, transform' }}
+          >
+            <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
+              <div className="image">
+                <SmoothImage
+                  src={artwork.imageUrl}
+                  alt={artwork.title}
+                  width={500}
+                  height={600}
+                  quality={85}
+                  cacheKey={artwork.artworkId}
+                  preload={index < 9} // Preload first 9 images immediately
+                  fadeIn={true}
+                  preventRerender={true}
+                  unoptimized={true}
+                  lazyBoundary="500px"
+                  onLoad={() => {
+                    // Preload next batch when current image loads
+                    if (index % 3 === 0) {
+                      const startIdx = Math.min(displayedArtworks.length - 1, index + 9);
+                      const count = Math.min(5, displayedArtworks.length - startIdx);
+                      if (count > 0) {
+                        preloadNextImages(startIdx, count);
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="item_catDetails">
+                <div className="item_title">{artwork.title}</div>
+                <div className="item_catnum">{artwork.catalogueNumber}</div>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    );
+  };
+
+  // Render the appropriate view based on viewType
   return (
     <div id="mainBody">
       <div id="pageTopMatter">
@@ -795,111 +851,53 @@ export default function CatalogueContent() {
           </div>
 
           <div id="indexContainer" className={viewType}>
-            {displayedArtworks.length === 0 && !contextLoading ? (
-              <div style={{ textAlign: 'center', padding: '50px 0', color: '#666' }}>
-                No artworks match the current filters.
-              </div>
-            ) : (
-              <>
-                {viewType === 'list' ? (
-                  <table className="list-view-table">
-                    <thead>
-                      <tr>
-                        <th>Catalogue No.</th>
-                        <th>Artist</th>
-                        <th>Title</th>
-                        <th>Size</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displayedArtworks.map(work => (
-                        <tr 
-                          key={work.artworkId} 
-                          onClick={() => window.location.href = `/catalogue/entry/${work.artworkId}`}
-                          style={{ cursor: 'pointer' }}
-                          className="clickable-row"
-                        >
-                          <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
-                              work.catalogueNumber.startsWith('FZ') ? 'Flyer/Zine' : 
-                              work.catalogueNumber}</td>
-                          <td>{work.catalogueNumber === 'AD' ? '' : 
-                              work.catalogueNumber.startsWith('FZ') ? '' : 
-                              work.artist}</td>
-                          <td>
-                            {work.catalogueNumber === 'AD' ? (
-                              <>Catalog</>
-                            ) : work.catalogueNumber.startsWith('FZ') ? (
-                              <>
-                                {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
-                              </>
-                            ) : (
-                              work.title
-                            )}
-                            {work.catalogueNumber.startsWith('FZ') && (
-                              <div style={{ fontSize: '0.85em', color: '#666' }}>Flyer/Zine</div>
-                            )}
-                          </td>
-                          <td>{work.catalogueNumber === 'AD' ? '' : 
-                              work.catalogueNumber.startsWith('FZ') ? '' : 
-                              work.size}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div id="catWorks" className="catWorksCont customCatWorks">
-                    {displayedArtworks.map(work => (
-                      <div className="item" key={work.artworkId}>
-                        <div id={`work-${work.artworkId}`}></div>
-                        <a href={`/catalogue/entry/${work.artworkId}`} className="image">
-                          <SmoothImage
-                            src={work.imageUrl}
-                            alt={work.title}
-                            width={170}
-                            height={170}
-                            style={{
-                              objectFit: 'cover',
-                              width: '100%',
-                              height: 'auto',
-                              aspectRatio: '1',
-                              display: 'block'
-                            }}
-                          />
-                        </a>
-                        {viewType === 'gridA' && (
-                          <div className="item_catDetails">
-                            <a href={`/catalogue/entry/${work.artworkId}`}>
-                              <div className="item_title">
-                                <em>
-                                  {work.catalogueNumber === 'AD' ? (
-                                    <>Catalog</>
-                                  ) : work.catalogueNumber.startsWith('FZ') ? (
-                                    <>
-                                      {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
-                                    </>
-                                  ) : (
-                                    work.title
-                                  )}
-                                </em>
-                              </div>
-                              {work.catalogueNumber === 'AD' ? (
-                                <div className="item_catnum">Catalog</div>
-                              ) : work.catalogueNumber.startsWith('FZ') ? (
-                                <div className="item_catnum">Flyer/Zine</div>
-                              ) : (
-                                <>
-                                  <div className="item_date">{work.artist}</div>
-                                  <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
-                                </>
-                              )}
-                            </a>
-                          </div>
+            {viewType === 'list' ? (
+              <table className="list-view-table">
+                <thead>
+                  <tr>
+                    <th>Catalogue No.</th>
+                    <th>Artist</th>
+                    <th>Title</th>
+                    <th>Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedArtworks.map(work => (
+                    <tr 
+                      key={work.artworkId} 
+                      onClick={() => window.location.href = `/catalogue/artwork?id=${encodeURIComponent(work.artworkId)}`}
+                      style={{ cursor: 'pointer' }}
+                      className="clickable-row"
+                    >
+                      <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
+                          work.catalogueNumber.startsWith('FZ') ? 'Flyer/Zine' : 
+                          work.catalogueNumber}</td>
+                      <td>{work.catalogueNumber === 'AD' ? '' : 
+                          work.catalogueNumber.startsWith('FZ') ? '' : 
+                          work.artist}</td>
+                      <td>
+                        {work.catalogueNumber === 'AD' ? (
+                          <>Catalog</>
+                        ) : work.catalogueNumber.startsWith('FZ') ? (
+                          <>
+                            {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
+                          </>
+                        ) : (
+                          work.title
                         )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+                        {work.catalogueNumber.startsWith('FZ') && (
+                          <div style={{ fontSize: '0.85em', color: '#666' }}>Flyer/Zine</div>
+                        )}
+                      </td>
+                      <td>{work.catalogueNumber === 'AD' ? '' : 
+                          work.catalogueNumber.startsWith('FZ') ? '' : 
+                          work.size}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              renderGridAView()
             )}
             
             {/* Pagination */}

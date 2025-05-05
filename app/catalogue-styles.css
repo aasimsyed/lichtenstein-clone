@@ -248,27 +248,106 @@ body {
 } 
  
 /* Gallery grid  */
-.catWorksCont { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-  gap: 20px; 
-  margin-bottom: 30px; 
-} 
- 
-.item { 
-  position: relative; 
-} 
- 
-.image { 
-  display: block; 
-  width: 100%; 
-  background-color: transparent; 
-} 
- 
-.item_catDetails { 
-  margin-top: 8px; 
-} 
- 
+#catWorks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  contain: layout style;
+}
+
+.item {
+  position: relative;
+  border: 1px solid #eee;
+  padding: 10px;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) backwards;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  contain: content;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background-color: #f8f8f8;
+  contain: paint;
+  transform: translateZ(0);
+}
+
+.item_catDetails {
+  margin-top: 10px;
+  animation: fadeInText 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.2s backwards;
+  will-change: opacity;
+  transform: translateZ(0);
+  contain: content;
+}
+
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply staggered animation to grid items */
+.item:nth-child(2n) {
+  animation-delay: 0.05s;
+}
+
+.item:nth-child(3n) {
+  animation-delay: 0.1s;
+}
+
+.item:nth-child(4n) {
+  animation-delay: 0.15s;
+}
+
+.item:nth-child(5n) {
+  animation-delay: 0.2s;
+}
+
+/* Apply staggered animation to item details */
+.item:nth-child(2n) .item_catDetails {
+  animation-delay: 0.25s;
+}
+
+.item:nth-child(3n) .item_catDetails {
+  animation-delay: 0.3s;
+}
+
+.item:nth-child(4n) .item_catDetails {
+  animation-delay: 0.35s;
+}
+
+.item:nth-child(5n) .item_catDetails {
+  animation-delay: 0.4s;
+}
+
 .item_catDetails a { 
   text-decoration: none; 
   color: inherit; 
@@ -515,7 +594,9 @@ body {
   align-items: center; 
   justify-content: center; 
   position: relative; 
-  overflow: hidden; 
+  overflow: hidden;
+  transform: translateZ(0); /* Hardware acceleration */
+  backface-visibility: hidden; /* Prevent paint flickering */
 } 
  
 /* Removing shimmer effect 

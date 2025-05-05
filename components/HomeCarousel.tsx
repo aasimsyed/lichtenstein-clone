@@ -13,27 +13,27 @@ interface SlideProps {
 
 const carouselSlides: SlideProps[] = [
   {
-    imageUrl: '/images/homepage/Picture Joly Michael Williams.jpg',
+    imageUrl: '/images/homepage/Picture Joly Michael Williams.webp',
     caption: 'Joly and Michael Williams - Better Badges founders and pioneers of punk culture ephemera',
     link: '/catalogue/'
   },
   {
-    imageUrl: '/images/homepage/bayley - punk badges.jpg',
+    imageUrl: '/images/homepage/bayley - punk badges.webp',
     caption: 'Punk badges collection - iconic pins from the late 70s and early 80s UK music scene',
     link: '/catalogue/'
   },
   {
-    imageUrl: '/images/homepage/BBB055 BBB065 Paper Wayne County Fuck Off Stiff.jpg',
+    imageUrl: '/images/homepage/BBB055 BBB065 Paper Wayne County Fuck Off Stiff.webp',
     caption: 'Wayne County "Fuck Off" - Rare Stiff Records promotional badges and paper ephemera',
     link: '/catalogue/'
   },
   {
-    imageUrl: '/images/homepage/BBB148 Paper.jpg',
+    imageUrl: '/images/homepage/BBB148 Paper.webp',
     caption: 'Original paper flyers and promotional materials from the punk era',
     link: '/catalogue/'
   },
   {
-    imageUrl: '/images/homepage/25MM_1451.jpg',
+    imageUrl: '/images/homepage/25MM_1451.webp',
     caption: 'Classic 25mm badges from the Better Badges collection',
     link: '/catalogue/'
   }

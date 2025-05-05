@@ -84,7 +84,7 @@ export default function SelectionsCarousel() {
             return (
               <div key={index} className="carousel-slide">
                 <div className="slide-inner">
-                  <Link href={`/catalogue/entry/${artworkId}`} className="artwork-link">
+                  <Link href={`/catalogue/artwork?id=${encodeURIComponent(artworkId)}`} className="artwork-link">
                     <div className="image-container">
                       <SmoothImage 
                         src={image.url} 
