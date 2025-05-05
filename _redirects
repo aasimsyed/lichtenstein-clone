@@ -1,1 +1,8 @@
-# /* /index.html 200 
+# Redirect rules for Cloudflare Pages
+# Ensure Next.js client-side navigation works properly
+
+# Redirect /catalogue/entry/* requests to /catalogue/artwork
+/catalogue/entry/* /catalogue/artwork 301
+
+# Handle 404s by redirecting to index
+/* /index.html 200 

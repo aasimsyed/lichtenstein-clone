@@ -2,9 +2,11 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Add static export configuration for Cloudflare Pages
-  output: 'export',
-  // Images configuration with static export settings
+  // Static export configuration is no longer needed with App Router
+  // We'll let Cloudflare handle the server-side rendering
+  // output: 'export', - removing this line
+  
+  // Images configuration
   images: {
     unoptimized: true,
     domains: [
@@ -59,10 +61,17 @@ const nextConfig = {
     // Skip type checking during builds
     ignoreBuildErrors: true,
   },
+  // Enable React strict mode for better development experience
+  reactStrictMode: true,
 };
 
+// Set up development platform only in development mode
 if (process.env.NODE_ENV === 'development') {
-  await setupDevPlatform();
+  try {
+    await setupDevPlatform();
+  } catch (e) {
+    console.warn('Failed to setup dev platform:', e);
+  }
 }
 
 export default nextConfig; 
