@@ -1,5 +1,6 @@
 import HomeCarousel from '../components/HomeCarousel';
 import SelectionsCarousel from '../components/SelectionsCarousel';
+import HomeSeriesGridClient from "@/components/HomeSeriesGridClient";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       <div id="mainBody" className="homepage">
         <HomeCarousel />
         <SelectionsCarousel />
+        <HomeSeriesGridClient />
       </div>
     </div>
   );

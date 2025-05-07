@@ -127,7 +127,7 @@ export default function HomeCarousel() {
       <div 
         id="homepageCarouselWrapper" 
         className="home-carousel-container" 
-        style={{ position: 'relative', paddingBottom: '150px', marginTop: isMobile ? '30px' : '0' }} // Increased padding
+        style={{ position: 'relative', paddingBottom: '50px', marginTop: isMobile ? '30px' : '0' }} // Increased padding
       >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (
@@ -274,7 +274,7 @@ export default function HomeCarousel() {
           #homepage #homepageCarouselWrapper {
             position: relative !important;
             min-height: 400px !important; /* Fixed minimum height for the entire carousel section */
-            padding-bottom: 180px !important; /* Increased space for caption, dots and callout */
+            padding-bottom: 50px !important; /* Increased space for caption, dots and callout */
             margin-bottom: 30px !important;
           }
           
