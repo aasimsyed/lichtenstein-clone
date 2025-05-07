@@ -22,7 +22,7 @@ export default function SeriesGrid({ items }: SeriesGridProps) {
       style={{
         width: '100%',
         maxWidth: '1200px',
-        margin: '40px auto',
+        margin: '0 auto',
         padding: '0 20px',
       }}
     >

@@ -254,26 +254,27 @@
 @media screen and (max-width: 768px) {
   /* Fix dot navigation for selections carousel */
   .selections-carousel .slick-dots {
-    bottom: -25px !important;
+    bottom: -35px !important; /* Increased from -25px to -35px for more space */
     position: absolute !important;
     z-index: 1 !important;
   }
   
   /* Add more space under each slide to prevent dot overlap with content */
   .selections-carousel .carousel-slide {
-    padding-bottom: 10px !important;
+    padding-bottom: 25px !important; /* Increased from 10px to 25px */
+    margin-bottom: 10px !important; /* Added margin for additional spacing */
   }
   
   /* Ensure info section has proper spacing */
   .selections-carousel .info {
-    margin-bottom: 10px !important;
+    margin-bottom: 20px !important; /* Increased from 10px to 20px */
     position: relative !important;
     z-index: 2 !important;
   }
   
   /* Add more space between slides */
   .selections-carousel .slide-inner {
-    margin-bottom: 5px !important;
+    margin-bottom: 15px !important; /* Increased from 5px to 15px */
   }
   
   /* Add spacing after the title to prevent overlap with dots */
@@ -283,14 +284,30 @@
   
   /* Add more margin to container to accommodate dots */
   .selections-carousel-container {
-    margin-bottom: 30px !important;
-    padding-bottom: 15px !important;
+    margin-bottom: 40px !important; /* Increased from 30px to 40px */
+    padding-bottom: 25px !important; /* Increased from 15px to 25px */
     overflow: visible !important;
   }
   
   /* Make sure dots are rendered with proper spacing from content */
   .selections-carousel .slick-track {
-    padding-bottom: 15px !important; 
+    padding-bottom: 30px !important; /* Increased from 15px to 30px */
+  }
+  
+  /* Add more space between the image and dots */
+  .selections-carousel .image-container {
+    margin-bottom: 20px !important;
+  }
+  
+  /* Add more space to the info container to create separation from dots */
+  .selections-carousel .info {
+    padding-bottom: 25px !important; 
+  }
+  
+  /* Add bottom margin to image container for more separation */
+  .selections-carousel .artwork-link {
+    margin-bottom: 20px !important;
+    display: block !important;
   }
   
   /* Force callout to display properly and not overlap with selections */
@@ -299,5 +316,83 @@
     position: relative !important;
     display: block !important;
     clear: both !important;
+  }
+  
+  /* Hide arrow navigation for selections carousel on mobile */
+  .selections-carousel .slick-slider .slick-prev,
+  .selections-carousel .slick-slider .slick-next,
+  .selections-carousel-container .slick-prev,
+  .selections-carousel-container .slick-next {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  
+  /* Increase space between dots and slides */
+  .selections-carousel .slick-slider {
+    margin-bottom: 45px !important;
+    padding-bottom: 10px !important;
+  }
+  
+  /* Ensure dots have enough space and proper positioning */
+  .selections-carousel-container .slick-slider .slick-dots {
+    bottom: -40px !important;
+  }
+  
+  /* Extra separation between last info element and dots */
+  .selections-carousel .artwork-rlcr {
+    margin-bottom: 30px !important;
+    display: inline-block !important;
+  }
+} 
+
+/* Mobile order fix for homepage - higher specificity */
+@media (max-width: 768px) {
+  html body #homepage #mainBody.homepage {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  /* Set the order of components with maximum specificity */
+  html body #homepage #mainBody.homepage > .home-carousel-container {
+    order: 1 !important;
+    width: 100% !important;
+    float: none !important;
+  }
+  
+  html body #homepage #mainBody.homepage > .selections-carousel-container {
+    order: 2 !important;
+    margin-top: 30px !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
+  }
+  
+  html body #homepage #mainBody.homepage > .series-grid-wrapper {
+    order: 3 !important;
+    margin-top: 20px !important;
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
+  }
+  
+  /* Add some additional spacing between components */
+  html body #homepage .selections-carousel-container {
+    padding-top: 20px !important;
+    border-top: 1px solid #eee !important;
+    position: relative !important;
+    display: block !important;
+  }
+  
+  /* Ensure the series grid always appears after selections on mobile */
+  html body #homepage .series-grid-wrapper {
+    padding-top: 20px !important;
+    margin-top: 30px !important;
+    border-top: 1px solid #eee !important;
+    position: relative !important;
+    display: block !important;
   }
 } 
