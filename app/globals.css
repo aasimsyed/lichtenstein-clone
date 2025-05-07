@@ -1532,4 +1532,43 @@ footer {
   position: absolute !important;
   z-index: 1 !important;
 }
+
+/* Global styles for metadata display */
+.metadata {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.metadata p {
+  margin: 8px 0;
+}
+
+.metadata strong {
+  font-weight: 600;
+  color: #111;
+}
+
+/* Mobile-specific overrides in media query */
+@media (max-width: 768px) {
+  .metadata {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Spin animation for loading indicators */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Show mobile filters panel on mobile */
+#mobileFiltersPanel {
+  display: none;
+}
   

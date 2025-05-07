@@ -22,6 +22,10 @@ export default function CatalogueContent() {
   const searchParams = useSearchParams();
   const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages } = useR2Images();
   
+  // Add refresh button loading state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+  
   // View and sort states
   const [viewType, setViewType] = useState('gridA');
   const [sortBy, setSortBy] = useState('catno_ASC');
@@ -364,6 +368,25 @@ export default function CatalogueContent() {
         ))}
       </div>
     );
+  };
+
+  // Add a function to handle the refresh with visual feedback
+  const handleRefreshImages = async () => {
+    try {
+      // Reset success state if it was showing
+      setRefreshSuccess(false);
+      setIsRefreshing(true);
+      await refreshImages();
+      // Show success message and hide after a delay
+      setIsRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => {
+        setRefreshSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error refreshing images:', error);
+      setIsRefreshing(false);
+    }
   };
 
   // Render the appropriate view based on viewType
@@ -832,20 +855,52 @@ export default function CatalogueContent() {
                 </>
               )}
               <button 
-                onClick={() => {
-                  refreshImages();
-                }} 
+                onClick={handleRefreshImages} 
                 style={{ 
                   marginLeft: '15px', 
-                  background: '#f0f0f0', 
-                  border: '1px solid #ccc',
+                  background: refreshSuccess ? '#e6f7e6' : (isRefreshing ? '#e8e8e8' : '#f0f0f0'), 
+                  border: `1px solid ${refreshSuccess ? '#a3d9a3' : '#ccc'}`,
                   borderRadius: '3px',
                   padding: '2px 8px',
                   fontSize: '12px',
-                  cursor: 'pointer'
+                  cursor: isRefreshing ? 'default' : 'pointer',
+                  opacity: isRefreshing ? '0.8' : '1',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease'
                 }}
+                disabled={isRefreshing}
               >
-                ↻ Refresh Images
+                {refreshSuccess ? (
+                  <React.Fragment>
+                    <span style={{ 
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      color: '#4caf50',
+                      marginRight: '5px',
+                      fontWeight: 'bold'
+                    }}>✓</span>
+                    Updated!
+                  </React.Fragment>
+                ) : isRefreshing ? (
+                  <React.Fragment>
+                    <span style={{ 
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      border: '2px solid #ccc',
+                      borderTopColor: '#666',
+                      borderRadius: '50%',
+                      marginRight: '5px',
+                      animation: 'spin 1s linear infinite'
+                    }}></span>
+                    Refreshing...
+                  </React.Fragment>
+                ) : (
+                  '↻ Refresh Images'
+                )}
               </button>
             </div>
           </div>

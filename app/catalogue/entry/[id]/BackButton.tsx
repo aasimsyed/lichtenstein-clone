@@ -19,13 +19,17 @@ export default function BackButton() {
         display: 'inline-block',
         padding: '8px 16px',
         marginBottom: '20px',
+        marginTop: '90px',
+        marginLeft: '10px',
         color: '#333333',
         backgroundColor: '#f0f0f0',
         border: '1px solid #dddddd',
         fontWeight: 500,
         cursor: 'pointer',
         textDecoration: 'none',
-        borderRadius: '3px'
+        borderRadius: '3px',
+        position: 'relative',
+        zIndex: 10
       }}
     >
       <span>← Back to Works</span>

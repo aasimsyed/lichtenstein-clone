@@ -127,7 +127,7 @@ async function getArtworkData(id: string): Promise<Artwork | null> {
 
     // Find the image by matching the DECODED ID directly
     // generateStaticParams should ensure 'decodedId' is a valid image ID from this list
-    let image = images.find(img => img.id === decodedId);
+    const image = images.find(img => img.id === decodedId);
 
     if (!image) {
       // This can happen for manually added fallback IDs
@@ -184,7 +184,7 @@ function createPlaceholderArtwork(id: string): Artwork {
 }
 
 // Use the basic page component interface for Next.js
-export default async function Page({ params }) {
+export default async function Page({ params }: { params: { id: string } }) {
   const { id } = params;
 
   try {
@@ -265,6 +265,10 @@ export default async function Page({ params }) {
                 width={800} 
                 height={800}
               />
+              <div className="artwork-caption">
+                {artwork.title} {artwork.artist ? `by ${artwork.artist}` : ''} 
+                <span className="artwork-catalog-number">({artwork.catalogueNumber})</span>
+              </div>
             </div>
           </div>
         </div>

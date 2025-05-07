@@ -11,7 +11,7 @@ import { useR2Images } from '../context/R2Context';
 export function ArtworkContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
-  const { images } = useR2Images();
+  const { images, loading } = useR2Images();
 
   if (!id) {
     return <div className="error-message">No artwork ID provided</div>;
@@ -20,32 +20,82 @@ export function ArtworkContent() {
   // Find the image based on ID
   const selectedImage = images.find(img => img.id === id);
   
-  if (!selectedImage) {
+  // Only show "Artwork not found" error if we're not in a loading state
+  if (!selectedImage && !loading) {
     return <div className="error-message">Artwork not found</div>;
   }
 
-  // Parse artwork information from filename
-  const parsedInfo = parseFilename(selectedImage.id);
+  // Show loading state if we're still loading and haven't found the image yet
+  if (loading && !selectedImage) {
+    return (
+      <div className="loading-artwork">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '40px 0'
+        }}>
+          <div style={{ marginBottom: '15px' }}>Loading artwork...</div>
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            border: '4px solid #f3f3f3', 
+            borderTop: '4px solid #333', 
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we're here, either we have the image or we're loading it
+  // We'll continue rendering with the selected image (might be undefined while loading)
+  // Parse artwork information from filename if we have an image
+  const parsedInfo = selectedImage ? parseFilename(selectedImage.id) : { title: '', catalogNumber: '', size: '', artist: '' };
 
   return (
     <div className="entry-page-container">
       <BackButton />
-      <div className="entry-page-content">
-        <h1 className="artwork-title">{parsedInfo.title || 'Untitled'}</h1>
-        <div className="metadata">
-          {parsedInfo.catalogNumber && <p><strong>Catalogue ID:</strong> {parsedInfo.catalogNumber}</p>}
-          {parsedInfo.size && <p><strong>Size:</strong> {parsedInfo.size}mm</p>}
-          {parsedInfo.artist && <p><strong>Artist:</strong> {parsedInfo.artist}</p>}
+      {selectedImage ? (
+        <div className="entry-page-content">
+          <h1 className="artwork-title">{parsedInfo.title || 'Untitled'}</h1>
+          <div className="metadata">
+            {parsedInfo.catalogNumber && <p><strong>Catalogue ID:</strong> {parsedInfo.catalogNumber}</p>}
+            {parsedInfo.size && <p><strong>Size:</strong> {parsedInfo.size}mm</p>}
+            {parsedInfo.artist && <p><strong>Artist:</strong> {parsedInfo.artist}</p>}
+          </div>
+          <div className="zoomable-image-container">
+            <ZoomableImage 
+              src={selectedImage.url} 
+              alt={parsedInfo.title || 'Artwork Image'} 
+              width={1000}
+              height={1200}
+            />
+          </div>
         </div>
-        <div className="zoomable-image-container">
-          <ZoomableImage 
-            src={selectedImage.url} 
-            alt={parsedInfo.title || 'Artwork Image'} 
-            width={1000}
-            height={1200}
-          />
+      ) : (
+        <div className="loading-artwork">
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center', 
+            justifyContent: 'center',
+            padding: '40px 0'
+          }}>
+            <div style={{ marginBottom: '15px' }}>Loading artwork...</div>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              border: '4px solid #f3f3f3', 
+              borderTop: '4px solid #333', 
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

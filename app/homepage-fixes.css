@@ -396,3 +396,158 @@
     display: block !important;
   }
 } 
+
+/* Mobile fixes for entry page - ensuring content isn't hidden behind the header */
+@media (max-width: 768px) {
+  /* Add padding to the entry container for proper spacing from header */
+  #entryContainer {
+    padding-top: 90px !important; /* Increased from 70px to 90px */
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Add extra padding to the main content area for mobile */
+  #mainBody {
+    padding-top: 60px !important; /* Increased from 50px to 60px */
+  }
+  
+  /* Fix positioning for the back button */
+  .backToWorks-custom, 
+  a.backToWorks-custom {
+    margin-top: 40px !important; /* Increased from 20px to 40px */
+    margin-bottom: 25px !important;
+    margin-left: 5px !important;
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Ensure the image container has proper spacing */
+  .entryImageContainer {
+    margin-top: 30px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+  
+  /* Fix the negative margin issue in zoomable image container */
+  .zoomable-image-container {
+    margin-top: 0 !important; /* Override the negative margin */
+    padding-top: 10px !important;
+  }
+  
+  /* Ensure proper caption visibility */
+  .artwork-caption {
+    margin-top: 20px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+    position: relative !important;
+    z-index: 5 !important;
+    padding: 10px !important;
+    background-color: #f5f5f5 !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Fix entry page container positioning */
+  #mainBody > #entryContainer {
+    margin-top: 0 !important;
+    padding-top: 80px !important; /* Increased from 60px to 80px */
+  }
+  
+  /* Add extra top padding to page top matter */
+  #mainBody > #pageTopMatter {
+    padding-top: 30px !important; /* Increased from 20px to 30px */
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  
+  /* Fix header positioning for artwork page */
+  #pageTopMatter h1 {
+    margin-top: 40px !important;
+    margin-left: 5px !important;
+    margin-bottom: 15px !important;
+  }
+} 
+
+/* High specificity fix for catalog entry page on mobile */
+@media (max-width: 768px) {
+  html body #mainBody[id="mainBody"] {
+    padding-top: 70px !important;
+    margin-top: 75px !important; /* Increased from 60px to 75px */
+  }
+  
+  html body #entryContainer {
+    padding-top: 140px !important; /* Increased from 120px to 140px */
+    margin-top: 50px !important;
+  }
+
+  html body .entryNavigation {
+    position: relative !important;
+    z-index: 100 !important;
+    padding-top: 70px !important; /* Increased from 50px to 70px */
+    margin-top: 30px !important; /* Increased from 20px to 30px */
+  }
+  
+  /* Target back button with maximum specificity */
+  html body a.backToWorks-custom,
+  html body .backToWorks-custom {
+    position: relative !important;
+    z-index: 999 !important;
+    margin-top: 80px !important; /* Increased from 60px to 80px */
+    margin-left: 10px !important;
+    margin-bottom: 30px !important;
+    display: block !important;
+    width: max-content !important;
+  }
+  
+  /* Add space to title and ensure it's below header */
+  html body #pageTopMatter {
+    margin-top: -140px !important; /* Increased from 70px to 80px */
+    padding-top: 40px !important; /* Increased from 30px to 40px */
+  }
+  
+  /* Fix entry metadata spacing */
+  html body .entrySideInfo {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-top: 20px !important; /* Reduced space between image and metadata */
+  }
+  
+  html body .entryMetadata {
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+    border-radius: 4px !important;
+  }
+  
+  /* Fix metadata spacing from edge and add padding */
+  html body .metadata {
+    padding-left: 15px !important; 
+    padding-right: 15px !important;
+    margin-bottom: 5px !important; /* Reduce space below metadata */
+  }
+  
+  /* Apply the same padding to artwork title as metadata */
+  html body h1.artwork-title {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  /* Reduce vertical space between image and metadata on mobile */
+  html body .entryContent {
+    gap: 10px !important; /* Reduced from default 30px */
+  }
+  
+  /* Ensure proper spacing between metadata and image */
+  html body .entry-page-content .metadata {
+    margin-bottom: 10px !important;
+  }
+  
+  html body .entry-page-content .zoomable-image-container {
+    margin-top: 5px !important; /* Reduce space between metadata and image */
+  }
+} 
