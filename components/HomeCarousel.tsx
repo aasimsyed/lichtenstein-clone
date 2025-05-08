@@ -79,25 +79,7 @@ export default function HomeCarousel() {
     autoplaySpeed: 5000,
     cssEase: "linear",
     adaptiveHeight: true,
-    dotsClass: "slick-dots custom-dots-container",
-    appendDots: (dots: React.ReactNode) => (
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '-40px', // Moved down below the image and caption
-          left: '0',
-          right: '0',
-          display: 'flex !important',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '10px 0',
-          backgroundColor: 'rgba(255,255,255,0.7)',
-          zIndex: 10
-        }}
-      >
-        {dots}
-      </div>
-    ),
+    dotsClass: "slick-dots carousel-dots", // Changed dot class name
     customPaging: function(i: number) {
       return (
         <button
@@ -123,11 +105,11 @@ export default function HomeCarousel() {
   const calloutText = "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.";
 
   return (
-    <div id="homepage">
+    <div className="carousel-outer-container">
       <div 
         id="homepageCarouselWrapper" 
         className="home-carousel-container" 
-        style={{ position: 'relative', paddingBottom: '50px', marginTop: isMobile ? '30px' : '0' }} // Increased padding
+        style={{ position: 'relative', marginTop: isMobile ? '30px' : '0' }}
       >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (
@@ -148,7 +130,8 @@ export default function HomeCarousel() {
                   priority={index === 0}
                 />
               </div>
-              <div className="homepageCarouseCaption" id={`caption-${index}`}>
+              {/* Caption moved outside the image-wrapper to be below the image */}
+              <div className="homepageCarouselCaption">
                 {slide.caption}
               </div>
             </div>
@@ -159,7 +142,7 @@ export default function HomeCarousel() {
         <div className="callout-container" style={{ 
           position: 'absolute',
           top: isMobile ? 'auto' : 'calc(70% + 35px)',
-          bottom: isMobile ? '10px' : 'auto',
+          bottom: isMobile ? '100px' : 'auto', // Adjusted to prevent overlap with dots
           right: isMobile ? 0 : '0%',
           left: isMobile ? 0 : 'auto',
           width: isMobile ? '100%' : '30%',
@@ -178,56 +161,79 @@ export default function HomeCarousel() {
       
       {/* Simple CSS overrides */}
       <style jsx global>{`
+        .carousel-outer-container {
+          position: relative;
+          margin-bottom: 100px;
+          overflow: visible;
+          padding-bottom: 50px;
+        }
+        
         .home-carousel-container {
           margin-bottom: 60px;
+          position: relative;
+          overflow: visible;
         }
         
         /* Fix caption display */
-        .homepageCarouseCaption {
+        .homepageCarouselCaption {
           position: relative !important;
-          z-index: 25 !important; /* Ensure it's above other elements */
           display: block !important;
-          margin-top: 10px !important;
+          margin-top: 15px !important; /* Space between image and caption */
+          margin-bottom: 15px !important; /* Space between caption and dots */
           background: rgba(240, 240, 240, 0.8) !important;
-          padding: 0px 20px !important;
+          padding: 8px 20px !important;
           width: 100% !important;
           text-align: left !important;
           font-size: 13px !important;
           box-sizing: border-box !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          z-index: 25 !important;
         }
         
         /* Ensure there's space for the caption */
         .homepageCarouselDiv {
           overflow: visible !important;
           height: auto !important;
-          padding-bottom: 10px !important;
+          padding-bottom: 0 !important;
+          position: relative !important;
+          display: flex !important;
+          flex-direction: column !important;
         }
         
         .image-wrapper {
           height: 676px !important; /* Maintain image height */
           overflow: hidden !important;
-        }
-        
-        .custom-dots-container {
-          position: absolute !important;
-          bottom: -40px !important;
-          left: 0 !important;
-          right: 0 !important;
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-          padding: 10px 0 !important;
-          z-index: 10 !important;
-          background-color: rgba(255,255,255,0.7) !important;
+          position: relative !important;
           width: 100% !important;
         }
         
-        .custom-dots-container li {
+        /* Complete dot navigation redesign */
+        .carousel-dots {
+          position: relative !important;
+          margin-top: 20px !important;
+          bottom: 0 !important;
+          padding: 10px 0 !important;
+          background-color: rgba(255,255,255,0.8) !important;
+          border-radius: 20px !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          list-style: none !important;
+          width: auto !important;
+          max-width: 80% !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+        }
+        
+        .carousel-dots li {
           display: inline-block !important;
           margin: 0 5px !important;
         }
         
-        .custom-dots-container li.slick-active button {
+        .carousel-dots li.slick-active button {
           background-color: #333 !important;
           transform: scale(1.2) !important;
         }
@@ -271,18 +277,26 @@ export default function HomeCarousel() {
         /* Responsiveness */
         @media (max-width: 768px) {
           /* Fixed layout for consistent positioning */
+          .carousel-outer-container {
+            margin-bottom: 60px;
+            padding-bottom: 30px;
+          }
+          
           #homepage #homepageCarouselWrapper {
             position: relative !important;
-            min-height: 400px !important; /* Fixed minimum height for the entire carousel section */
-            padding-bottom: 50px !important; /* Increased space for caption, dots and callout */
+            min-height: 400px !important;
             margin-bottom: 30px !important;
           }
           
           /* Caption with fixed height to prevent layout shifts */
-          .homepageCarouseCaption {
-            min-height: 40px !important; /* Fixed height accommodating 2 lines */
-            overflow: auto !important; /* Allow scrolling if needed */
-            margin-top: 8px !important;
+          .homepageCarouselCaption {
+            position: relative !important;
+            margin-top: 10px !important;
+            margin-bottom: 10px !important;
+            min-height: 20px !important; /* Reduced height for single line */
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
             padding: 8px 15px !important;
             font-size: 12px !important;
             line-height: 1.3 !important;
@@ -290,14 +304,14 @@ export default function HomeCarousel() {
             z-index: 50 !important;
             display: block !important;
             width: 100% !important;
+            text-align: left !important;
             box-sizing: border-box !important;
-            position: relative !important;
           }
           
           /* Fixed positioning for callout */
           .callout-container {
             position: absolute !important;
-            bottom: 10px !important;
+            bottom: 80px !important; /* Adjusted to prevent overlap with dots and caption */
             top: auto !important;
             left: 0 !important;
             right: 0 !important;
@@ -311,15 +325,12 @@ export default function HomeCarousel() {
           }
           
           /* Fixed positioning for dot navigation */
-          .custom-dots-container {
-            position: absolute !important;
-            bottom: 70px !important; /* Fixed position from bottom */
-            left: 0 !important;
-            right: 0 !important;
-            background-color: rgba(255, 255, 255, 0.9) !important;
+          .carousel-dots {
+            position: relative !important;
+            margin-top: 10px !important;
             padding: 8px 0 !important;
-            z-index: 30 !important;
-            width: 100% !important;
+            z-index: 99 !important;
+            max-width: 95% !important;
           }
           
           /* Consistent container spacing */
@@ -339,6 +350,7 @@ export default function HomeCarousel() {
             height: 234px !important; /* Match mobile image height */
             overflow: hidden !important;
             margin-bottom: 0 !important;
+            position: relative !important;
           }
           
           /* Proper carousel div setup */
@@ -346,8 +358,9 @@ export default function HomeCarousel() {
             overflow: visible !important;
             height: auto !important;
             max-height: none !important;
-            padding-bottom: 0 !important; /* Remove padding to prevent shifts */
+            padding-bottom: 10px !important;
             margin-bottom: 0 !important;
+            position: relative !important;
           }
           
           /* Reduce whitespace between carousel and Featured Badges section */
