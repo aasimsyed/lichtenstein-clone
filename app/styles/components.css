@@ -326,7 +326,7 @@ div:not(.btn), span:not(.btn), p, a:not(.btn-primary), h1, h2, h3, h4, h5, h6, l
 .zoomable-image-container {
   width: 100%;
   text-align: center;
-  margin-top: 20px;
+  margin-top: -20px;
 }
 
 .error-message {
