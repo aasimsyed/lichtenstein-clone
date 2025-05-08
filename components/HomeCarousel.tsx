@@ -420,6 +420,32 @@ export default function HomeCarousel() {
             margin-bottom: 5px !important;
           }
           
+          /* Center justify all text in the info box on mobile */
+          .jsx-2d2c4b6ccf985683.info,
+          div.jsx-2d2c4b6ccf985683.info,
+          .jsx-2d2c4b6ccf985683 .info {
+            text-align: center !important;
+          }
+          
+          .jsx-2d2c4b6ccf985683.info h3,
+          .jsx-2d2c4b6ccf985683.info p,
+          div.jsx-2d2c4b6ccf985683.info h3, 
+          div.jsx-2d2c4b6ccf985683.info p,
+          .jsx-2d2c4b6ccf985683 .info h3,
+          .jsx-2d2c4b6ccf985683 .info p,
+          .jsx-2d2c4b6ccf985683 .artwork-artist,
+          .jsx-2d2c4b6ccf985683 .artwork-artist {
+            text-align: center !important;
+          }
+          
+          /* Styling for artwork artist text */
+          .jsx-2d2c4b6ccf985683 .artwork-artist,
+          .jsx-2d2c4b6ccf985683 .artwork-artist {
+            font-style: italic !important;
+            color: #555 !important;
+            margin: 4px 0 !important;
+          }
+          
           /* Reorganize dots into 3 rows of 6 dots */
           .jsx-2d2c4b6ccf985683 .slick-dots {
             bottom: -35px !important; /* Position lower */

@@ -21,7 +21,7 @@ export const parseFilename = (url: string): {
   
   // Extract filename and remove file extension if present
   const fullFilename = cleanUrl.split('/').pop() || '';
-  const filename = fullFilename.replace(/\.(jpg|jpeg|png|gif)$/i, '');
+  const filename = fullFilename.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '');
   
   // Debug the parsing process
   // console.log(`Parsing filename: ${filename}`);

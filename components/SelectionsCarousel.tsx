@@ -184,7 +184,7 @@ export default function SelectionsCarousel() {
                     </div>
                     <div className="info">
                       <h3 className="artwork-title">{cleanTitle(title)}</h3>
-                      <p className="artwork-date">{artist}</p>
+                      <p className="artwork-artist">{cleanTitle(artist)}</p>
                       <p className="artwork-rlcr">{catalogNumber}, {size}</p>
                     </div>
                   </Link>
