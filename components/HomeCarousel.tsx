@@ -173,7 +173,7 @@ export default function HomeCarousel() {
       <style jsx global>{`
         .carousel-outer-container {
           position: relative;
-          margin-bottom: 100px;
+          margin-bottom: 0px;
           overflow: visible;
           padding-bottom: 50px;
         }
@@ -303,6 +303,24 @@ export default function HomeCarousel() {
             margin-bottom: 30px !important;
           }
           
+          /* Target series grid wrapper to reduce margin-top in mobile */
+          html body .series-grid-wrapper,
+          #homepage .series-grid-wrapper,
+          div.series-grid-wrapper[style*="margin-top"],
+          body div[class="series-grid-wrapper"],
+          .series-grid-wrapper[style] {
+            margin-top: -60px !important;
+          }
+          
+          /* Target only the selections carousel dots with higher specificity */
+          html body .jsx-2d2c4b6ccf985683.selections-carousel .slick-dots,
+          body .jsx-2d2c4b6ccf985683 .slick-dots,
+          #homepage .jsx-2d2c4b6ccf985683 .slick-dots,
+          .jsx-2d2c4b6ccf985683 .slick-slider .slick-dots,
+          div.jsx-2d2c4b6ccf985683 > .slick-dots {
+            left: 60px !important;
+          }
+          
           /* Caption with fixed height to prevent layout shifts */
           .homepageCarouselCaption {
             position: relative !important;
@@ -326,7 +344,7 @@ export default function HomeCarousel() {
           /* Fixed positioning for callout */
           .callout-container {
             position: absolute !important;
-            bottom: 80px !important; /* Adjusted to prevent overlap with dots and caption */
+            bottom: -60px !important; /* Moved down further to appear below dots */
             top: auto !important;
             left: 0 !important;
             right: 0 !important;
@@ -346,26 +364,28 @@ export default function HomeCarousel() {
             padding: 8px 0 !important;
             z-index: 99 !important;
             max-width: 95% !important;
+            bottom: 0 !important; /* Repositioned to reduce space */
+          }
+          
+          /* Ensure the image wrapper has proper spacing for dot navigation below */
+          .image-wrapper {
+            height: 234px !important; /* Match mobile image height */
+            overflow: hidden !important;
+            margin-bottom: 0 !important;
+            position: relative !important;
           }
           
           /* Consistent container spacing */
           .home-carousel-container {
             overflow: visible !important;
-            margin-bottom: 30px !important;
+            margin-bottom: 110px !important; /* Increased to accommodate callout moved below dots */
+            padding-bottom: 20px !important;
           }
           
           /* Ensure link is styled properly */
           .callout-link {
             font-size: 0.9em;
             line-height: 1.3;
-          }
-          
-          /* Fix image wrapper height */
-          .image-wrapper {
-            height: 234px !important; /* Match mobile image height */
-            overflow: hidden !important;
-            margin-bottom: 0 !important;
-            position: relative !important;
           }
           
           /* Proper carousel div setup */
@@ -389,6 +409,53 @@ export default function HomeCarousel() {
             margin-top: 0 !important;
             padding-top: 0 !important;
             margin-bottom: 15px !important;
+          }
+          
+          /* Fix spacing in selections carousel */
+          .jsx-2d2c4b6ccf985683.selections-carousel {
+            padding: 0 !important;
+          }
+          
+          .jsx-2d2c4b6ccf985683.info {
+            margin-bottom: 5px !important;
+          }
+          
+          /* Reorganize dots into 3 rows of 6 dots */
+          .jsx-2d2c4b6ccf985683 .slick-dots {
+            bottom: -35px !important; /* Position lower */
+            margin-top: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            max-width: 216px !important; /* Exact width for 6 dots per row */
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding: 5px 0 !important;
+            margin-bottom: 15px !important; /* Additional spacing below */
+          }
+          
+          .jsx-2d2c4b6ccf985683 .slick-dots li {
+            width: 36px !important; /* Exact 1/6 of container width */
+            height: 36px !important;
+            margin: 0 !important; /* Remove margins to ensure 6 per row */
+            flex: 0 0 auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+          
+          .jsx-2d2c4b6ccf985683 .slick-dots li button {
+            width: 14px !important; /* Larger dot size */
+            height: 14px !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            background: #999 !important; /* More visible color */
+            border: none !important;
+          }
+          
+          .jsx-2d2c4b6ccf985683 .slick-dots li.slick-active button {
+            transform: scale(1.3) !important;
+            background-color: #333 !important;
           }
         }
         
