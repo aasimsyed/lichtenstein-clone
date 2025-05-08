@@ -17,8 +17,19 @@ export function ArtworkContent() {
     return <div className="error-message">No artwork ID provided</div>;
   }
 
-  // Find the image based on ID
-  const selectedImage = images.find(img => img.id === id);
+  // Try to find the image using different methods:
+  // 1. Direct match with the image.id (string ID)
+  // 2. If ID is numeric, try to find by index (1-based indexing)
+  let selectedImage = images.find(img => img.id === id);
+  
+  // If not found and id is numeric, try to find by index
+  if (!selectedImage && /^\d+$/.test(id)) {
+    const numericId = parseInt(id, 10);
+    // Arrays are 0-indexed, but our IDs are 1-indexed
+    if (numericId > 0 && numericId <= images.length) {
+      selectedImage = images[numericId - 1];
+    }
+  }
   
   // Only show "Artwork not found" error if we're not in a loading state
   if (!selectedImage && !loading) {
@@ -51,7 +62,6 @@ export function ArtworkContent() {
   }
 
   // If we're here, either we have the image or we're loading it
-  // We'll continue rendering with the selected image (might be undefined while loading)
   // Parse artwork information from filename if we have an image
   const parsedInfo = selectedImage ? parseFilename(selectedImage.id) : { title: '', catalogNumber: '', size: '', artist: '' };
 

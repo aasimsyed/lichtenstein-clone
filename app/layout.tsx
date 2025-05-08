@@ -1,13 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Open_Sans, Roboto_Mono } from "next/font/google";
-import "./globals.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "./slick-overrides.css";
-import "./styles/slick-custom.css";
+import "./styles/index.css";
 import "./catalogue-styles.css";
-import "./homepage-fixes.css";
-import "./mobile-carousel-fix.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { R2Provider } from '../context/R2Context';

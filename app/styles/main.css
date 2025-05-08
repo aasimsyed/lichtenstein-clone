@@ -1,0 +1,168 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+/*
+ * CONSOLIDATED CSS FILE
+ * This file combines all styles from:
+ * - globals.css
+ * - homepage-fixes.css
+ * - mobile-carousel-fix.css
+ * - slick-overrides.css
+ * 
+ * Structure:
+ * 1. Variables and base styles
+ * 2. Layout styles
+ * 3. Component styles
+ * 4. Media queries and responsive styles
+ */
+
+/* 1. Variables and base styles */
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --carousel-height: 676px;
+  --carousel-mobile-height: 234px;
+  --default-transition: all 0.3s ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-rgb: 0, 0, 0;
+  }
+}
+
+/* CSS Reset and base styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* For Safari iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+}
+
+/* Basic animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Base typography and elements */
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: var(--font-open-sans), Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: #777;
+}
+
+/* 2. Layout styles */
+#mainWrapperOuter {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+#mainWrapperInner {
+  flex: 1;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+}
+
+/* Main content area */
+#mainBody {
+  padding: 0 20px;
+}
+
+#mainBody.homepage {
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  background: #f0f0f0;
+  color: #333;
+  padding: 40px 20px;
+  margin-top: 40px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* Visibility helpers */
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none;
+}
+
+/* Mobile browsing controls (hidden by default) */
+#browseMobileControls {
+  display: none;
+}
+
+/* Mobile filters panel (hidden by default) */
+#mobileFiltersPanel {
+  display: none;
+} 
