@@ -44,6 +44,7 @@ export default function HomeCarousel() {
   // used in media queries. This is intentional as we might need responsive behavior later.
   const [isMobile, setIsMobile] = useState(false);
   const [showArrows, setShowArrows] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<number[]>([]);
   
   useEffect(() => {
     // Only run in browser environment
@@ -68,16 +69,23 @@ export default function HomeCarousel() {
     }
   }, []);
 
+  const handleImageLoad = (index: number) => {
+    if (!loadedImages.includes(index)) {
+      setLoadedImages(prev => [...prev, index]);
+    }
+  };
+
   const settings = {
     dots: true,
     arrows: showArrows, // Control arrows based on screen size
     infinite: true,
-    speed: 500,
+    speed: 300,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 5000,
-    cssEase: "linear",
+    cssEase: "ease-out",
+    fade: true,
     adaptiveHeight: true,
     dotsClass: "slick-dots carousel-dots", // Changed dot class name
     customPaging: function(i: number) {
@@ -120,12 +128,14 @@ export default function HomeCarousel() {
                   alt={slide.caption}
                   width={1200}
                   height={600}
+                  onLoad={() => handleImageLoad(index)}
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'contain',
                     objectPosition: 'center',
-                    backgroundColor: '#f5f5f5'
+                    backgroundColor: '#f5f5f5',
+                    opacity: loadedImages.includes(index) ? 1 : 0
                   }}
                   priority={index === 0}
                 />
@@ -207,6 +217,11 @@ export default function HomeCarousel() {
           overflow: hidden !important;
           position: relative !important;
           width: 100% !important;
+        }
+        
+        /* Image fade-in animation */
+        .image-wrapper img {
+          transition: opacity 0.5s ease-in !important;
         }
         
         /* Complete dot navigation redesign */
