@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import '../app/styles/main.css';
 
 export default function Footer() {
   return (

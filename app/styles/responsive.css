@@ -74,15 +74,114 @@
     position: relative;
     overflow: visible !important;
     margin-top: 20px;
+    overflow: visible !important;
+    margin-bottom: 80px !important; /* Reduced from 110px to decrease spacing */
+    padding-bottom: 20px !important;
   }
   
-  #homepage #homepageCarouselWrapper.home-carousel-container {
-    margin-bottom: -75px !important;
-    max-height: none !important;
-    height: auto !important;
-    overflow: visible !important;
+  /* Mobile-specific carousel styles from HomeCarousel.tsx */
+  /* Fixed caption display */
+  .homepageCarouselCaption {
     position: relative !important;
-    padding-bottom: 0px !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    min-height: 20px !important; /* Reduced height for single line */
+    overflow: visible !important;
+    text-overflow: initial !important;
+    white-space: normal !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    background: rgba(240,240,240,0.9) !important;
+    z-index: 50 !important;
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure callout stays below the fixed dots with consistent spacing */
+  .callout-container {
+    position: absolute !important;
+    bottom: auto !important; /* Remove bottom positioning */
+    top: calc(var(--carousel-mobile-height) + 100px) !important; /* Position based on dot navigation location plus spacing */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 12px 15px !important;
+    transform: none !important;
+    z-index: 20 !important;
+    display: block !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Fixed positioning for dot navigation */
+  .carousel-dots {
+    position: absolute !important;
+    top: calc(var(--carousel-mobile-height) + 50px) !important; /* Fixed position from top of carousel */
+    left: 0 !important;
+    right: 0 !important;
+    margin-top: 0 !important; /* Remove margin that causes position shifts */
+    padding: 8px 0 !important;
+    z-index: 99 !important;
+    max-width: 95% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Highly specific selector to override desktop styles */
+  #homepage .home-carousel-container .carousel-dots,
+  html body #homepage #homepageCarouselWrapper .carousel-dots,
+  .home-carousel-container .slick-slider .carousel-dots {
+    margin-top: 15px !important;
+    transform: none !important; /* Override any transform that might add spacing */
+    position: absolute !important;
+    top: calc(var(--carousel-mobile-height) + 50px) !important;
+  }
+  
+  /* Show carousel arrows on mobile */
+  .slick-prev, .slick-next {
+    display: flex !important; /* Show arrows on mobile */
+  }
+  
+  .slick-prev {
+    left: 10px !important;
+  }
+  
+  .slick-next {
+    right: 10px !important;
+  }
+  
+  /* Ensure link is styled properly */
+  .callout-link {
+    font-size: 0.9em;
+    line-height: 1.3;
+  }
+  
+  /* Center justify all text in the info box on mobile */
+  .jsx-2d2c4b6ccf985683.info,
+  div.jsx-2d2c4b6ccf985683.info,
+  .jsx-2d2c4b6ccf985683 .info {
+    text-align: center !important;
+  }
+  
+  .jsx-2d2c4b6ccf985683.info h3,
+  .jsx-2d2c4b6ccf985683.info p,
+  div.jsx-2d2c4b6ccf985683.info h3, 
+  div.jsx-2d2c4b6ccf985683.info p,
+  .jsx-2d2c4b6ccf985683 .info h3,
+  .jsx-2d2c4b6ccf985683 .info p,
+  .jsx-2d2c4b6ccf985683 .artwork-artist {
+    text-align: center !important;
+  }
+  
+  /* Styling for artwork artist text */
+  .jsx-2d2c4b6ccf985683 .artwork-artist {
+    font-style: italic !important;
+    color: #555 !important;
+    margin: 4px 0 !important;
   }
   
   /* Home carousel div adjustments */
@@ -90,138 +189,64 @@
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
-    padding-bottom: 0 !important;
+    padding-bottom: 60px !important; /* Increased padding to accommodate fixed dot position */
     margin-bottom: 0 !important;
-    position: relative !important;
+    position: relative !important; /* Ensure this is a positioning context */
   }
   
-  /* Image wrapper height adjustment */
+  /* Image wrapper height adjustment for mobile */
   .image-wrapper {
-    height: var(--carousel-mobile-height) !important;
+    height: 234px !important; /* Match mobile image height */
     overflow: hidden !important;
     margin-bottom: 0 !important;
-  }
-  
-  /* Caption styling adjustments */
-  .homepageCarouseCaption {
     position: relative !important;
-    bottom: auto !important;
-    z-index: 50 !important;
-    padding: 8px 15px !important;
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-    width: 100% !important;
-    left: auto !important;
-    right: auto !important;
-    margin-top: 5px !important;
-    display: block !important;
-    min-height: 32px !important;
-    box-sizing: border-box !important;
-    background: rgba(240, 240, 240, 0.9) !important;
   }
   
-  /* Dot navigation positioning */
-  .slick-dots,
-  .custom-dots-container,
-  #homepage .custom-dots-container,
-  html body #homepage .slick-dots,
-  html body .home-carousel-container .slick-dots,
-  html body .slick-slider .slick-dots {
-    position: absolute !important;
-    bottom: -25px !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    padding: 8px 0 !important;
-    z-index: 10 !important;
-    width: 100% !important;
-    text-align: center !important;
+  /* Reorganize dots into 3 rows of 6 dots */
+  .jsx-2d2c4b6ccf985683 .slick-dots {
+    bottom: -35px !important; /* Position lower */
+    margin-top: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 216px !important; /* Exact width for 6 dots per row */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 5px 0 !important;
+    margin-bottom: 15px !important; /* Additional spacing below */
+  }
+  
+  .jsx-2d2c4b6ccf985683 .slick-dots li {
+    width: 36px !important; /* Exact 1/6 of container width */
+    height: 36px !important;
+    margin: 0 !important; /* Remove margins to ensure 6 per row */
+    flex: 0 0 auto !important;
     display: flex !important;
     justify-content: center !important;
-    top: auto !important;
-    background-color: rgba(255,255,255,0.5) !important;
+    align-items: center !important;
   }
   
-  /* Dot styling for mobile */
-  .slick-dots li,
-  .custom-dots-container li {
-    position: relative !important;
-    display: inline-block !important;
-    width: 20px !important;
-    height: 20px !important;
-    margin: 0 5px !important;
-    padding: 0 !important;
-  }
-  
-  .slick-dots li button,
-  .custom-dots-container li button,
-  .slick-dots li button.custom-dot,
-  .custom-dots-container li button.custom-dot {
-    font-size: 0 !important;
-    width: 12px !important;
-    height: 12px !important;
+  .jsx-2d2c4b6ccf985683 .slick-dots li button {
+    width: 14px !important; /* Larger dot size */
+    height: 14px !important;
     border-radius: 50% !important;
     padding: 0 !important;
-    margin: 4px auto !important;
-    background: #999 !important;
+    background: #999 !important; /* More visible color */
     border: none !important;
-    display: block !important;
   }
   
-  .slick-dots li.slick-active button,
-  .custom-dots-container li.slick-active button {
-    background: #333 !important;
-    transform: scale(1.2) !important;
+  .jsx-2d2c4b6ccf985683 .slick-dots li.slick-active button {
+    transform: scale(1.3) !important;
+    background-color: #333 !important;
   }
-  
-  /* Callout positioning */
-  html body #homepage #homepageCarouselCallout,
-  #homepageCarouselCallout,
-  .callout-container {
-    position: absolute !important;
-    bottom: 10px !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    z-index: 4 !important;
-    margin: 0 !important;
-    margin-top: 10px !important;
-    margin-bottom: 15px !important;
-  }
-  
-  /* Callout link styling */
-  #homepage #homepageCarouselWrapper #homepageCarouselCallout a,
-  #homepageCarouselCallout a {
-    position: relative !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 13px !important;
-    line-height: 1.3 !important;
-    padding: 10px 35px 10px 10px !important;
-    margin: 0 !important;
-    background-color: rgba(255, 245, 204, 0.95) !important;
-    opacity: 1 !important;
-    box-sizing: border-box !important;
-    display: block !important;
+
+  #homepage #homepageCarouselWrapper.home-carousel-container {
+    margin-bottom: 0 !important;
+    max-height: none !important;
     height: auto !important;
     overflow: visible !important;
-  }
-  
-  /* Callout arrow styling */
-  #homepage #homepageCarouselWrapper #homepageCarouselCallout a:after,
-  #homepageCarouselCallout a:after {
-    content: '' !important;
-    position: absolute !important;
-    width: 14px !important;
-    height: 7px !important;
-    right: 10px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-top: 0 !important;
-    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 30 15'%3E%3Cpath d='M1 7.5h25M19 1l7 6.5-7 6.5' stroke='%23333' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center !important;
-    background-size: contain !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
+    position: relative !important;
+    padding-bottom: 75px !important; /* Increased to ensure enough space for the callout at its new position */
   }
   
   /* Selections carousel adjustments */
@@ -231,19 +256,60 @@
     margin-bottom: 40px !important;
     padding-bottom: 25px !important;
     overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+    clear: both !important;
   }
   
-  .selections-title {
-    font-size: 20px;
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-  
-  /* Selections carousel slides */
-  .carousel-slide {
-    padding: 0 5px;
-    padding-bottom: 25px !important;
+  /* Fix for dot navigation overlapping with info */
+  .selections-carousel .slick-list {
+    padding-bottom: 10px !important;
     margin-bottom: 10px !important;
+  }
+  
+  /* Info text container needs spacing and z-index */
+  .selections-carousel .info {
+    margin-bottom: 10px !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Push dots down */
+  .selections-carousel .slick-dots {
+    bottom: -20px !important;
+    position: absolute !important;
+  }
+  
+  /* Add background to ensure dots are more visible */
+  .selections-carousel .slick-dots li button {
+    background: #888 !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Ensure selections title is visible above the carousel */
+  .selections-title {
+    display: block !important;
+    position: relative !important;
+    z-index: 5 !important;
+    padding-top: 10px !important;
+    margin-top: 0 !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    font-size: 22px !important;
+    clear: both !important;
+    width: 100% !important;
+  }
+  
+  /* Force the callout to be properly positioned */
+  .callout-container {
+    margin-bottom: 50px !important;
+    position: relative !important;
+    display: block !important;
+    clear: both !important;
+    width: 100% !important;
+    float: none !important;
   }
   
   .selections-carousel .slide-inner {
@@ -263,14 +329,6 @@
     bottom: -35px !important;
     position: absolute !important;
     z-index: 1 !important;
-  }
-  
-  /* Selections info spacing */
-  .selections-carousel .info {
-    margin-bottom: 20px !important;
-    position: relative !important;
-    z-index: 2 !important;
-    padding-bottom: 25px !important;
   }
   
   /* Selections image spacing */
@@ -410,7 +468,31 @@
   
   /* Show mobile filters panel */
   #mobileFiltersPanel {
+    display: none; /* Hidden by default */
+  }
+  
+  /* Define styling for mobile panels */
+  .mobilePanel {
+    display: block !important; /* Force display when class is added */
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+  
+  #mobileFiltersPanel.mobilePanel,
+  #mobileOptionsPanel.mobilePanel {
+    display: block; /* Displayed when class is added */
+  }
+  
+  .mobilePanel {
     display: block;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 4px;
   }
   
   /* Entry page mobile fixes */
@@ -476,7 +558,7 @@
   
   /* High specificity fixes for catalog entry page */
   html body #mainBody[id="mainBody"] {
-    padding-top: 70px !important;
+    padding-top: 0px !important;
     margin-top: 75px !important;
   }
   
@@ -547,5 +629,12 @@
   
   html body .entry-page-content .zoomable-image-container {
     margin-top: 5px !important;
+  }
+  
+  /* Remove padding for carousel outer container on mobile */
+  .carousel-outer-container {
+    padding-bottom: 0px !important;
+    overflow: visible !important;
+    position: relative !important;
   }
 } 

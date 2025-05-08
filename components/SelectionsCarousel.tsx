@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SmoothImage from '../app/components/SmoothImage';
 import { useR2Images } from '../context/R2Context';
 import { parseFilename } from '../app/utils/filename-utils';
+import '../app/styles/carousel.css';
 
 export default function SelectionsCarousel() {
   // Get images from R2 context
@@ -107,7 +108,7 @@ export default function SelectionsCarousel() {
     return (
       <div className="selections-carousel-container">
         <h2 className="selections-title">Featured Badges</h2>
-        <div className="selections-carousel" style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="selections-carousel loading-container">
           <div>Loading images...</div>
         </div>
       </div>
@@ -117,7 +118,7 @@ export default function SelectionsCarousel() {
   return (
     <div className="selections-carousel-container">
       <h2 className="selections-title">Featured Badges</h2>
-      <div className="selections-carousel" style={{ padding: '10px 0' }}>
+      <div className="selections-carousel">
         <Slider {...settings}>
           {selections.map((image, index) => {
             const { catalogNumber, title, artist, size } = parseFilename(image.url);
@@ -125,34 +126,17 @@ export default function SelectionsCarousel() {
             const imagePreloaded = imagesPreloaded[image.url];
             return (
               <div key={index} className="carousel-slide">
-                <div className="slide-inner" style={{ margin: '0 8px' }}>
+                <div className="slide-inner">
                   <Link href={`/catalogue/artwork?id=${encodeURIComponent(artworkId)}`} className="artwork-link">
-                    <div className="image-container" style={{
-                      position: 'relative',
-                      background: 'white',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      border: '1px solid #ddd'
-                    }}>
+                    <div className="image-container">
                       {!imagePreloaded && (
-                        <div style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          zIndex: 1,
-                          backgroundColor: 'white'
-                        }}>
+                        <div className="placeholder-container">
                           <img 
                             src="/placeholder.svg" 
                             alt="Loading" 
                             width={100} 
                             height={100}
-                            style={{ opacity: 0.8 }}
+                            className="placeholder-image"
                           />
                         </div>
                       )}
@@ -161,16 +145,7 @@ export default function SelectionsCarousel() {
                         alt={cleanTitle(title)} 
                         width={150}
                         height={150}
-                        style={{
-                          width: '100%',
-                          height: '150px',
-                          objectFit: 'contain',
-                          backgroundColor: 'white',
-                          position: 'relative',
-                          zIndex: 2,
-                          opacity: imagePreloaded ? 1 : 0,
-                          transition: 'opacity 0.3s ease-in-out'
-                        }}
+                        className={`carousel-image ${imagePreloaded ? 'loaded' : 'loading'}`}
                         quality={70}
                         loadingColor="#f0f0f0"
                         unoptimized={true}
@@ -194,72 +169,6 @@ export default function SelectionsCarousel() {
           })}
         </Slider>
       </div>
-
-      {/* Additional styles to fix dot navigation overlap */}
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          /* Fix for dot navigation overlapping with info */
-          .selections-carousel .slick-list {
-            padding-bottom: 10px !important;
-            margin-bottom: 10px !important;
-          }
-          
-          /* Info text container needs spacing and z-index */
-          .selections-carousel .info {
-            margin-bottom: 10px !important;
-            position: relative !important;
-            z-index: 5 !important;
-          }
-          
-          /* Push dots down */
-          .selections-carousel .slick-dots {
-            bottom: -20px !important;
-            position: absolute !important;
-          }
-          
-          /* Add background to ensure dots are more visible */
-          .selections-carousel .slick-dots li button {
-            background: #888 !important;
-            width: 10px !important;
-            height: 10px !important;
-            border-radius: 50% !important;
-          }
-          
-          /* Container needs to account for dot positioning */
-          .selections-carousel-container {
-            padding-bottom: 20px !important;
-            margin-bottom: 20px !important;
-            overflow: visible !important;
-            position: relative !important;
-            z-index: 1 !important;
-            clear: both !important;
-          }
-          
-          /* Ensure selections title is visible above the carousel */
-          .selections-title {
-            display: block !important;
-            position: relative !important;
-            z-index: 5 !important;
-            padding-top: 10px !important;
-            margin-top: 0 !important;
-            font-weight: 500 !important;
-            text-align: center !important;
-            font-size: 22px !important;
-            clear: both !important;
-            width: 100% !important;
-          }
-          
-          /* Force the callout to be properly positioned */
-          .callout-container {
-            margin-bottom: 50px !important;
-            position: relative !important;
-            display: block !important;
-            clear: both !important;
-            width: 100% !important;
-            float: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 } 

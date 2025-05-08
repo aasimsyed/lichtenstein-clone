@@ -1,11 +1,101 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SmoothImage from '../app/components/SmoothImage';
 import { useR2Images } from '../context/R2Context';
 import { R2Image as R2ContextImage } from '../app/utils/r2-client';
 import { parseFilename } from '../app/utils/filename-utils';
+import '../app/styles/components.css';
+
+// Custom dropdown component for mobile view
+interface DropdownOption {
+  value: string;
+  label: string;
+}
+
+interface CustomDropdownProps {
+  options: DropdownOption[];
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  id: string;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChange, label, id }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Find the currently selected option
+  const selectedOption = options.find(option => option.value === value) || options[0];
+
+  // Toggle dropdown
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  // Handle option selection
+  const handleSelect = (optionValue: string) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="custom-dropdown-container" ref={dropdownRef}>
+      <label htmlFor={id} className="custom-dropdown-label">{label}</label>
+      <div className="custom-dropdown">
+        <button 
+          type="button"
+          id={id}
+          className="custom-dropdown-button"
+          onClick={toggleDropdown}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+        >
+          <span className="selected-value">{selectedOption.label}</span>
+          <span className="dropdown-arrow">▼</span>
+        </button>
+        
+        {isOpen && (
+          <div 
+            className="custom-dropdown-menu" 
+            role="listbox"
+            aria-labelledby={id}
+          >
+            {options.map(option => (
+              <div 
+                key={option.value}
+                className={`dropdown-item ${option.value === value ? 'selected' : ''}`}
+                onClick={() => handleSelect(option.value)}
+                role="option"
+                aria-selected={option.value === value}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // Extend the R2 image type from context with parsed metadata for easier handling
 interface ProcessedArtwork extends R2ContextImage {
@@ -331,7 +421,6 @@ export default function CatalogueContent() {
           <article
             key={`${artwork.artworkId}-${index}`}
             className="item"
-            style={{ contain: 'content', willChange: 'opacity, transform' }}
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
               <div className="image">
@@ -361,7 +450,7 @@ export default function CatalogueContent() {
               </div>
               <div className="item_catDetails">
                 <div className="item_title">{artwork.title}</div>
-                <div className="item_catnum">{artwork.catalogueNumber}</div>
+                <div className="item_catnum">{artwork.catalogueNumber}, {artwork.size}</div>
               </div>
             </a>
           </article>
@@ -398,34 +487,20 @@ export default function CatalogueContent() {
 
       {contextLoading ? (
         // Center loading indicator while waiting for images
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          padding: '50px 0',
-          fontSize: '16px'
-        }}>
+        <div className="catalogue-loading-container">
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+            <div className="catalogue-loading-text">
               Loading catalogue...
             </div>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              border: '4px solid #f3f3f3', 
-              borderTop: '4px solid #333', 
-              borderRadius: '50%',
-              margin: '0 auto',
-              animation: 'spin 1s linear infinite'
-            }}></div>
+            <div className="catalogue-loading-spinner"></div>
           </div>
         </div>
       ) : contextError ? (
-        <div className="error-message" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+        <div className="error-message">
           Error loading image data: {contextError}
           <button
             onClick={() => refreshImages()}
-            style={{ marginLeft: '10px', padding: '5px 10px' }}
+            className="clear-search-button"
           >
             Retry
           </button>
@@ -444,22 +519,20 @@ export default function CatalogueContent() {
               <div id="mobileFiltersPanel" className="mobilePanel">
                 <div id="searchBoxesWrapper">
                   <div id="searcWrapper">
-                    <form action="" method="post" id="minisearchForm" autoComplete="off" onSubmit={handleSearch}>
+                    <form action="" method="post" id="minisearchForm_mobile" autoComplete="off" onSubmit={handleSearch}>
                       <input
                         type="text"
                         name="searchbox" 
-                        id="searchbox" 
+                        id="searchbox_mobile" 
                         placeholder="Search by keyword" 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ paddingRight: "40px" }}
                       />
                       <input 
                         name="seachBoxButton" 
                         type="submit" 
-                        id="seachBoxButton" 
+                        id="seachBoxButton_mobile" 
                         value="search" 
-                        style={{ right: "5px" }}
                       />
                     </form>
                   </div>
@@ -467,95 +540,95 @@ export default function CatalogueContent() {
                 
                 {/* Series Filter */}
                 <div className="filter-section">
-                  <h3 style={{ fontSize: '16px', margin: '15px 0 10px 0' }}>Series</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                  <h3 className="mobile-filter-title">Series</h3>
+                  <div className="mobile-filter-grid">
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       A
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       B
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBB}
                         onChange={handleBBBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBB
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBC}
                         onChange={handleBBCChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBC
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterD}
                         onChange={handleDChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       D
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterRGG}
                         onChange={handleRGGChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       RGG
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPreBetterBadges}
                         onChange={handlePreBetterBadgesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pre Better Badges
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPopArtKoop}
                         onChange={handlePopArtKoopChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pop Art Koop
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterCatalogs}
                         onChange={handleCatalogsChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Catalogs
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterZines}
                         onChange={handleZinesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Zines
                     </label>
@@ -568,69 +641,48 @@ export default function CatalogueContent() {
             {showMobileOptions && (
               <div id="mobileOptionsPanel" className="mobilePanel">
                 <div className="option-group">
-                  <label htmlFor="sortSelect">Sort by:</label>
-                  <select 
+                  <CustomDropdown
                     id="sortSelect"
-                    aria-label="Sort results by"
-                    value={sortBy} 
-                    onChange={(e) => { setSortBy(e.target.value); setCurrentPage(0); }}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="catno_ASC">Catalogue number (ascending)</option>
-                    <option value="catno_DESC">Catalogue number (descending)</option>
-                    <option value="cattitle_ASC">Title (A to Z)</option>
-                    <option value="cattitle_DESC">Title (Z to A)</option>
-                  </select>
+                    label="Sort by:"
+                    options={[
+                      { value: 'catno_ASC', label: 'Catalogue number (ascending)' },
+                      { value: 'catno_DESC', label: 'Catalogue number (descending)' },
+                      { value: 'cattitle_ASC', label: 'Title (A to Z)' },
+                      { value: 'cattitle_DESC', label: 'Title (Z to A)' }
+                    ]}
+                    value={sortBy}
+                    onChange={(value) => { setSortBy(value); setCurrentPage(0); }}
+                  />
                 </div>
 
                 <div className="option-group">
-                  <label htmlFor="viewSelect">View as:</label>
-                  <select 
+                  <CustomDropdown
                     id="viewSelect"
-                    aria-label="Change view type"
+                    label="View as:"
+                    options={[
+                      { value: 'gridA', label: 'Grid' },
+                      { value: 'list', label: 'List' }
+                    ]}
                     value={viewType}
-                    onChange={(e) => setViewType(e.target.value)}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="gridA">Grid</option>
-                    <option value="list">List</option>
-                  </select>
+                    onChange={(value) => setViewType(value)}
+                  />
                 </div>
 
                 <div className="option-group">
-                  <label htmlFor="numDisplaySelect">Results per page:</label>
-                  <select 
+                  <CustomDropdown
                     id="numDisplaySelect"
-                    aria-label="Number of results per page"
-                    value={resultsPerPage} 
-                    onChange={(e) => {
-                      setResultsPerPage(Number(e.target.value));
-                      setCurrentPage(0); // Reset to first page when changing results per page
+                    label="Results per page:"
+                    options={[
+                      { value: '50', label: '50 per page' },
+                      { value: '75', label: '75 per page' },
+                      { value: '100', label: '100 per page' }
+                    ]}
+                    value={resultsPerPage.toString()}
+                    onChange={(value) => {
+                      setResultsPerPage(Number(value));
+                      setCurrentPage(0);
                     }}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="50">50 per page</option>
-                    <option value="75">75 per page</option>
-                    <option value="100">100 per page</option>
-                  </select>
+                  />
                 </div>
               </div>
             )}
@@ -647,114 +699,107 @@ export default function CatalogueContent() {
                       placeholder="Search by keyword" 
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{ paddingRight: "40px" }}
                     />
                     <input 
                       name="seachBoxButton" 
                       type="submit" 
                       id="seachBoxButton" 
                       value="search" 
-                      style={{ right: "5px" }}
                     />
                   </form>
                 </div>
                 
                 {/* Desktop Series Filter */}
-                <div className="filter-section" style={{ marginTop: '20px', marginBottom: '10px', width: '100%' }}>
-                  <h3 style={{ fontSize: '16px', margin: '0 0 10px 0' }}>Series</h3>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(6, 1fr)',
-                    gap: '10px', 
-                    width: '100%'
-                  }}>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                <div className="filter-section">
+                  <h3>Series</h3>
+                  <div className="filter-grid">
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       A
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       B
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBB}
                         onChange={handleBBBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBB
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBC}
                         onChange={handleBBCChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBC
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterD}
                         onChange={handleDChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       D
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterRGG}
                         onChange={handleRGGChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       RGG
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPreBetterBadges}
                         onChange={handlePreBetterBadgesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pre Better Badges
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPopArtKoop}
                         onChange={handlePopArtKoopChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pop Art Koop
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterCatalogs}
                         onChange={handleCatalogsChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Catalogs
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterZines}
                         onChange={handleZinesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Flyers & Zines
                     </label>
@@ -772,12 +817,7 @@ export default function CatalogueContent() {
                   aria-label="Sort results by"
                   value={sortBy} 
                   onChange={(e) => { setSortBy(e.target.value); setCurrentPage(0); }}
-                  style={{ 
-                    minWidth: "280px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5"
-                  }}
+                  className="sort-select"
                 >
                   <option value="catno_ASC">Catalogue number (ascending)</option>
                   <option value="catno_DESC">Catalogue number (descending)</option>
@@ -793,13 +833,7 @@ export default function CatalogueContent() {
                   aria-label="Change view type"
                   value={viewType}
                   onChange={(e) => setViewType(e.target.value)}
-                  style={{ 
-                    minWidth: "150px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5",
-                    verticalAlign: "middle"
-                  }}
+                  className="view-select"
                 >
                   <option value="gridA">Grid</option>
                   <option value="list">List</option>
@@ -816,13 +850,7 @@ export default function CatalogueContent() {
                     setResultsPerPage(Number(e.target.value));
                     setCurrentPage(0); // Reset to first page when changing results per page
                   }}
-                  style={{ 
-                    minWidth: "150px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5",
-                    verticalAlign: "middle"
-                  }}
+                  className="results-per-page-select"
                 >
                   <option value="50">50 per page</option>
                   <option value="75">75 per page</option>
@@ -837,18 +865,10 @@ export default function CatalogueContent() {
               RESULTS {dynamicStartResult} TO {dynamicEndResult} OF {totalResults}
               {isSearching && (
                 <>
-                  <span> (Filtered by: &ldquo;{searchTerm}&rdquo;)</span>
+                  <span className="search-term">(Filtered by: &ldquo;{searchTerm}&rdquo;)</span>
                   <button 
                     onClick={clearSearch} 
-                    style={{ 
-                      marginLeft: '10px', 
-                      background: 'none', 
-                      border: '1px solid #ccc',
-                      borderRadius: '3px',
-                      padding: '2px 5px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
+                    className="clear-search-button"
                   >
                     Clear Search
                   </button>
@@ -856,46 +876,17 @@ export default function CatalogueContent() {
               )}
               <button 
                 onClick={handleRefreshImages} 
-                style={{ 
-                  marginLeft: '15px', 
-                  background: refreshSuccess ? '#e6f7e6' : (isRefreshing ? '#e8e8e8' : '#f0f0f0'), 
-                  border: `1px solid ${refreshSuccess ? '#a3d9a3' : '#ccc'}`,
-                  borderRadius: '3px',
-                  padding: '2px 8px',
-                  fontSize: '12px',
-                  cursor: isRefreshing ? 'default' : 'pointer',
-                  opacity: isRefreshing ? '0.8' : '1',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease'
-                }}
+                className={`refresh-button ${isRefreshing ? 'refreshing' : ''} ${refreshSuccess ? 'success' : ''}`}
                 disabled={isRefreshing}
               >
                 {refreshSuccess ? (
                   <React.Fragment>
-                    <span style={{ 
-                      display: 'inline-block',
-                      width: '12px',
-                      height: '12px',
-                      color: '#4caf50',
-                      marginRight: '5px',
-                      fontWeight: 'bold'
-                    }}>✓</span>
+                    <span className="success-checkmark">✓</span>
                     Updated!
                   </React.Fragment>
                 ) : isRefreshing ? (
                   <React.Fragment>
-                    <span style={{ 
-                      display: 'inline-block',
-                      width: '12px',
-                      height: '12px',
-                      border: '2px solid #ccc',
-                      borderTopColor: '#666',
-                      borderRadius: '50%',
-                      marginRight: '5px',
-                      animation: 'spin 1s linear infinite'
-                    }}></span>
+                    <span className="refresh-spinner"></span>
                     Refreshing...
                   </React.Fragment>
                 ) : (
@@ -921,7 +912,6 @@ export default function CatalogueContent() {
                     <tr 
                       key={work.artworkId} 
                       onClick={() => window.location.href = `/catalogue/artwork?id=${encodeURIComponent(work.artworkId)}`}
-                      style={{ cursor: 'pointer' }}
                       className="clickable-row"
                     >
                       <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
@@ -941,7 +931,7 @@ export default function CatalogueContent() {
                           work.title
                         )}
                         {work.catalogueNumber.startsWith('FZ') && (
-                          <div style={{ fontSize: '0.85em', color: '#666' }}>Flyer/Zine</div>
+                          <div className="flyer-zine-note">Flyer/Zine</div>
                         )}
                       </td>
                       <td>{work.catalogueNumber === 'AD' ? '' : 
@@ -1034,94 +1024,6 @@ export default function CatalogueContent() {
                 <div className="pagination-summary">
                   Page {currentPage + 1} of {totalPages}
                 </div>
-
-                {/* Add inline styles for pagination */}
-                <style jsx global>{`
-                  .pagination-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 2rem 0;
-                    gap: 8px;
-                  }
-                  
-                  .pagination-nav {
-                    display: flex;
-                    gap: 4px;
-                  }
-                  
-                  .pagination-pages {
-                    display: flex;
-                    gap: 4px;
-                    align-items: center;
-                  }
-                  
-                  .pagination-button, .pagination-number {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 36px;
-                    height: 36px;
-                    padding: 0 8px;
-                    border: 1px solid #ddd;
-                    background: white;
-                    border-radius: 4px;
-                    font-size: 14px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    color: #333;
-                  }
-                  
-                  .pagination-button:hover, .pagination-number:hover {
-                    background-color: #f5f5f5;
-                    border-color: #ccc;
-                  }
-                  
-                  .pagination-number.active {
-                    background-color: #ededed;
-                    color: #333;
-                    border-color: #333;
-                    font-weight: 500;
-                  }
-                  
-                  .pagination-button.disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                    pointer-events: none;
-                  }
-                  
-                  .pagination-ellipsis {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 36px;
-                    height: 36px;
-                    color: #666;
-                  }
-                  
-                  .pagination-summary {
-                    text-align: center;
-                    color: #666;
-                    font-size: 14px;
-                    margin-bottom: 1rem;
-                  }
-                  
-                  .clickable-row:hover {
-                    background-color: #f5f5f5;
-                  }
-                  
-                  @media (max-width: 768px) {
-                    .pagination-container {
-                      flex-wrap: wrap;
-                    }
-                    
-                    .pagination-button, .pagination-number {
-                      min-width: 32px;
-                      height: 32px;
-                      font-size: 13px;
-                    }
-                  }
-                `}</style>
               </div>
             )}
           </div>

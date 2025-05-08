@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import Link from 'next/link';
 import Image from 'next/image';
+import '../app/styles/carousel.css';
 
 interface SlideProps {
   imageUrl: string;
@@ -87,23 +88,17 @@ export default function HomeCarousel() {
     cssEase: "ease-out",
     fade: true,
     adaptiveHeight: true,
-    dotsClass: "slick-dots carousel-dots", // Changed dot class name
+    dotsClass: "carousel-dots", // Updated class name to match CSS
+    appendDots: (dots: React.ReactNode) => (
+      <div className="dots-container">
+        <ul style={{ margin: "0px" }}>{dots}</ul>
+      </div>
+    ),
     customPaging: function(i: number) {
       return (
         <button
           aria-label={`Go to slide ${i + 1}`}
-          style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            background: '#888',
-            border: '1px solid #666',
-            display: 'block',
-            padding: 0,
-            margin: '0 5px',
-            boxShadow: '0 0 2px rgba(0, 0, 0, 0.5)',
-            cursor: 'pointer'
-          }}
+          className="carousel-dot-button"
         />
       );
     }
@@ -112,12 +107,16 @@ export default function HomeCarousel() {
   // Simple callout content
   const calloutText = "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.";
 
+  const carouselWrapperStyle = {
+    marginTop: isMobile ? '30px' : '0'
+  };
+
   return (
     <div className="carousel-outer-container">
       <div 
         id="homepageCarouselWrapper" 
         className="home-carousel-container" 
-        style={{ position: 'relative', marginTop: isMobile ? '30px' : '0' }}
+        style={carouselWrapperStyle}
       >
         <Slider {...settings}>
           {carouselSlides.map((slide, index) => (
@@ -129,14 +128,7 @@ export default function HomeCarousel() {
                   width={1200}
                   height={600}
                   onLoad={() => handleImageLoad(index)}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    backgroundColor: '#f5f5f5',
-                    opacity: loadedImages.includes(index) ? 1 : 0
-                  }}
+                  className={`carousel-image ${loadedImages.includes(index) ? 'loaded' : ''}`}
                   priority={index === 0}
                 />
               </div>
@@ -149,390 +141,12 @@ export default function HomeCarousel() {
         </Slider>
         
         {/* Overlay callout on top of everything */}
-        <div className="callout-container" style={{ 
-          position: 'absolute',
-          top: isMobile ? 'auto' : 'calc(70% + 35px)',
-          bottom: isMobile ? '100px' : 'auto', // Adjusted to prevent overlap with dots
-          right: isMobile ? 0 : '0%',
-          left: isMobile ? 0 : 'auto',
-          width: isMobile ? '100%' : '30%',
-          zIndex: 20,
-          backgroundColor: isMobile ? 'rgba(255, 235, 132, 0.95)' : 'rgba(255, 235, 132, 0.8)',
-          padding: '15px 15px',
-          textAlign: 'left',
-          transform: isMobile ? 'none' : 'translateY(-50%)',
-          borderRadius: isMobile ? 0 : '4px'
-        }}>
+        <div className={`callout-container ${isMobile ? 'mobile' : ''}`}>
           <Link href="/catalogue/" className="callout-link">
             {calloutText}
           </Link>
         </div>
       </div>
-      
-      {/* Simple CSS overrides */}
-      <style jsx global>{`
-        .carousel-outer-container {
-          position: relative;
-          margin-bottom: 0px;
-          overflow: visible;
-          padding-bottom: 50px;
-        }
-        
-        .home-carousel-container {
-          margin-bottom: 60px;
-          position: relative;
-          overflow: visible;
-        }
-        
-        /* Fix caption display */
-        .homepageCarouselCaption {
-          position: relative !important;
-          display: block !important;
-          margin-top: 15px !important; /* Space between image and caption */
-          margin-bottom: 15px !important; /* Space between caption and dots */
-          background: rgba(240, 240, 240, 0.8) !important;
-          padding: 8px 20px !important;
-          width: 100% !important;
-          text-align: left !important;
-          font-size: 13px !important;
-          box-sizing: border-box !important;
-          white-space: nowrap !important;
-          overflow: hidden !important;
-          text-overflow: ellipsis !important;
-          z-index: 25 !important;
-        }
-        
-        /* Ensure there's space for the caption */
-        .homepageCarouselDiv {
-          overflow: visible !important;
-          height: auto !important;
-          padding-bottom: 0 !important;
-          position: relative !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-        
-        .image-wrapper {
-          height: 676px !important; /* Maintain image height */
-          overflow: hidden !important;
-          position: relative !important;
-          width: 100% !important;
-        }
-        
-        /* Image fade-in animation */
-        .image-wrapper img {
-          transition: opacity 0.5s ease-in !important;
-        }
-        
-        /* Complete dot navigation redesign */
-        .carousel-dots {
-          position: relative !important;
-          margin-top: 20px !important;
-          bottom: 0 !important;
-          padding: 10px 0 !important;
-          background-color: rgba(255,255,255,0.8) !important;
-          border-radius: 20px !important;
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-          list-style: none !important;
-          width: auto !important;
-          max-width: 80% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
-        }
-        
-        .carousel-dots li {
-          display: inline-block !important;
-          margin: 0 5px !important;
-        }
-        
-        .carousel-dots li.slick-active button {
-          background-color: #333 !important;
-          transform: scale(1.2) !important;
-        }
-        
-        /* Clean callout styling with no conflicting elements */
-        .callout-container {
-          position: absolute;
-          z-index: 20;
-          background-color: rgba(255, 235, 132, 0.8);
-          padding: 15px;
-          text-align: left;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          transition: background-color 0.3s ease;
-          display: flex;
-          align-items: center;
-        }
-        
-        .callout-container:hover {
-          background-color: rgba(255, 235, 132, 0.95);
-        }
-        
-        .callout-link {
-          color: #333;
-          text-decoration: none;
-          display: block;
-          width: 100%;
-          position: relative;
-          font-size: 1.05em;
-          line-height: 1.4;
-        }
-        
-        /* Arrow icon for the link */
-        .callout-link::after {
-          content: "→";
-          position: absolute;
-          right: 0;
-          bottom: -13px;
-          font-size: 1.2em;
-        }
-        
-        /* Responsiveness */
-        @media (max-width: 768px) {
-          /* Fixed layout for consistent positioning */
-          .carousel-outer-container {
-            margin-bottom: 60px;
-            padding-bottom: 30px;
-          }
-          
-          #homepage #homepageCarouselWrapper {
-            position: relative !important;
-            min-height: 400px !important;
-            margin-bottom: 30px !important;
-          }
-          
-          /* Target series grid wrapper to reduce margin-top in mobile */
-          html body .series-grid-wrapper,
-          #homepage .series-grid-wrapper,
-          div.series-grid-wrapper[style*="margin-top"],
-          body div[class="series-grid-wrapper"],
-          .series-grid-wrapper[style] {
-            margin-top: -60px !important;
-          }
-          
-          /* Target only the selections carousel dots with higher specificity */
-          html body .jsx-2d2c4b6ccf985683.selections-carousel .slick-dots,
-          body .jsx-2d2c4b6ccf985683 .slick-dots,
-          #homepage .jsx-2d2c4b6ccf985683 .slick-dots,
-          .jsx-2d2c4b6ccf985683 .slick-slider .slick-dots,
-          div.jsx-2d2c4b6ccf985683 > .slick-dots {
-            left: 60px !important;
-          }
-          
-          /* Caption with fixed height to prevent layout shifts */
-          .homepageCarouselCaption {
-            position: relative !important;
-            margin-top: 10px !important;
-            margin-bottom: 10px !important;
-            min-height: 20px !important; /* Reduced height for single line */
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-            padding: 8px 15px !important;
-            font-size: 12px !important;
-            line-height: 1.3 !important;
-            background: rgba(240,240,240,0.9) !important;
-            z-index: 50 !important;
-            display: block !important;
-            width: 100% !important;
-            text-align: left !important;
-            box-sizing: border-box !important;
-          }
-          
-          /* Fixed positioning for callout */
-          .callout-container {
-            position: absolute !important;
-            bottom: -60px !important; /* Moved down further to appear below dots */
-            top: auto !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 12px 15px !important;
-            transform: none !important;
-            z-index: 20 !important;
-            display: block !important;
-            border-radius: 0 !important;
-          }
-          
-          /* Fixed positioning for dot navigation */
-          .carousel-dots {
-            position: relative !important;
-            margin-top: 10px !important;
-            padding: 8px 0 !important;
-            z-index: 99 !important;
-            max-width: 95% !important;
-            bottom: 0 !important; /* Repositioned to reduce space */
-          }
-          
-          /* Ensure the image wrapper has proper spacing for dot navigation below */
-          .image-wrapper {
-            height: 234px !important; /* Match mobile image height */
-            overflow: hidden !important;
-            margin-bottom: 0 !important;
-            position: relative !important;
-          }
-          
-          /* Consistent container spacing */
-          .home-carousel-container {
-            overflow: visible !important;
-            margin-bottom: 110px !important; /* Increased to accommodate callout moved below dots */
-            padding-bottom: 20px !important;
-          }
-          
-          /* Ensure link is styled properly */
-          .callout-link {
-            font-size: 0.9em;
-            line-height: 1.3;
-          }
-          
-          /* Proper carousel div setup */
-          .homepageCarouselDiv {
-            overflow: visible !important;
-            height: auto !important;
-            max-height: none !important;
-            padding-bottom: 10px !important;
-            margin-bottom: 0 !important;
-            position: relative !important;
-          }
-          
-          /* Reduce whitespace between carousel and Featured Badges section */
-          .selections-carousel-container {
-            margin-top: 10px !important;
-            padding-top: 0 !important;
-          }
-          
-          /* Better spacing for title */
-          .selections-title {
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-            margin-bottom: 15px !important;
-          }
-          
-          /* Fix spacing in selections carousel */
-          .jsx-2d2c4b6ccf985683.selections-carousel {
-            padding: 0 !important;
-          }
-          
-          .jsx-2d2c4b6ccf985683.info {
-            margin-bottom: 5px !important;
-          }
-          
-          /* Center justify all text in the info box on mobile */
-          .jsx-2d2c4b6ccf985683.info,
-          div.jsx-2d2c4b6ccf985683.info,
-          .jsx-2d2c4b6ccf985683 .info {
-            text-align: center !important;
-          }
-          
-          .jsx-2d2c4b6ccf985683.info h3,
-          .jsx-2d2c4b6ccf985683.info p,
-          div.jsx-2d2c4b6ccf985683.info h3, 
-          div.jsx-2d2c4b6ccf985683.info p,
-          .jsx-2d2c4b6ccf985683 .info h3,
-          .jsx-2d2c4b6ccf985683 .info p,
-          .jsx-2d2c4b6ccf985683 .artwork-artist,
-          .jsx-2d2c4b6ccf985683 .artwork-artist {
-            text-align: center !important;
-          }
-          
-          /* Styling for artwork artist text */
-          .jsx-2d2c4b6ccf985683 .artwork-artist,
-          .jsx-2d2c4b6ccf985683 .artwork-artist {
-            font-style: italic !important;
-            color: #555 !important;
-            margin: 4px 0 !important;
-          }
-          
-          /* Reorganize dots into 3 rows of 6 dots */
-          .jsx-2d2c4b6ccf985683 .slick-dots {
-            bottom: -35px !important; /* Position lower */
-            margin-top: 0 !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            justify-content: center !important;
-            max-width: 216px !important; /* Exact width for 6 dots per row */
-            margin-left: auto !important;
-            margin-right: auto !important;
-            padding: 5px 0 !important;
-            margin-bottom: 15px !important; /* Additional spacing below */
-          }
-          
-          .jsx-2d2c4b6ccf985683 .slick-dots li {
-            width: 36px !important; /* Exact 1/6 of container width */
-            height: 36px !important;
-            margin: 0 !important; /* Remove margins to ensure 6 per row */
-            flex: 0 0 auto !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-          }
-          
-          .jsx-2d2c4b6ccf985683 .slick-dots li button {
-            width: 14px !important; /* Larger dot size */
-            height: 14px !important;
-            border-radius: 50% !important;
-            padding: 0 !important;
-            background: #999 !important; /* More visible color */
-            border: none !important;
-          }
-          
-          .jsx-2d2c4b6ccf985683 .slick-dots li.slick-active button {
-            transform: scale(1.3) !important;
-            background-color: #333 !important;
-          }
-        }
-        
-        /* Add styling for the carousel arrows */
-        .slick-prev, .slick-next {
-          display: none !important; /* Hide arrows by default (desktop) */
-          position: absolute !important;
-          z-index: 15 !important;
-          top: 50% !important;
-          transform: translateY(-50%) !important;
-          width: 30px !important;
-          height: 30px !important;
-          background-color: rgba(255, 255, 255, 0.7) !important;
-          border-radius: 50% !important;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-        
-        .slick-prev {
-          left: 15px !important;
-        }
-        
-        .slick-next {
-          right: 15px !important;
-        }
-        
-        .slick-prev:before, .slick-next:before {
-          font-size: 20px !important;
-          opacity: 0.8 !important;
-          color: #333 !important;
-        }
-        
-        .slick-prev:hover, .slick-next:hover {
-          background-color: rgba(255, 255, 255, 0.9) !important;
-        }
-        
-        @media (max-width: 768px) {
-          .slick-prev, .slick-next {
-            display: flex !important; /* Show arrows on mobile */
-          }
-          
-          .slick-prev {
-            left: 10px !important;
-          }
-          
-          .slick-next {
-            right: 10px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 } 

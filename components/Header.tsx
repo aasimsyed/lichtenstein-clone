@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import '../app/styles/header.css';
 
 export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -57,20 +58,23 @@ export default function Header() {
       if (event.key === 'Escape' && searchOpen) {
         setSearchOpen(false);
       }
+      if (event.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
     };
 
     document.addEventListener('keyup', handleEscKey);
     
     // Prevent scrolling when mobile menu is open
     if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('menu-open');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('menu-open');
     }
     
     return () => {
       document.removeEventListener('keyup', handleEscKey);
-      document.body.style.overflow = '';
+      document.body.classList.remove('menu-open');
     };
   }, [searchOpen, mobileMenuOpen]);
 
@@ -112,7 +116,7 @@ export default function Header() {
         <div id="headerMoble">
           <div className="mobile-logo">
             <Link href="/">
-              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={450} height={24} />
+              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={320} height={20} />
             </Link>
           </div>
           <div className="mobile-toggle" onClick={toggleMobileMenu}>
@@ -126,9 +130,12 @@ export default function Header() {
           <div className="behind" onClick={toggleMobileMenu}></div>
           <div className="middle">
             <ul>
-              <li>
-                <Link href="/catalogue">Browse the Works</Link>
+              <li style={{ '--item-index': 0 } as React.CSSProperties}>
+                <Link href="/catalogue" onClick={() => setMobileMenuOpen(false)}>
+                  Browse the Works
+                </Link>
               </li>
+              {/* Add more menu items as needed */}
             </ul>
           </div>
         </div>

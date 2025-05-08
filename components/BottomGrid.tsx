@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import '../app/styles/components.css';
 
 interface GridItemProps {
   imageUrl: string;
@@ -61,7 +62,6 @@ export default function BottomGrid() {
               alt={item.title}
               width={120}
               height={120}
-              style={{ objectFit: 'cover' }}
             />
           </div>
           <div className="right">

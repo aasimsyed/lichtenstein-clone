@@ -57,7 +57,7 @@ body {
   position: relative; 
 } 
  
-#searchbox, #searchNumBox { 
+#searchbox, #searchbox_mobile, #searchNumBox { 
   width: 100%; 
   padding: 10px 40px 10px 10px; 
   border: 1px solid #ccc; 
@@ -67,7 +67,7 @@ body {
   height: 40px; 
 } 
  
-#seachBoxButton, #seachNumButton { 
+#seachBoxButton, #seachBoxButton_mobile, #seachNumButton { 
   position: absolute; 
   right: 0; 
   top: 0; 
@@ -568,6 +568,44 @@ body {
   .catWorksCont { 
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
   } 
+  
+  /* Mobile options panel - simplified approach */
+  #mobileOptionsPanel {
+    padding: 15px;
+  }
+  
+  #mobileOptionsPanel .option-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  #mobileOptionsPanel .option-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  
+  /* Ultra-minimalist styling for mobile select elements */
+  .mobile-select,
+  #mobileOptionsPanel select {
+    /* Only absolute essential styling */
+    width: 100%;
+    height: 44px; /* Taller for better touch target */
+    font-size: 16px;
+    padding: 0 10px; /* More horizontal padding */
+    margin: 0;
+    border: 1px solid #bbb;
+    border-radius: 0;
+    background-color: #fff;
+    color: #333;
+    /* NO appearance properties */
+    /* NO background images */
+    /* NO complex positioning */
+  }
 } 
  
 /* Loading and error states  */
@@ -1102,3 +1140,175 @@ body {
   color: #666;
   margin-left: 5px;
 }  
+
+/* Article styling for performance optimization */
+.item {
+  contain: content;
+  will-change: opacity, transform;
+}
+
+.item_catDetails a { 
+  text-decoration: none; 
+  color: inherit; 
+} 
+
+/* Fix dropdown option styling globally - but only basic properties */
+select {
+  cursor: pointer;
+}
+
+/* Desktop styling - keep this but don't apply to mobile */
+@media (min-width: 769px) {
+  /* Desktop select styling */
+  .option-group select,
+  .sort-select,
+  .view-select,
+  .results-per-page-select {
+    height: 40px;
+    padding: 8px 35px 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+    font-size: 15px;
+    color: #333;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6' viewBox='0 0 12 6'%3E%3Cpath fill='%23333' d='M0 0l6 6 6-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    min-width: 180px;
+  }
+  
+  /* Desktop select option styling */
+  select option {
+    padding: 12px;
+    font-size: 15px;
+    color: #333;
+  }
+  
+  /* Focus styling for desktop */
+  select:focus {
+    outline: none;
+    border-color: #999;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  }
+}
+
+/* Custom Dropdown for Mobile */
+.custom-dropdown-container {
+  width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.custom-dropdown-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-button {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  font-size: 16px;
+  background-color: #fff;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  margin-left: 8px;
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-top: 2px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover, 
+.dropdown-item:focus {
+  background-color: #f8f8f8;
+}
+
+.dropdown-item.selected {
+  background-color: #f0f0f0;
+  font-weight: 500;
+}
+
+/* Mobile styles  */
+@media (max-width: 768px) { 
+  #searchBoxesWrapper { 
+    flex-direction: column; 
+  } 
+   
+  .filter-row { 
+    flex-direction: column; 
+  } 
+   
+  .filter-dropdown { 
+    width: 100%; 
+  } 
+   
+  #pageTopMatter h1 {
+    margin-left: 10px; /* Add left margin only on mobile */
+  }
+   
+  .options-row { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 15px; 
+  } 
+   
+  .catWorksCont { 
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+  } 
+  
+  /* Mobile options panel */
+  #mobileOptionsPanel {
+    padding: 15px;
+  }
+  
+  #mobileOptionsPanel .option-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+}

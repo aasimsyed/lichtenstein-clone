@@ -5,6 +5,7 @@ import { catalogSeries } from "@/data/catalogSeries";
 import { useR2Images } from "@/context/R2Context";
 import { parseFilename } from "@/app/utils/filename-utils";
 import { useEffect, useState } from "react";
+import "@/app/styles/components.css";
 
 export default function HomeSeriesGridClient() {
   const { images: r2Images } = useR2Images();
@@ -38,7 +39,7 @@ export default function HomeSeriesGridClient() {
 
   // Add key prop to force component re-rendering
   return (
-    <div className="series-grid-wrapper" style={{ width: '100%', marginTop: '50px' }}>
+    <div className="series-grid-wrapper">
       <SeriesGrid 
         items={seriesWithR2Images} 
         key={`series-grid-${timestamp}`} 

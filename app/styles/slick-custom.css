@@ -17,19 +17,74 @@
     top: auto !important;
   }
   
+  /* Ensure carousel-outer-container has no bottom padding on mobile */
+  .carousel-outer-container {
+    padding-bottom: 0px !important;
+    overflow: visible !important;
+  }
+  
   /* Fix for selections carousel specifically */
   .selections-carousel .slick-dots {
-    bottom: -20px !important;
+    position: relative !important;
+    bottom: auto !important;
+    top: auto !important;
     z-index: 1 !important;
+    /* Organize dots into 3 rows of 6 dots */
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 216px !important; /* Exact width for 6 dots per row */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 15px !important; /* Space below the info box */
+    padding: 5px 0 !important;
+    margin-bottom: 15px !important; /* Additional spacing below */
+    clear: both !important; /* Ensure it starts on a new line */
+  }
+  
+  /* Styling for selections carousel dot items */
+  .selections-carousel .slick-dots li {
+    width: 36px !important; /* Exact 1/6 of container width */
+    height: 36px !important;
+    margin: 0 !important; /* Remove margins to ensure 6 per row */
+    flex: 0 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* Styling for selections carousel dot buttons */
+  .selections-carousel .slick-dots li button {
+    width: 14px !important; /* Larger dot size */
+    height: 14px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background: #999 !important; /* More visible color */
+    border: none !important;
+  }
+  
+  /* Active dot styling for selections carousel */
+  .selections-carousel .slick-dots li.slick-active button {
+    transform: scale(1.3) !important;
+    background-color: #333 !important;
   }
   
   /* Add visual separation between info and dots */
   .selections-carousel .info {
     background-color: rgba(255, 255, 255, 0.9) !important;
     padding: 6px !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 0 !important; /* Remove bottom margin to connect with dots */
     border-radius: 4px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    width: 100% !important; /* Ensure full width */
+    display: block !important; /* Ensure block display */
+  }
+  
+  /* Ensure proper slide layout */
+  .selections-carousel .slide-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   
   /* Fix callout and selections carousel display order */
@@ -46,19 +101,21 @@
   #homepage #homepageCarouselWrapper {
     position: relative !important;
     min-height: 380px !important; /* Fixed height including space for all elements */
-    padding-bottom: 190px !important; /* Increased space for caption, dots and callout */
+    padding-bottom: 120px !important; /* Reduced from 190px to decrease overall spacing */
   }
   
   /* Fixed height caption to prevent layout shifts */
-  #homepage .homepageCarouseCaption {
-    min-height: 32px !important; /* Fixed height accommodating 2 lines */
-    max-height: 32px !important;
-    overflow: auto !important; /* Allow scrolling if text is longer */
+  #homepage .homepageCarouselCaption {
+    min-height: auto !important; /* Allow height to adapt to content */
+    max-height: none !important; /* Remove height restriction */
+    overflow: visible !important; /* Allow content to be fully visible */
+    white-space: normal !important; /* Allow text wrapping */
+    text-overflow: clip !important; /* Don't truncate text */
     margin-top: 8px !important;
     margin-bottom: 0 !important;
     padding: 8px 15px !important;
     font-size: 11px !important;
-    line-height: 1.2 !important;
+    line-height: 1.4 !important;
     z-index: 50 !important;
     position: relative !important;
   }
@@ -67,13 +124,13 @@
   #homepage .custom-dots-container,
   #homepage .slick-dots {
     position: absolute !important;
-    bottom: 70px !important; /* Adjusted position from bottom */
-    left: 0 !important;
+    bottom: -47px !important; /* Changed from 60px to -47px as requested */
+    left: 47px !important; /* Changed from 0 to 47px as requested */
     right: 0 !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 8px 0 !important;
-    z-index: 100 !important;
+    z-index: 25 !important; /* Added explicit z-index between caption and callout */
   }
   
   /* Fixed callout positioning */
@@ -192,7 +249,7 @@
   /* Prevent callout from pushing content down */
   .callout-container {
     position: absolute !important;
-    margin-top: 0 !important;
+    margin-top: 10 !important;
     margin-bottom: 0 !important;
   }
   

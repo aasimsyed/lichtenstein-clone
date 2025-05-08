@@ -4,9 +4,16 @@
 .home-carousel-container {
   position: relative;
   margin-bottom: 40px;
-  overflow: hidden;
+  overflow: visible !important;
   width: 100%;
   max-height: var(--carousel-height);
+}
+
+.carousel-outer-container {
+  position: relative;
+  margin-bottom: 0px;
+  overflow: visible;
+  padding-bottom: 70px;
 }
 
 .homepageCarouselDiv {
@@ -15,6 +22,12 @@
   height: var(--carousel-height);
   max-height: var(--carousel-height);
   overflow: hidden;
+  overflow: visible !important;
+  height: auto !important;
+  padding-bottom: 0 !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .image-wrapper {
@@ -25,9 +38,82 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: var(--carousel-height) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
 }
 
-.homepageCarouseCaption {
+/* Add media query for mobile devices */
+@media (max-width: 768px) {
+  .image-wrapper {
+    height: var(--carousel-mobile-height) !important;
+  }
+  
+  .homepageCarouselCaption {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.4 !important;
+  }
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background-color: #f5f5f5;
+  opacity: 0;
+  transition: opacity 0.5s ease-in !important;
+}
+
+.carousel-image.loaded {
+  opacity: 1;
+}
+
+.carousel-dot-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #888;
+  border: 1px solid #666;
+  display: block;
+  padding: 0;
+  margin: 0 5px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 52 !important;
+}
+
+/* Ensure proper styling for active dots */
+.carousel-dots li.slick-active {
+  z-index: 53 !important;
+}
+
+.carousel-dots li.slick-active .carousel-dot-button {
+  background-color: #333 !important;
+  transform: scale(1.2) !important;
+  z-index: 53 !important;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Add hover effect */
+.carousel-dot-button:hover {
+  background-color: #666;
+}
+
+/* Fix active dot appearance */
+.slick-dots li.slick-active button,
+.carousel-dots li.slick-active button {
+  background: #333 !important;
+}
+
+/* Fix caption display */
+.homepageCarouselCaption {
   padding: 10px 20px;
   background: rgba(240,240,240,0.8);
   color: #333;
@@ -42,68 +128,201 @@
   margin-top: 10px;
   text-align: left;
   display: block;
+  margin-bottom: 5px !important; /* Ensure smaller gap before dots */
 }
 
-#homepageCarouselCallout {
+.homepageCarouselCaption {
+  position: relative !important;
+  display: block !important;
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+  background: rgba(240, 240, 240, 0.8) !important;
+  padding: 8px 20px !important;
+  width: 100% !important;
+  text-align: left !important;
+  font-size: 13px !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  z-index: 25 !important;
+}
+
+/* Callout container styling */
+.callout-container {
   position: absolute;
-  right: 0;
-  bottom: 30px;
-  z-index: 10;
-}
-
-#homepageCarouselCalloutInside {
-  padding: 0;
-  border: none;
+  z-index: 20;
+  background-color: rgba(255, 235, 132, 0.8);
+  padding: 15px;
   text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  top: calc(70% + 35px);
+  bottom: auto;
+  right: 0%;
+  left: auto;
+  width: 30%;
+  transform: translateY(-50%);
+  border-radius: 4px;
 }
 
-#homepage #homepageCarouselWrapper #homepageCarouselCallout a,
-#homepageCarouselCallout a {
-  position: absolute;
+.callout-container.mobile {
+  top: auto;
+  bottom: 100px;
   right: 0;
-  bottom: 30px;
-  font-size: 22px;
-  line-height: 28px;
-  display: block;
+  left: 0;
+  width: 100%;
+  transform: none;
+  border-radius: 0;
+  background-color: rgba(255, 235, 132, 0.95);
+}
+
+.callout-container:hover {
+  background-color: rgba(255, 235, 132, 0.95);
+}
+
+.callout-link {
   color: #333;
-  margin-left: 0px;
-  padding: 30px 105px 30px 20px;
-  background-color: rgba(255, 245, 204, 0.85);
-  opacity: 0.85;
   text-decoration: none;
-  font-weight: 400;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  width: 690px;
-  max-width: 690px;
-  text-align: left;
-  box-sizing: border-box;
-  text-rendering: optimizelegibility;
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  transition: background-color 0.3s ease, opacity 0.3s ease;
-}
-
-#homepage #homepageCarouselWrapper #homepageCarouselCallout a:after,
-#homepageCarouselCallout a:after {
   display: block;
-  content: '';
-  position: absolute;
-  pointer-events: none;
-  width: 30px;
-  height: 15px;
-  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Cpath d='M1 7.5h25M19 1l7 6.5-7 6.5' stroke='%23333' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center;
-  background-size: contain;
-  right: 20px;
-  top: 50%;
-  margin-top: -7px;
+  width: 100%;
+  position: relative;
+  font-size: 1.05em;
+  line-height: 1.4;
 }
 
-#homepage #homepageCarouselWrapper #homepageCarouselCallout a:hover,
-#homepageCarouselCallout a:hover {
-  opacity: 0.95;
-  background-color: rgba(255, 242, 179, 0.95);
-  transition: all 0.2s ease;
+/* Arrow icon for the link */
+.callout-link::after {
+  content: "→";
+  position: absolute;
+  right: 0;
+  bottom: -13px;
+  font-size: 1.2em;
+}
+
+/* Complete dot navigation redesign */
+.carousel-dots {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin-top: 65px !important;
+  margin-bottom: 30px !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 50 !important;
+  list-style: none !important;
+  padding: 0 !important;
+  transform: translateY(15px) !important;
+  height: 30px !important;
+}
+
+/* Mobile-specific override for carousel dots */
+@media (max-width: 768px) {
+  .carousel-dots,
+  #homepage .carousel-dots,
+  .home-carousel-container .carousel-dots {
+    margin-top: 0px !important;
+    transform: none !important;
+    position: absolute !important;
+    top: calc(var(--carousel-mobile-height) + 50px) !important;
+    bottom: auto !important;
+  }
+  
+  /* Ensure the homepageCarouselDiv is a positioning context */
+  .homepageCarouselDiv {
+    position: relative !important;
+    min-height: calc(var(--carousel-mobile-height) + 130px) !important; /* Add enough height for dots and caption */
+  }
+}
+
+.slick-dots {
+  position: absolute;
+  bottom: -45px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  text-align: center;
+  z-index: 1;
+  display: flex !important;
+  justify-content: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.slick-dots li {
+  position: relative;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin: 0 5px !important;
+  padding: 0 !important;
+  cursor: pointer;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.slick-dots li button {
+  font-size: 0 !important;
+  line-height: 0;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 12px !important;
+  height: 12px !important;
+  padding: 0;
+  cursor: pointer;
+  color: transparent;
+  border: 1px solid #666 !important;
+  outline: none;
+  background: #888 !important;
+  border-radius: 50% !important;
+  margin: 4px auto !important;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.slick-dots li.slick-active button {
+  background: #333 !important;
+}
+
+/* Add styling for the carousel arrows */
+.slick-prev, .slick-next {
+  display: none !important; /* Hide arrows by default (desktop) */
+  position: absolute !important;
+  z-index: 15 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 30px !important;
+  height: 30px !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.slick-prev {
+  left: 15px !important;
+}
+
+.slick-next {
+  right: 15px !important;
+}
+
+.slick-prev:before, .slick-next:before {
+  font-size: 20px !important;
+  opacity: 0.8 !important;
+  color: #333 !important;
+}
+
+.slick-prev:hover, .slick-next:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* Selections Carousel Styles */
@@ -122,6 +341,7 @@
 .selections-carousel {
   width: 100%;
   position: relative;
+  padding: 10px 0;
 }
 
 .carousel-slide {
@@ -132,6 +352,7 @@
 
 .slide-inner {
   position: relative;
+  margin: 0 8px;
 }
 
 .selections-carousel .image-container {
@@ -144,6 +365,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.selections-carousel .loading-container {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selections-carousel .placeholder-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  background-color: white;
+}
+
+.selections-carousel .placeholder-image {
+  opacity: 0.8;
+}
+
+.selections-carousel .carousel-image {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  background-color: white;
+  position: relative;
+  z-index: 2;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.selections-carousel .carousel-image.loaded {
+  opacity: 1;
+}
+
+.selections-carousel .carousel-image.loading {
+  opacity: 0;
 }
 
 .artwork-link {
@@ -251,60 +517,70 @@
   background: rgba(180, 180, 180, 0.9) !important;
 }
 
-/* Slick Dots - Pagination */
-.slick-dots {
-  position: absolute;
-  bottom: -45px;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  text-align: center;
-  z-index: 1;
-  display: flex !important;
-  justify-content: center !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.slick-dots li {
-  position: relative;
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  margin: 0 5px !important;
-  padding: 0 !important;
-  cursor: pointer;
-  width: 20px !important;
-  height: 20px !important;
-}
-
-.slick-dots li button {
-  font-size: 0 !important;
-  line-height: 0;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 12px !important;
-  height: 12px !important;
-  padding: 0;
-  cursor: pointer;
-  color: transparent;
-  border: 1px solid #666 !important;
-  outline: none;
-  background: #888 !important;
-  border-radius: 50% !important;
-  margin: 4px auto !important;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
-}
-
-.slick-dots li.slick-active button {
-  background: #333 !important;
-}
-
 /* Selections carousel specific dot styles */
 .selections-carousel .slick-dots {
   bottom: -45px !important;
   position: absolute !important;
   z-index: 1 !important;
+}
+
+.image-wrapper img {
+  transition: opacity 0.5s ease-in !important;
+}
+
+/* Style for individual carousel dots list items */
+.carousel-dots li {
+  display: inline-block !important;
+  margin: 0 5px !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 51 !important;
+}
+
+/* Override any potential inline style that sets it to block */
+.carousel-dots[style*="display: block"] {
+  display: flex !important;
+}
+
+/* Make sure the slider container doesn't interfere with dots */
+.home-carousel-container .slick-slider {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/* Additional fixes to ensure caption doesn't hide dots */
+.homepageCarouselCaption {
+  z-index: 25 !important;
+  overflow: visible !important; /* Allow content to overflow */
+}
+
+/* Container for dots to ensure proper positioning */
+.dots-container {
+  position: relative !important;
+  width: 100% !important;
+  display: block !important;
+  margin: 10px 0 !important;
+  padding: 0 !important;
+  z-index: 50 !important;
+  height: auto !important;
+  min-height: 30px !important;
+  overflow: visible !important;
+}
+
+.dots-container ul {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  list-style: none !important;
+  width: 100% !important;
+}
+
+/* Ensure the outer container doesn't hide any elements */
+.carousel-outer-container * {
+  overflow: visible !important;
 } 

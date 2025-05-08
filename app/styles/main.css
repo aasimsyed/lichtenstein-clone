@@ -163,6 +163,6 @@ footer {
 }
 
 /* Mobile filters panel (hidden by default) */
-#mobileFiltersPanel {
+#mobileFiltersPanel, #mobileOptionsPanel {
   display: none;
 } 

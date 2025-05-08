@@ -6,6 +6,7 @@ import BackButton from '../app/catalogue/entry/[id]/BackButton';
 import ZoomableImage from '../app/catalogue/entry/[id]/ZoomableImage';
 import { parseFilename } from '../app/utils/filename-utils';
 import { useR2Images } from '../context/R2Context';
+import '../app/styles/components.css';
 
 // Client component that safely uses useSearchParams
 export function ArtworkContent() {
@@ -40,22 +41,9 @@ export function ArtworkContent() {
   if (loading && !selectedImage) {
     return (
       <div className="loading-artwork">
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center',
-          padding: '40px 0'
-        }}>
-          <div style={{ marginBottom: '15px' }}>Loading artwork...</div>
-          <div style={{ 
-            width: '40px', 
-            height: '40px', 
-            border: '4px solid #f3f3f3', 
-            borderTop: '4px solid #333', 
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }}></div>
+        <div className="loading-artwork-container">
+          <div className="loading-artwork-text">Loading artwork...</div>
+          <div className="loading-artwork-spinner"></div>
         </div>
       </div>
     );
@@ -87,22 +75,9 @@ export function ArtworkContent() {
         </div>
       ) : (
         <div className="loading-artwork">
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            alignItems: 'center', 
-            justifyContent: 'center',
-            padding: '40px 0'
-          }}>
-            <div style={{ marginBottom: '15px' }}>Loading artwork...</div>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              border: '4px solid #f3f3f3', 
-              borderTop: '4px solid #333', 
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
+          <div className="loading-artwork-container">
+            <div className="loading-artwork-text">Loading artwork...</div>
+            <div className="loading-artwork-spinner"></div>
           </div>
         </div>
       )}
