@@ -13,6 +13,10 @@ export default function AdminPage() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const { images, refreshImages } = useR2Images();
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -20,6 +24,93 @@ export default function AdminPage() {
       setUploadSuccess(false);
       setUploadError(null);
       setUploadProgress({});
+    }
+  };
+
+  // Image selection handler
+  const toggleImageSelection = (key: string) => {
+    setSelectedImages(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(key)) {
+        newSelected.delete(key);
+      } else {
+        newSelected.add(key);
+      }
+      return newSelected;
+    });
+  };
+
+  // Clear selection handler
+  const clearSelection = () => {
+    setSelectedImages(new Set());
+  };
+
+  // Select all images handler
+  const selectAllImages = () => {
+    if (selectedImages.size === images.length) {
+      // If all are selected, clear selection
+      clearSelection();
+    } else {
+      // Otherwise select all
+      const allKeys = images.map(img => img.key);
+      setSelectedImages(new Set(allKeys));
+    }
+  };
+
+  // Handle image deletion
+  const handleDelete = async () => {
+    if (selectedImages.size === 0) {
+      setDeleteError('Please select at least one image to delete');
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedImages.size} selected image(s)? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+
+    try {
+      const R2_WORKER_BASE_URL = 'https://r2-image-worker.aasim-ss.workers.dev';
+      const keysToDelete = Array.from(selectedImages);
+
+      const response = await fetch(`${R2_WORKER_BASE_URL}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ keys: keysToDelete }),
+        mode: 'cors',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete images: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Delete result:', result);
+
+      if (result.deletedCount > 0) {
+        setDeleteSuccess(true);
+        await refreshImages();
+        clearSelection();
+      }
+
+      if (result.failedCount > 0) {
+        setDeleteError(`Failed to delete ${result.failedCount} image(s). ${result.deletedCount} deleted successfully.`);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setDeleteError(error instanceof Error ? error.message : 'Unknown error occurred during deletion');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -216,10 +307,60 @@ export default function AdminPage() {
         </div>
         
         <div className="admin-images-section">
-          <h2>Current Images ({images.length})</h2>
+          <div className="admin-images-header">
+            <h2>Current Images ({images.length})</h2>
+            <div className="admin-images-actions">
+              <button 
+                onClick={selectAllImages} 
+                className="admin-action-button"
+                disabled={images.length === 0}
+              >
+                {selectedImages.size === images.length && images.length > 0 ? 'Deselect All' : 'Select All'}
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="admin-action-button delete-button" 
+                disabled={selectedImages.size === 0 || isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : `Delete Selected (${selectedImages.size})`}
+              </button>
+              {selectedImages.size > 0 && (
+                <button onClick={clearSelection} className="admin-action-button">
+                  Clear Selection
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {deleteSuccess && (
+            <div className="delete-success">
+              Images deleted successfully!
+            </div>
+          )}
+          
+          {deleteError && (
+            <div className="delete-error">
+              Error: {deleteError}
+            </div>
+          )}
+          
           <div className="admin-images-grid">
             {images.map((image) => (
-              <div key={image.id} className="admin-image-card">
+              <div 
+                key={image.id} 
+                className={`admin-image-card ${selectedImages.has(image.key) ? 'selected' : ''}`}
+                onClick={() => toggleImageSelection(image.key)}
+              >
+                <div className="admin-image-selection">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedImages.has(image.key)} 
+                    onChange={() => toggleImageSelection(image.key)}
+                    onClick={(e) => e.stopPropagation()}
+                    title={`Select ${image.id}`}
+                    aria-label={`Select ${image.id}`}
+                  />
+                </div>
                 <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
                 <div className="admin-image-info">
                   <p className="admin-image-name">{image.id}</p>

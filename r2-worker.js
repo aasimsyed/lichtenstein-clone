@@ -19,6 +19,11 @@ export default {
       return await handleUpload(request, env);
     }
     
+    // Handle file deletions
+    if (url.pathname === '/delete' && request.method === 'DELETE') {
+      return await handleDelete(request, env);
+    }
+    
     // Decode the pathname to handle encoded URLs
     const encodedObjectKey = url.pathname.slice(1); // Remove the leading slash
     const objectKey = decodeURIComponent(encodedObjectKey);
@@ -46,7 +51,7 @@ export default {
       headers.set("Content-Type", object.httpMetadata?.contentType || "application/octet-stream");
       headers.set("Cache-Control", "public, max-age=31536000");
       headers.set("Access-Control-Allow-Origin", "*");
-      headers.set("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS");
+      headers.set("Access-Control-Allow-Methods", "GET, HEAD, POST, DELETE, OPTIONS");
       headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
       headers.set("Access-Control-Max-Age", "86400");
       
@@ -242,4 +247,103 @@ function inferContentType(filename) {
   };
   
   return typeMap[extension] || 'application/octet-stream';
+}
+
+// Handle file deletions from R2
+async function handleDelete(request, env) {
+  // Extract the origin from the request for CORS
+  const origin = request.headers.get('Origin') || '*';
+  
+  // Common headers for all responses
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+  
+  try {
+    console.log("Processing delete request");
+    
+    // Get the keys to delete from the request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error("Error parsing request body:", error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    const keys = body.keys;
+    
+    if (!keys || !Array.isArray(keys) || keys.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'No valid keys provided for deletion' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    // Delete the objects
+    const deleteResults = [];
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const key of keys) {
+      try {
+        await env.MY_BUCKET.delete(key);
+        deleteResults.push({ key, success: true });
+        successCount++;
+      } catch (error) {
+        console.error(`Error deleting ${key}:`, error);
+        deleteResults.push({ key, success: false, error: error.message });
+        failCount++;
+      }
+    }
+    
+    console.log(`Deleted ${successCount} objects, ${failCount} failed`);
+    
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        deletedCount: successCount,
+        failedCount: failCount,
+        results: deleteResults
+      }), 
+      { 
+        status: 200, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  } catch (error) {
+    console.error("Delete error:", error.stack || error);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Delete operation failed' }), 
+      { 
+        status: 500, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  }
 } 

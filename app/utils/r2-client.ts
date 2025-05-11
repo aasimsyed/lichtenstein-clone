@@ -8,6 +8,7 @@ export interface R2Image {
   created: string;
   placeholder?: string; // Base64 blur placeholder
   responsiveUrls?: Record<string, string>; // URLs for different breakpoints
+  key: string; // File key in the R2 bucket
 }
 
 // Define R2 object structure returned from worker
@@ -171,6 +172,7 @@ export async function fetchR2Images(ignoreCache = false): Promise<R2Image[]> {
               height: 1200, // Placeholder height
               format,
               created: obj.uploaded || new Date().toISOString(),
+              key: obj.key,
             };
           });
           
