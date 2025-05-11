@@ -1,11 +1,22 @@
 // r2-worker.js
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
+    // Get the request URL
     const url = new URL(request.url);
+    
+    // Handle CORS preflight requests first - check both method and path
+    if (request.method === 'OPTIONS') {
+      return handleCORS(request);
+    }
     
     // Special endpoint for listing objects in the bucket
     if (url.searchParams.has('list')) {
       return await listObjects(env);
+    }
+    
+    // Handle file uploads
+    if (url.pathname === '/upload' && request.method === 'POST') {
+      return await handleUpload(request, env);
     }
     
     // Decode the pathname to handle encoded URLs
@@ -35,6 +46,9 @@ export default {
       headers.set("Content-Type", object.httpMetadata?.contentType || "application/octet-stream");
       headers.set("Cache-Control", "public, max-age=31536000");
       headers.set("Access-Control-Allow-Origin", "*");
+      headers.set("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      headers.set("Access-Control-Max-Age", "86400");
       
       return new Response(object.body, { headers });
     } catch (error) {
@@ -43,6 +57,27 @@ export default {
     }
   }
 };
+
+// Handle CORS preflight requests
+function handleCORS(request) {
+  // Extract the origin from the request
+  const origin = request.headers.get('Origin') || '*';
+  
+  // Get the Access-Control-Request-Headers header
+  const requestHeaders = request.headers.get('Access-Control-Request-Headers') || 'Content-Type, Authorization';
+  
+  // Set CORS headers for preflight response
+  return new Response(null, {
+    status: 204, // No content needed for preflight response
+    headers: {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': requestHeaders,
+      'Access-Control-Max-Age': '86400',
+      'Access-Control-Allow-Credentials': 'false'
+    }
+  });
+}
 
 // List all objects in the bucket
 async function listObjects(env) {
@@ -73,9 +108,138 @@ async function listObjects(env) {
     const headers = new Headers();
     headers.set("Content-Type", "application/json");
     headers.set("Access-Control-Allow-Origin", "*");
+    headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    headers.set("Access-Control-Max-Age", "86400");
     
     return new Response(JSON.stringify(response), { headers });
   } catch (error) {
-    return new Response(`Error listing objects: ${error.message}`, { status: 500 });
+    console.error("Error listing objects:", error);
+    return new Response(`Error listing objects: ${error.message}`, { 
+      status: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Content-Type": "application/json"
+      }
+    });
   }
+}
+
+// Handle file uploads to R2
+async function handleUpload(request, env) {
+  // Extract the origin from the request for CORS
+  const origin = request.headers.get('Origin') || '*';
+  
+  // Common headers for all responses
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+  
+  try {
+    console.log("Processing upload request");
+    
+    // Process the form data to extract the file
+    let formData;
+    try {
+      formData = await request.formData();
+    } catch (formError) {
+      console.error("Error parsing form data:", formError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid form data: ' + formError.message }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    const file = formData.get('file');
+    
+    if (!file) {
+      return new Response(
+        JSON.stringify({ error: 'No file provided' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    // Use the provided name or generate a unique filename
+    const filename = file.name;
+    
+    // Get content type from file metadata or infer from extension
+    const contentType = file.type || inferContentType(filename);
+    
+    // Convert the file to an ArrayBuffer for upload
+    const arrayBuffer = await file.arrayBuffer();
+    
+    // Upload the file to R2
+    await env.MY_BUCKET.put(filename, arrayBuffer, {
+      httpMetadata: {
+        contentType: contentType
+      }
+    });
+    
+    // Construct the URL to access the file
+    const fileUrl = `${new URL(request.url).origin}/${encodeURIComponent(filename)}`;
+    
+    console.log(`Successfully uploaded: ${filename} (${contentType})`);
+    
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        key: filename,
+        url: fileUrl,
+        size: arrayBuffer.byteLength,
+        contentType: contentType
+      }), 
+      { 
+        status: 200, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  } catch (error) {
+    console.error("Upload error:", error.stack || error);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Upload failed' }), 
+      { 
+        status: 500, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  }
+}
+
+// Infer content type from file extension
+function inferContentType(filename) {
+  const extension = filename.split('.').pop()?.toLowerCase();
+  const typeMap = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+    'svg': 'image/svg+xml',
+    'avif': 'image/avif'
+  };
+  
+  return typeMap[extension] || 'application/octet-stream';
 } 
