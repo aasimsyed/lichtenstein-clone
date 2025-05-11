@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useR2Images } from '../../context/R2Context';
 import Link from 'next/link';
 import '../styles/admin.css';
@@ -17,6 +17,20 @@ export default function AdminPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  // Filter images based on search keyword
+  const filteredImages = useMemo(() => {
+    if (!searchKeyword.trim()) {
+      return images;
+    }
+    
+    const keyword = searchKeyword.toLowerCase().trim();
+    return images.filter(image => 
+      image.id.toLowerCase().includes(keyword) || 
+      image.key.toLowerCase().includes(keyword)
+    );
+  }, [images, searchKeyword]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -25,6 +39,16 @@ export default function AdminPage() {
       setUploadError(null);
       setUploadProgress({});
     }
+  };
+
+  // Handle search change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(e.target.value);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchKeyword('');
   };
 
   // Image selection handler
@@ -45,15 +69,15 @@ export default function AdminPage() {
     setSelectedImages(new Set());
   };
 
-  // Select all images handler
+  // Select all images handler (only selects filtered images)
   const selectAllImages = () => {
-    if (selectedImages.size === images.length) {
-      // If all are selected, clear selection
+    if (selectedImages.size === filteredImages.length) {
+      // If all filtered images are selected, clear selection
       clearSelection();
     } else {
-      // Otherwise select all
-      const allKeys = images.map(img => img.key);
-      setSelectedImages(new Set(allKeys));
+      // Otherwise select all filtered images
+      const filteredKeys = filteredImages.map(img => img.key);
+      setSelectedImages(new Set(filteredKeys));
     }
   };
 
@@ -308,14 +332,33 @@ export default function AdminPage() {
         
         <div className="admin-images-section">
           <div className="admin-images-header">
-            <h2>Current Images ({images.length})</h2>
+            <h2>Current Images ({filteredImages.length}{images.length !== filteredImages.length ? ` of ${images.length}` : ''})</h2>
+            <div className="admin-search-container">
+              <input
+                type="text"
+                className="admin-search-input"
+                placeholder="Search images..."
+                value={searchKeyword}
+                onChange={handleSearchChange}
+                aria-label="Search images"
+              />
+              {searchKeyword && (
+                <button 
+                  className="admin-search-clear" 
+                  onClick={clearSearch}
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
             <div className="admin-images-actions">
               <button 
                 onClick={selectAllImages} 
                 className="admin-action-button"
-                disabled={images.length === 0}
+                disabled={filteredImages.length === 0}
               >
-                {selectedImages.size === images.length && images.length > 0 ? 'Deselect All' : 'Select All'}
+                {selectedImages.size === filteredImages.length && filteredImages.length > 0 ? 'Deselect All' : 'Select All'}
               </button>
               <button 
                 onClick={handleDelete}
@@ -344,8 +387,14 @@ export default function AdminPage() {
             </div>
           )}
           
+          {filteredImages.length === 0 && (
+            <div className="no-images-message">
+              {images.length === 0 ? 'No images available in the bucket.' : 'No images match your search.'}
+            </div>
+          )}
+          
           <div className="admin-images-grid">
-            {images.map((image) => (
+            {filteredImages.map((image) => (
               <div 
                 key={image.id} 
                 className={`admin-image-card ${selectedImages.has(image.key) ? 'selected' : ''}`}
