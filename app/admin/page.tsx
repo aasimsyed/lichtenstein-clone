@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useR2Images } from '../../context/R2Context';
 import Link from 'next/link';
 import '../styles/admin.css';
+import { signOut } from 'next-auth/react';
 
 // Static export compatible version
 export default function AdminPage() {
@@ -263,7 +264,18 @@ export default function AdminPage() {
     <div className="admin-container">
       <div className="admin-header">
         <h1>Admin Dashboard</h1>
-        <Link href="/" className="admin-home-link">Back to Home</Link>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Link href="/" className="admin-home-link">Back to Home</Link>
+          <button
+            type="button"
+            className="admin-home-link"
+            style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer' }}
+            onClick={() => signOut({ callbackUrl: '/' })}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        </div>
       </div>
       
       <div className="admin-content">

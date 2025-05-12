@@ -3,7 +3,7 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable static export for Cloudflare Pages
-  output: 'export',
+  // output: 'export',
   
   // Images configuration
   images: {

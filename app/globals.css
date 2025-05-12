@@ -1,0 +1,27 @@
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
+
+body {
+  min-height: 100vh;
+  background-color: rgb(249, 250, 251);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+a {
+  color: rgb(37, 99, 235);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Specific override for Google Sign-In button text color */
+#google-signin-button,
+#google-signin-button-fallback {
+  color: #E3E3E3 !important;
+} 
