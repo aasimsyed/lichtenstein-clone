@@ -33,6 +33,25 @@ EOL
     cp _redirects out/
   fi
 
+  # Create a script to inject environment variables at runtime
+  # This helps with client-side authentication in static exports
+  cat > out/env-config.js << EOL
+// This script injects environment variables into the window object at runtime
+window.__ENV__ = window.__ENV__ || {};
+// Auth0 configuration
+window.__ENV__.NEXT_PUBLIC_AUTH0_DOMAIN = '${NEXT_PUBLIC_AUTH0_DOMAIN}';
+window.__ENV__.NEXT_PUBLIC_AUTH0_CLIENT_ID = '${NEXT_PUBLIC_AUTH0_CLIENT_ID}';
+console.log('Runtime environment variables loaded');
+EOL
+
+  # Add the env-config.js script to the HTML files
+  find out -name "*.html" -exec sed -i.bak -e '</head>/i\
+  <script src="/env-config.js"></script>' {} \;
+  
+  # Remove backup files
+  find out -name "*.html.bak" -delete
+
+  echo "✓ Created runtime environment variables script"
   echo "✓ Build completed successfully!"
   echo "✓ Created Cloudflare _headers file"
   
