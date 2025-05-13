@@ -8,6 +8,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { R2Provider } from '../context/R2Context';
 import { AnalyticsProvider } from './analytics';
+import Auth0Wrapper from './auth/auth0-wrapper';
 
 // Define fonts
 const inter = Inter({ subsets: ["latin"], display: 'swap', variable: '--font-inter' });
@@ -71,15 +72,17 @@ export default function RootLayout({
       <body>
         <AnalyticsProvider>
           <R2Provider>
-            <div id="mainWrapperOuter">
-              <div id="mainWrapperInner">
-                <Header />
-                <div id="maincontent">
-                  {children}
+            <Auth0Wrapper>
+              <div id="mainWrapperOuter">
+                <div id="mainWrapperInner">
+                  <Header />
+                  <div id="maincontent">
+                    {children}
+                  </div>
+                  <Footer />
                 </div>
-                <Footer />
               </div>
-            </div>
+            </Auth0Wrapper>
           </R2Provider>
         </AnalyticsProvider>
       </body>

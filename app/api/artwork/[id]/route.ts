@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchCloudinaryImages, getOptimizedServerUrl } from '../../../utils/cloudinary-server';
+import { fetchR2Images, getOptimizedR2Url } from '../../../utils/r2-server';
 import { parseFilename } from '../../../utils/filename-utils';
 
 // Add force-static for compatibility with static export
@@ -40,8 +40,8 @@ export async function GET(
       );
     }
     
-    // Use the server-side utility function to fetch images from Cloudinary
-    const images = await fetchCloudinaryImages('rupture/badges');
+    // Use the server-side utility function to fetch images from R2
+    const images = await fetchR2Images();
     
     // Find the specific image by index
     const index = parseInt(id) - 1;
@@ -53,13 +53,13 @@ export async function GET(
     }
     
     const image = images[index];
-    const { catalogNumber, title, artist, size } = parseFilename(image.secure_url);
+    const { catalogNumber, title, artist, size } = parseFilename(image.url);
     
     // Check if this is a zine (FZ)
     const isZine = catalogNumber === 'FZ';
     
     // Create optimized image URL for high quality viewing
-    const optimizedImageUrl = await getOptimizedServerUrl(image, {
+    const optimizedImageUrl = getOptimizedR2Url(image.key, {
       width: 1600,
       quality: 90,
       format: 'auto'
@@ -76,9 +76,9 @@ export async function GET(
       catalogNumber,
       artist,
       size,
-      imageUrl: image.secure_url,
-      width: image.width,
-      height: image.height,
+      imageUrl: image.url,
+      width: 1000, // Using placeholder values since R2 may not provide dimensions
+      height: 1200,
       optimizedImageUrl,
       isZine,
       additionalInfo: ''
