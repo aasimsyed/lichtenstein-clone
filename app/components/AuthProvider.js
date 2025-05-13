@@ -1,7 +1,6 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
-
+// No longer using NextAuth - Auth0 provider is in app/auth/auth0-wrapper.js
 export default function AuthProvider({ children }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return children;
 } 

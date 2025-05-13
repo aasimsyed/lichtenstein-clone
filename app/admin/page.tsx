@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useR2Images } from '../../context/R2Context';
 import Link from 'next/link';
 import '../styles/admin.css';
-import { signOut } from 'next-auth/react';
+import { useAuth } from '../auth/useAuth';
 
 // Static export compatible version
 export default function AdminPage() {
@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const { logout } = useAuth();
 
   // Filter images based on search keyword
   const filteredImages = useMemo(() => {
@@ -270,7 +271,7 @@ export default function AdminPage() {
             type="button"
             className="admin-home-link"
             style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer' }}
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={logout}
             aria-label="Logout"
           >
             Logout

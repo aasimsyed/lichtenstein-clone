@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { useAuth } from '../useAuth';
 
 function UnauthorizedContent() {
+  const { logout } = useAuth();
+
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md text-center">
@@ -16,7 +18,7 @@ function UnauthorizedContent() {
             Return to Homepage
           </Link>
           <button
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={() => logout()}
             className="text-red-600 hover:underline"
           >
             Sign Out

@@ -2,25 +2,21 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static export for Cloudflare Pages
-  // output: 'export',
+  // Only enable static export for production
+  ...(process.env.NODE_ENV !== 'development' && { output: 'export' }),
   
   // Images configuration
   images: {
     unoptimized: true,
     domains: [
-      'res.cloudinary.com', 
+      // 'res.cloudinary.com' - Removed as we're not using Cloudinary anymore
       'cdn.panopticoncr.com', 
       'via.placeholder.com',
       'r2-image-worker.aasim-ss.workers.dev',
       'images.better-badges.com'
     ],
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '/**',
-      },
+      // Removed Cloudinary pattern as we're not using it anymore
       {
         protocol: 'https',
         hostname: 'cdn.panopticoncr.com',
@@ -62,12 +58,15 @@ const nextConfig = {
   },
   // Enable React strict mode for better development experience
   reactStrictMode: true,
+  // Disable build ID in static output to prevent unnecessary warnings
+  generateBuildId: async () => 'static-build',
 };
 
 // Set up development platform only in development mode
 if (process.env.NODE_ENV === 'development') {
   try {
     await setupDevPlatform();
+    console.log('🔧 Running in development mode with full API functionality enabled');
   } catch (e) {
     console.warn('Failed to setup dev platform:', e);
   }

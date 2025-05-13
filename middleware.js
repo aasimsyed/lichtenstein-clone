@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// For static export, we need a middleware that doesn't rely on dynamic features
+// This is a minimal middleware that will be ignored in static export mode
 
-export async function middleware(request) {
-  const token = await getToken({ req: request });
-  
-  if (!token) {
-    // Not signed in
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/auth/signin", request.url));
-    }
-  }
-  
-  return NextResponse.next();
+export const config = {
+  matcher: [],
+};
+
+export function middleware() {
+  // This function is intentionally empty
+  // It's only here to satisfy the Next.js requirement
+  // but won't run in static export mode
 } 

@@ -1,7 +1,6 @@
 'use client';
 
-import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react';
-
-export function SessionProvider({ children }) {
-  return <NextAuthSessionProvider>{children}</NextAuthSessionProvider>;
+// Dummy session provider since we've moved to Auth0
+export default function SessionProvider({ children }) {
+  return children;
 } 

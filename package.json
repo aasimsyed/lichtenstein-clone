@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev-auth": "NODE_ENV=development NEXTAUTH_URL=http://localhost:3000 next dev --turbopack",
     "build": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 next build",
     "static-export": "NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPE_CHECKS=1 next build",
     "start": "next start",
@@ -15,7 +16,7 @@
     "deploy:pages": "npm run static-export && wrangler pages publish out"
   },
   "dependencies": {
-    "cloudinary": "^2.6.0",
+    "@auth0/auth0-react": "^2.3.0",
     "next": "15.2.4",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
