@@ -5,8 +5,8 @@
 
 // Fallback values for development/testing - ONLY used if .env.local is missing
 const fallbackValues = {
-  NEXT_PUBLIC_AUTH0_DOMAIN: process.env.NEXT_PUBLIC_AUTH0_DOMAIN || 'dev-pits6x7daaksl8kp.us.auth0.com',
-  NEXT_PUBLIC_AUTH0_CLIENT_ID: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || 'YPFdzB2T6YZvJeVdAD1Xx1tPox8Klx5b',
+  NEXT_PUBLIC_AUTH0_DOMAIN: 'dev-bni81hnbp4ngsa2s.us.auth0.com',
+  NEXT_PUBLIC_AUTH0_CLIENT_ID: 'gXjCpDCJr8Ei8hJGvtymWnx7PkPvZ6Y5'
 };
 
 // Get an environment variable with fallback for static exports
