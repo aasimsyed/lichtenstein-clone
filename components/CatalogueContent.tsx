@@ -140,6 +140,7 @@ export default function CatalogueContent() {
   // New filename prefix filter states
   const [filterBBB, setFilterBBB] = useState(false);
   const [filterBBC, setFilterBBC] = useState(false);
+  const [filterBBA, setFilterBBA] = useState(false);
   const [filterD, setFilterD] = useState(false);
   const [filterRGG, setFilterRGG] = useState(false);
   
@@ -233,7 +234,7 @@ export default function CatalogueContent() {
       }
 
       // --- Apply Checkbox Filters ---
-      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterD || filterRGG ||
+      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterBBA || filterD || filterRGG ||
                               filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines;
 
       if (anyFilterActive) {
@@ -244,6 +245,7 @@ export default function CatalogueContent() {
         if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC')) passesFilter = true;
         if (filterBBB && work.catalogueNumber.startsWith('BBB')) passesFilter = true;
         if (filterBBC && work.catalogueNumber.startsWith('BBC')) passesFilter = true;
+        if (filterBBA && work.catalogueNumber.startsWith('BBA')) passesFilter = true;
         if (filterD && work.catalogueNumber.startsWith('D')) passesFilter = true;
         if (filterRGG && work.catalogueNumber.startsWith('RGG')) passesFilter = true;
         // Add specific checks if prefixes differ or exact match is needed
@@ -305,7 +307,7 @@ export default function CatalogueContent() {
 
   }, [
     r2Images, contextLoading, searchTerm,
-    seriesA, seriesB, filterBBB, filterBBC, filterD, filterRGG,
+    seriesA, seriesB, filterBBB, filterBBC, filterBBA, filterD, filterRGG,
     filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines,
     sortBy, resultsPerPage, currentPage
   ]);
@@ -354,6 +356,7 @@ export default function CatalogueContent() {
   const handleSeriesBChange = () => handleFilterChange(setSeriesB);
   const handleBBBChange = () => handleFilterChange(setFilterBBB);
   const handleBBCChange = () => handleFilterChange(setFilterBBC);
+  const handleBBAChange = () => handleFilterChange(setFilterBBA);
   const handleDChange = () => handleFilterChange(setFilterD);
   const handleRGGChange = () => handleFilterChange(setFilterRGG);
   const handlePreBetterBadgesChange = () => handleFilterChange(setFilterPreBetterBadges);
@@ -563,6 +566,15 @@ export default function CatalogueContent() {
                     <label className="filter-label">
                       <input
                         type="checkbox"
+                        checked={filterBBA}
+                        onChange={handleBBAChange}
+                        className="filter-checkbox"
+                      />
+                      BBA
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
                         checked={filterBBB}
                         onChange={handleBBBChange}
                         className="filter-checkbox"
@@ -730,6 +742,15 @@ export default function CatalogueContent() {
                         className="filter-checkbox"
                       />
                       B
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
+                        checked={filterBBA}
+                        onChange={handleBBAChange}
+                        className="filter-checkbox"
+                      />
+                      BBA
                     </label>
                     <label className="filter-label">
                       <input

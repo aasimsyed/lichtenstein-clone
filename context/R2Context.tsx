@@ -48,13 +48,17 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       
       // Add cache busting for refresh requests
       const cacheBuster = refresh ? `&t=${Date.now()}` : '';
-      const response = await fetch(`${R2_WORKER_BASE_URL}/?list=true${cacheBuster}`);
+      const fetchUrl = `${R2_WORKER_BASE_URL}/?list=true${cacheBuster}`;
+      console.log('Fetching from URL:', fetchUrl);
+      const response = await fetch(fetchUrl);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch images from R2 worker: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('Raw R2 response:', data);
+      console.log('Number of objects in response:', data.objects?.length || 0);
 
       // Process worker response with memoization
       const formattedImages = (data.objects || []).map((obj: any) => {
@@ -76,6 +80,9 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       });
 
       // Use the formatted images directly from the worker
+      console.log('Setting images, count:', formattedImages?.length || 0);
+      console.log('Sample image keys (first 10):', formattedImages?.slice(0, 10).map(img => img.key));
+      console.log('Sample image IDs (first 10):', formattedImages?.slice(0, 10).map(img => img.id));
       setImages(formattedImages || []);
       setError(null);
     } catch (err) {

@@ -34,6 +34,10 @@ export default function AdminPage() {
     );
   }, [images, searchKeyword]);
 
+  // Debug: Log current state after filteredImages is computed
+  console.log('AdminPage render - Images count:', images.length);
+  console.log('AdminPage render - Filtered images count:', filteredImages.length);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFiles(e.target.files);
@@ -156,25 +160,30 @@ export default function AdminPage() {
       let errorCount = 0;
       const fileArray = Array.from(files);
       
+      console.log('=== UPLOAD STARTED ===');
+      console.log('Files to upload:', fileArray.map(f => f.name));
+      console.log('Current images before upload:', images.length);
+      
       // Process each file sequentially to avoid overwhelming the server
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
         setUploadProgress(prev => ({...prev, [file.name]: 0}));
         
         try {
-          // Generate a unique filename
-          const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
+          // Use original filename
           const originalName = file.name;
-          const newFilename = `${timestamp}-${originalName}`;
+          const newFilename = originalName;
           
           console.log(`Uploading file ${i+1}/${fileArray.length}: ${newFilename}`);
+          console.log('File details:', { name: file.name, size: file.size, type: file.type });
+          console.log('Current images count before upload:', images.length);
           
           // Upload directly to the R2 worker
           const R2_WORKER_BASE_URL = 'https://r2-image-worker.aasim-ss.workers.dev';
           
           // Create a FormData object for the worker
           const formData = new FormData();
-          formData.append('file', file, newFilename);
+          formData.append('file', file);
           
           // Create an AbortController to handle timeouts
           const controller = new AbortController();
@@ -222,7 +231,9 @@ export default function AdminPage() {
           }
           
           // Parse response
-          await response.json();
+          const uploadResult = await response.json();
+          console.log('Upload response:', uploadResult);
+          console.log('Uploaded file key/filename:', uploadResult.key);
           
           // Update progress
           setUploadProgress(prev => ({...prev, [file.name]: 100}));
@@ -238,8 +249,38 @@ export default function AdminPage() {
       
       if (successCount > 0) {
         setUploadSuccess(true);
-        // Refresh the image list after all uploads
-        await refreshImages();
+        console.log('Upload completed successfully, refreshing images...');
+        console.log('Images count before refresh:', images.length);
+        
+        // Capture uploaded filenames before setTimeout
+        const uploadedFilenames = fileArray.map(f => f.name);
+        console.log('=== UPLOAD COMPLETED ===');
+        console.log(`Successfully uploaded ${successCount}/${fileArray.length} files`);
+        
+        // Wait a moment before refreshing to allow R2 to process
+        setTimeout(async () => {
+          console.log('Starting image refresh after delay...');
+          try {
+            await refreshImages();
+            console.log('Images count after refresh:', images.length);
+            
+            // Check if uploaded files are in the refreshed list
+            console.log('Files that were uploaded:', uploadedFilenames);
+            
+            uploadedFilenames.forEach(filename => {
+              const found = images.find(img => 
+                img.key === filename || 
+                img.id === filename || 
+                img.key.includes(filename) ||
+                img.id.includes(filename)
+              );
+              console.log(`Uploaded file "${filename}" found in list:`, !!found, found?.key);
+            });
+            
+          } catch (refreshError) {
+            console.error('Error during refresh:', refreshError);
+          }
+        }, 2000); // 2 second delay
       }
       
       if (errorCount > 0) {
@@ -366,6 +407,16 @@ export default function AdminPage() {
               )}
             </div>
             <div className="admin-images-actions">
+              <button 
+                onClick={async () => {
+                  console.log('Manual refresh triggered');
+                  await refreshImages();
+                  console.log('Manual refresh completed');
+                }}
+                className="admin-action-button"
+              >
+                🔄 Refresh Images
+              </button>
               <button 
                 onClick={selectAllImages} 
                 className="admin-action-button"

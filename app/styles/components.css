@@ -597,3 +597,227 @@ div:not(.btn), span:not(.btn), p, a:not(.btn-primary), h1, h2, h3, h4, h5, h6, l
 #seachBoxButton, #seachBoxButton_mobile {
   right: 5px;
 } 
+
+/* Entry page layout fixes - position metadata beside/over image instead of above */
+html body .entry-page-container {
+  padding-top: 10px !important;
+  margin-top: 0 !important;
+}
+
+html body .entry-page-content {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  align-items: flex-start !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+html body .artwork-title {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+/* Create a sidebar for title and metadata */
+.artwork-info-sidebar {
+  flex: 0 0 300px !important;
+  min-width: 250px !important;
+}
+
+html body .entry-page-content .metadata {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+/* Image container takes remaining space */
+html body .entry-page-content .zoomable-image-container {
+  flex: 1 !important;
+  margin-top: 0 !important;
+  max-width: calc(100% - 320px) !important;
+}
+
+/* Mobile-specific: stack vertically on small screens */
+@media (max-width: 768px) {
+  html body .entry-page-container {
+    padding-top: 5px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  html body .entry-page-content {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .artwork-info-sidebar {
+    flex: none !important;
+    min-width: auto !important;
+  }
+  
+  html body .entry-page-content .zoomable-image-container {
+    max-width: 100% !important;
+  }
+  
+  html body .artwork-title {
+    margin-bottom: 8px !important;
+  }
+  
+  html body .entry-page-content .metadata {
+    margin-bottom: 8px !important;
+  }
+}
+
+/* Artwork content section styles */
+.artwork-content-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.content-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.content-loading {
+  font-style: italic;
+  color: #666;
+  padding: 10px 0;
+}
+
+.content-display-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.content-text {
+  line-height: 1.6;
+  color: #333;
+}
+
+.content-text p {
+  margin-bottom: 12px;
+}
+
+.content-text p:last-child {
+  margin-bottom: 0;
+}
+
+.content-empty {
+  font-style: italic;
+  color: #666;
+  padding: 10px 0;
+}
+
+.content-edit-button {
+  align-self: flex-start;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.content-edit-button:hover {
+  background: #e8e8e8;
+}
+
+.content-edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.content-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.content-textarea:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.content-edit-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.content-save-button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.content-save-button:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.content-save-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.content-cancel-button {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.content-cancel-button:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.content-cancel-button:disabled {
+  background: #f8f8f8;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Mobile adjustments for content section */
+@media (max-width: 768px) {
+  .artwork-content-section {
+    margin-top: 15px;
+    padding-top: 12px;
+  }
+  
+  .content-section-title {
+    font-size: 15px;
+  }
+  
+  .content-textarea {
+    min-height: 100px;
+  }
+  
+  .content-edit-buttons {
+    flex-direction: column;
+  }
+  
+  .content-save-button,
+  .content-cancel-button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+} 
