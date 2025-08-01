@@ -35,7 +35,7 @@ export default function TermsModal() {
           <div className="scroll" id="terms-content">
             <h3>Terms and Conditions</h3>
             
-            <p>Welcome to Roy Lichtenstein: A Catalogue Raisonné.</p>
+            <p>Welcome to Roy Lichtenstein: Image as Virus.</p>
             
             <p>By accessing this website, you agree to be bound by these Terms and Conditions of Use, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.</p>
             

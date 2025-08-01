@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Better Badges: A Catalogue Raisonné",
+  title: "Better Badges: Image as Virus",
   description: "Browse the Better Badges collection, featuring iconic punk and post-punk era badges, pins and memorabilia.",
   icons: {
     icon: '/favicon.svg',

@@ -100,7 +100,7 @@ export default function Header() {
         <div id="headerMain">
           <div className="logo">
             <Link href="/">
-              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={550} height={40} priority />
+              <Image src="/img/logo.svg" alt="Better Badges: Image as Virus" width={550} height={40} priority />
             </Link>
           </div>
           
@@ -116,7 +116,7 @@ export default function Header() {
         <div id="headerMoble">
           <div className="mobile-logo">
             <Link href="/">
-              <Image src="/img/logo.svg" alt="Better Badges: A Catalogue Raisonné" width={320} height={20} />
+              <Image src="/img/logo.svg" alt="Better Badges: Image as Virus" width={320} height={20} />
             </Link>
           </div>
           <div className="mobile-toggle" onClick={toggleMobileMenu}>

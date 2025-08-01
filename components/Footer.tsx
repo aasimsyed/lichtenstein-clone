@@ -9,7 +9,7 @@ export default function Footer() {
     <footer>
       <div className="footer-content">
         <div className="footer-section">
-          <h4>Better Badges: A Catalogue Raisonné</h4>
+          <h4>Better Badges: Image as Virus</h4>
           <ul>
             <li><Link href="/resources/?Guide+to+the+Catalogue">Guide to the Catalogue</Link></li>
           </ul>
