@@ -34,10 +34,22 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
     setIsOpen(!isOpen);
   };
 
+
+
   // Handle option selection
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
+  };
+
+  // Create button props to satisfy strict linters
+  const buttonProps = {
+    type: "button" as const,
+    id,
+    className: "custom-dropdown-button",
+    onClick: toggleDropdown,
+    "aria-haspopup": "listbox" as const,
+    "aria-expanded": isOpen,
   };
 
   // Close dropdown when clicking outside
@@ -61,14 +73,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
     <div className="custom-dropdown-container" ref={dropdownRef}>
       <label htmlFor={id} className="custom-dropdown-label">{label}</label>
       <div className="custom-dropdown">
-        <button 
-          type="button"
-          id={id}
-          className="custom-dropdown-button"
-          onClick={toggleDropdown}
-          aria-haspopup="listbox"
-          aria-expanded={isOpen}
-        >
+        <button {...buttonProps}>
           <span className="selected-value">{selectedOption.label}</span>
           <span className="dropdown-arrow">▼</span>
         </button>
@@ -76,20 +81,22 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
         {isOpen && (
           <div 
             className="custom-dropdown-menu" 
-            role="listbox"
             aria-labelledby={id}
+            aria-label={`${label} options`}
           >
-            {options.map(option => (
-              <div 
-                key={option.value}
-                className={`dropdown-item ${option.value === value ? 'selected' : ''}`}
-                onClick={() => handleSelect(option.value)}
-                role="option"
-                aria-selected={option.value === value}
-              >
-                {option.label}
-              </div>
-            ))}
+            {options.map(option => {
+              const optionProps = {
+                className: `dropdown-item ${option.value === value ? 'selected' : ''}`,
+                onClick: () => handleSelect(option.value),
+                role: "option" as const,
+                "aria-selected": option.value === value,
+              };
+              return (
+                <div key={option.value} {...optionProps}>
+                  {option.label}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -135,12 +142,14 @@ export default function CatalogueContent() {
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
+  const [filterAAA, setFilterAAA] = useState(false);
   const [seriesB, setSeriesB] = useState(false);
   
   // New filename prefix filter states
   const [filterBBB, setFilterBBB] = useState(false);
   const [filterBBC, setFilterBBC] = useState(false);
   const [filterBBA, setFilterBBA] = useState(false);
+  const [filterC, setFilterC] = useState(false);
   const [filterD, setFilterD] = useState(false);
   const [filterRGG, setFilterRGG] = useState(false);
   
@@ -234,18 +243,20 @@ export default function CatalogueContent() {
       }
 
       // --- Apply Checkbox Filters ---
-      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterBBA || filterD || filterRGG ||
+      const anyFilterActive = seriesA || filterAAA || seriesB || filterBBB || filterBBC || filterBBA || filterC || filterD || filterRGG ||
                               filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines;
 
       if (anyFilterActive) {
         let passesFilter = false;
         // Use simple startsWith checks based on catalogueNumber
-        if (seriesA && work.catalogueNumber.startsWith('A')) passesFilter = true;
-        // Refined check for B series (starts with B, but not BBB or BBC)
-        if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC')) passesFilter = true;
+        if (seriesA && work.catalogueNumber.startsWith('A') && !work.catalogueNumber.startsWith('AAA')) passesFilter = true;
+        if (filterAAA && work.catalogueNumber.startsWith('AAA')) passesFilter = true;
+        // Refined check for B series (starts with B, but not BBB, BBC, or BBA)
+        if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC') && !work.catalogueNumber.startsWith('BBA')) passesFilter = true;
         if (filterBBB && work.catalogueNumber.startsWith('BBB')) passesFilter = true;
         if (filterBBC && work.catalogueNumber.startsWith('BBC')) passesFilter = true;
         if (filterBBA && work.catalogueNumber.startsWith('BBA')) passesFilter = true;
+        if (filterC && work.catalogueNumber.startsWith('C')) passesFilter = true;
         if (filterD && work.catalogueNumber.startsWith('D')) passesFilter = true;
         if (filterRGG && work.catalogueNumber.startsWith('RGG')) passesFilter = true;
         // Add specific checks if prefixes differ or exact match is needed
@@ -307,7 +318,7 @@ export default function CatalogueContent() {
 
   }, [
     r2Images, contextLoading, searchTerm,
-    seriesA, seriesB, filterBBB, filterBBC, filterBBA, filterD, filterRGG,
+    seriesA, filterAAA, seriesB, filterBBB, filterBBC, filterBBA, filterC, filterD, filterRGG,
     filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines,
     sortBy, resultsPerPage, currentPage
   ]);
@@ -321,7 +332,7 @@ export default function CatalogueContent() {
 
   // Process search query from URL on load - Keep this
   useEffect(() => {
-    const query = searchParams.get('search');
+    const query = searchParams?.get('search');
     if (query && query !== searchTerm) {
       setSearchTerm(query);
       // No need to fetch, the main useEffect will handle the filtering
@@ -353,10 +364,12 @@ export default function CatalogueContent() {
 
   // Series filter handlers
   const handleSeriesAChange = () => handleFilterChange(setSeriesA);
+  const handleAAAChange = () => handleFilterChange(setFilterAAA);
   const handleSeriesBChange = () => handleFilterChange(setSeriesB);
   const handleBBBChange = () => handleFilterChange(setFilterBBB);
   const handleBBCChange = () => handleFilterChange(setFilterBBC);
   const handleBBAChange = () => handleFilterChange(setFilterBBA);
+  const handleCChange = () => handleFilterChange(setFilterC);
   const handleDChange = () => handleFilterChange(setFilterD);
   const handleRGGChange = () => handleFilterChange(setFilterRGG);
   const handlePreBetterBadgesChange = () => handleFilterChange(setFilterPreBetterBadges);
@@ -557,6 +570,15 @@ export default function CatalogueContent() {
                     <label className="filter-label">
                       <input
                         type="checkbox"
+                        checked={filterAAA}
+                        onChange={handleAAAChange}
+                        className="filter-checkbox"
+                      />
+                      AAA
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
                         className="filter-checkbox"
@@ -589,6 +611,15 @@ export default function CatalogueContent() {
                         className="filter-checkbox"
                       />
                       BBC
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
+                        checked={filterC}
+                        onChange={handleCChange}
+                        className="filter-checkbox"
+                      />
+                      C
                     </label>
                     <label className="filter-label">
                       <input
@@ -737,6 +768,15 @@ export default function CatalogueContent() {
                     <label className="filter-label">
                       <input
                         type="checkbox"
+                        checked={filterAAA}
+                        onChange={handleAAAChange}
+                        className="filter-checkbox"
+                      />
+                      AAA
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
                         className="filter-checkbox"
@@ -769,6 +809,15 @@ export default function CatalogueContent() {
                         className="filter-checkbox"
                       />
                       BBC
+                    </label>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
+                        checked={filterC}
+                        onChange={handleCChange}
+                        className="filter-checkbox"
+                      />
+                      C
                     </label>
                     <label className="filter-label">
                       <input

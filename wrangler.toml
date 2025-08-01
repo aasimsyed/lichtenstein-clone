@@ -13,7 +13,7 @@ workers_dev = true
 # For Cloudflare Pages integration
 # [site]
 # bucket = "out"
-# pages_build_output_dir = "out"
+pages_build_output_dir = "out"
 
 [triggers]
 crons = []

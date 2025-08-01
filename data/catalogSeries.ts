@@ -42,6 +42,12 @@ export const catalogSeries = [
     link: "/big-series",
   },
   {
+    id: "c-series",
+    title: "C-series",
+    description: "Read about the C-series artwork entries.",
+    link: "/c-series",
+  },
+  {
     id: "d-series",
     title: "D-series",
     description: "Read about the D-series artwork entries.",

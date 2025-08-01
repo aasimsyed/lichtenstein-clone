@@ -18,14 +18,24 @@ function EditableContentSection({ artworkId }: { artworkId: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const [tempContent, setTempContent] = useState('');
 
+  // R2 worker configuration
+  const R2_WORKER_BASE_URL = 'https://r2-image-worker.aasim-ss.workers.dev';
+  const CONTENT_FILE_KEY = 'artwork-content.json';
+
   const loadContent = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/artwork-content/${encodeURIComponent(artworkId)}`);
+      
+      // Fetch content file directly from R2 worker
+      const response = await fetch(`${R2_WORKER_BASE_URL}/${CONTENT_FILE_KEY}`);
+      
       if (response.ok) {
-        const data = await response.json();
-        setContent(data.content || '');
-      } else if (response.status !== 404) {
+        const allContent = await response.json();
+        setContent(allContent[artworkId] || '');
+      } else if (response.status === 404) {
+        // File doesn't exist yet, that's okay
+        setContent('');
+      } else {
         console.error('Failed to load content:', response.statusText);
       }
     } catch (error) {
@@ -33,7 +43,7 @@ function EditableContentSection({ artworkId }: { artworkId: string }) {
     } finally {
       setIsLoading(false);
     }
-  }, [artworkId]);
+  }, [artworkId, R2_WORKER_BASE_URL, CONTENT_FILE_KEY]);
 
   // Load content on mount
   useEffect(() => {
@@ -53,15 +63,42 @@ function EditableContentSection({ artworkId }: { artworkId: string }) {
   const saveContent = async () => {
     try {
       setIsSaving(true);
-      const response = await fetch(`/api/artwork-content/${encodeURIComponent(artworkId)}`, {
+      
+      // First, fetch existing content
+      let allContent: Record<string, string> = {};
+      
+      try {
+        const response = await fetch(`${R2_WORKER_BASE_URL}/${CONTENT_FILE_KEY}`);
+        if (response.ok) {
+          allContent = await response.json();
+        }
+      } catch (error) {
+        console.log('No existing content file, creating new one');
+      }
+      
+      // Update content for this artwork
+      if (tempContent && tempContent.trim()) {
+        allContent[artworkId] = tempContent.trim();
+      } else {
+        // Remove empty content
+        delete allContent[artworkId];
+      }
+      
+      // Save updated content back to R2
+      const formData = new FormData();
+      const jsonBlob = new Blob([JSON.stringify(allContent, null, 2)], { 
+        type: 'application/json' 
+      });
+      formData.append('file', jsonBlob, CONTENT_FILE_KEY);
+
+      const uploadResponse = await fetch(`${R2_WORKER_BASE_URL}/upload`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: tempContent }),
+        body: formData,
+        mode: 'cors',
+        credentials: 'omit',
       });
 
-      if (response.ok) {
+      if (uploadResponse.ok) {
         setContent(tempContent);
         setIsEditing(false);
         setTempContent('');
@@ -196,7 +233,7 @@ export function ArtworkContent() {
             <h1 className="artwork-title">{parsedInfo.title || 'Untitled'}</h1>
             <div className="metadata">
               {parsedInfo.catalogNumber && <p><strong>Catalogue ID:</strong> {parsedInfo.catalogNumber}</p>}
-              {parsedInfo.size && <p><strong>Size:</strong> {parsedInfo.size}mm</p>}
+              {parsedInfo.size && <p><strong>Size:</strong> {parsedInfo.size}</p>}
               {parsedInfo.artist && <p><strong>Artist:</strong> {parsedInfo.artist}</p>}
             </div>
             <EditableContentSection artworkId={selectedImage.id} />
