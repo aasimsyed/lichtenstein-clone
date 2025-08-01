@@ -41,6 +41,26 @@ export function useAuth() {
       },
     });
   }, [logout]);
+
+  // Handle Google-specific login
+  const loginWithGoogle = useCallback((returnTo = '/admin') => {
+    // Check if Auth0 is properly configured
+    const domain = getEnv('NEXT_PUBLIC_AUTH0_DOMAIN');
+    const clientId = getEnv('NEXT_PUBLIC_AUTH0_CLIENT_ID');
+    
+    if (!domain || !clientId) {
+      console.error('Auth0 configuration missing. Domain or Client ID not set.');
+      alert('Authentication is not configured properly. Please contact the administrator.');
+      return;
+    }
+    
+    loginWithRedirect({
+      appState: { returnTo },
+      authorizationParams: {
+        connection: 'google-oauth2'
+      }
+    });
+  }, [loginWithRedirect]);
   
   // Get user's token for API calls
   const getToken = useCallback(async () => {
@@ -57,6 +77,7 @@ export function useAuth() {
     isLoading,
     user,
     login,
+    loginWithGoogle,
     logout: handleLogout,
     getToken,
     error,
