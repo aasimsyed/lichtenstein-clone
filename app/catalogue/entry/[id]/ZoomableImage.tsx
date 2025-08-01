@@ -215,7 +215,7 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
       
       // Apply transform directly - no requestAnimationFrame to avoid timing issues
       if (imageRef.current) {
-        imageRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0) scale(${zoomLevel})`;
+        imageRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0) scale(${zoomLevelRef.current})`;
       }
     } else if (e.touches.length === 2 && touchStartRef.current.distance !== null) {
       // Two touches - pinching
@@ -224,21 +224,20 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
       
       // Calculate new zoom based on pinch gesture
       const scaleFactor = currentDistance / initialDistance;
-      const newZoom = Math.min(Math.max(zoomLevel * scaleFactor, 0.5), 8);
+      const newZoom = Math.min(Math.max(zoomLevelRef.current * scaleFactor, 0.5), 8);
       
       // Update the zoom level
       if (newZoom >= 0.5 && newZoom <= 8) {
+        // Update the ref first for immediate use
+        zoomLevelRef.current = newZoom;
+        
         // Apply zoom directly to DOM for immediate feedback
         if (imageRef.current) {
           imageRef.current.style.transform = `translate3d(${positionRef.current.x}px, ${positionRef.current.y}px, 0) scale(${newZoom})`;
         }
         
-        // Update midpoint position for smoother zooming
-        const midpoint = getMidpoint(e.touches);
-        dragStartRef.current = {
-          x: midpoint.x - positionRef.current.x,
-          y: midpoint.y - positionRef.current.y
-        };
+        // Update state for UI display (throttled to avoid excessive re-renders)
+        setZoomLevel(newZoom);
       }
       
       // Update touch reference for next move event
@@ -246,11 +245,6 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
         x: getMidpoint(e.touches).x,
         y: getMidpoint(e.touches).y,
         distance: currentDistance
-      };
-      
-      // Update zoom level with slight delay
-      if (newZoom >= 0.5 && newZoom <= 8) {
-        setZoomLevel(newZoom);
       }
     }
   };
@@ -272,8 +266,8 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
     // Reset touch distance
     touchStartRef.current.distance = null;
     
-    // Update position state to match the current drag position
-    positionRef.current = { x: 0, y: 0 };
+    // DO NOT reset position - keep the current position to prevent recentering
+    // positionRef.current should maintain its current value
     
     // Set dragging state to false after other operations
     isDraggingRef.current = false;
