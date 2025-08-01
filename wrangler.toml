@@ -1,8 +1,5 @@
-name = "r2-image-worker"
-main = "r2-worker.js"
+name = "lichtenstein-clone"
 compatibility_date = "2022-11-30"
-compatibility_flags = ["nodejs_compat"]
-workers_dev = true
 
 # Specify Node.js compatibility version for Pages
 # [build]
@@ -15,8 +12,9 @@ workers_dev = true
 # bucket = "out"
 pages_build_output_dir = "out"
 
-[triggers]
-crons = []
+# Triggers are for Workers, not needed for Pages
+# [triggers]
+# crons = []
 
 # Bind the R2 bucket
 [[r2_buckets]]

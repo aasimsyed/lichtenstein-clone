@@ -151,10 +151,12 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
   };
   
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent default browser behavior and stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (e.touches.length === 1) {
       // Single touch - dragging
-      e.preventDefault();
-      
       const touch = e.touches[0];
       dragStartRef.current = {
         x: touch.clientX - positionRef.current.x,
@@ -178,8 +180,6 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
       isDraggingRef.current = true;
     } else if (e.touches.length === 2) {
       // Two touches - pinching
-      e.preventDefault();
-      
       // Disable transitions during pinch zoom
       if (imageRef.current) {
         imageRef.current.style.transition = 'none';
@@ -198,7 +198,9 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault(); // Prevent page scrolling
+    // Prevent all default browser behavior and stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     if (e.touches.length === 1 && isDraggingRef.current) {
       // Single touch - dragging
@@ -253,7 +255,11 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
     }
   };
   
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Prevent default browser behavior and stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!isDraggingRef.current && touchStartRef.current.distance === null) return;
     
     // Remove dragging class and re-enable transitions
@@ -386,8 +392,22 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
       
       {/* Modal for zoomed image */}
       {isModalOpen && (
-        <div className="image-modal-overlay" onClick={closeModal}>
-          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="image-modal-overlay" 
+          onClick={closeModal}
+          style={{
+            touchAction: 'none', // Prevent default browser touch behaviors on the overlay
+            overscrollBehavior: 'none' // Prevent overscroll behaviors
+          }}
+        >
+          <div 
+            className="image-modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              touchAction: 'none', // Prevent default browser touch behaviors on the content
+              overscrollBehavior: 'none' // Prevent overscroll behaviors
+            }}
+          >
             <button className="image-modal-close" onClick={closeModal}>×</button>
             
             <div 
@@ -401,6 +421,14 @@ export default function ZoomableImage({ src, alt, width, height }: ZoomableImage
               onTouchEnd={handleTouchEnd}
               onWheel={handleWheel}
               ref={containerRef}
+              style={{
+                touchAction: 'none', // Prevent default browser touch behaviors like pinch-to-zoom
+                userSelect: 'none', // Prevent text selection
+                WebkitUserSelect: 'none', // Webkit browsers
+                msUserSelect: 'none', // IE/Edge
+                overflow: 'hidden', // Prevent scrolling
+                position: 'relative' // Ensure proper positioning context
+              }}
             >
               <SmoothImage 
                 src={src}
