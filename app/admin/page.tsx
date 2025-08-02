@@ -19,6 +19,11 @@ export default function AdminPage() {
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [renamingImage, setRenamingImage] = useState<string | null>(null);
+  const [newFileName, setNewFileName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameSuccess, setRenameSuccess] = useState(false);
+  const [renameError, setRenameError] = useState<string | null>(null);
   const { logout } = useAuth();
 
   // Filter images based on search keyword
@@ -141,6 +146,89 @@ export default function AdminPage() {
       setDeleteError(error instanceof Error ? error.message : 'Unknown error occurred during deletion');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Handle starting rename mode for an image
+  const startRename = (imageKey: string) => {
+    setRenamingImage(imageKey);
+    // Extract filename without extension for easier editing
+    const filename = imageKey.split('.').slice(0, -1).join('.');
+    setNewFileName(filename);
+    setRenameError(null);
+    setRenameSuccess(false);
+  };
+
+  // Handle canceling rename
+  const cancelRename = () => {
+    setRenamingImage(null);
+    setNewFileName('');
+    setRenameError(null);
+  };
+
+  // Handle file rename
+  const handleRename = async (oldKey: string) => {
+    if (!newFileName.trim()) {
+      setRenameError('Please enter a valid filename');
+      return;
+    }
+
+    // Get the file extension from the original key
+    const extension = oldKey.split('.').pop() || '';
+    const newKey = `${newFileName.trim()}.${extension}`;
+
+    if (oldKey === newKey) {
+      setRenameError('New filename must be different from the current filename');
+      return;
+    }
+
+    // Basic filename validation
+    const invalidChars = /[<>:"/\\|?*]/;
+    if (invalidChars.test(newFileName)) {
+      setRenameError('Filename contains invalid characters');
+      return;
+    }
+
+    setIsRenaming(true);
+    setRenameError(null);
+
+    try {
+      const R2_WORKER_BASE_URL = 'https://r2-image-worker.aasim-ss.workers.dev';
+
+      const response = await fetch(`${R2_WORKER_BASE_URL}/rename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ oldKey, newKey }),
+        mode: 'cors',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to rename file: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Rename result:', result);
+
+      setRenameSuccess(true);
+      setRenamingImage(null);
+      setNewFileName('');
+      
+      // Refresh the images list to show the renamed file
+      await refreshImages();
+
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setRenameSuccess(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Rename error:', error);
+      setRenameError(error instanceof Error ? error.message : 'Unknown error occurred during rename');
+    } finally {
+      setIsRenaming(false);
     }
   };
 
@@ -451,6 +539,18 @@ export default function AdminPage() {
             </div>
           )}
           
+          {renameSuccess && (
+            <div className="rename-success">
+              File renamed successfully!
+            </div>
+          )}
+          
+          {renameError && (
+            <div className="rename-error">
+              Error: {renameError}
+            </div>
+          )}
+          
           {filteredImages.length === 0 && (
             <div className="no-images-message">
               {images.length === 0 ? 'No images available in the bucket.' : 'No images match your search.'}
@@ -461,26 +561,96 @@ export default function AdminPage() {
             {filteredImages.map((image) => (
               <div 
                 key={image.id} 
-                className={`admin-image-card ${selectedImages.has(image.key) ? 'selected' : ''}`}
-                onClick={() => toggleImageSelection(image.key)}
+                className={`admin-image-card ${selectedImages.has(image.key) ? 'selected' : ''} ${renamingImage === image.key ? 'renaming' : ''}`}
               >
-                <div className="admin-image-selection">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedImages.has(image.key)} 
-                    onChange={() => toggleImageSelection(image.key)}
-                    onClick={(e) => e.stopPropagation()}
-                    title={`Select ${image.id}`}
-                    aria-label={`Select ${image.id}`}
-                  />
-                </div>
-                <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
-                <div className="admin-image-info">
-                  <p className="admin-image-name">{image.id}</p>
-                  <p className="admin-image-date">
-                    {new Date(image.created).toLocaleDateString()}
-                  </p>
-                </div>
+                {renamingImage === image.key ? (
+                  // Rename mode
+                  <div className="admin-image-rename-mode">
+                    <div className="admin-image-selection">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedImages.has(image.key)} 
+                        onChange={() => toggleImageSelection(image.key)}
+                        title={`Select ${image.id}`}
+                        aria-label={`Select ${image.id}`}
+                      />
+                    </div>
+                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
+                    <div className="admin-image-rename-controls">
+                      <input
+                        type="text"
+                        value={newFileName}
+                        onChange={(e) => setNewFileName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleRename(image.key);
+                          } else if (e.key === 'Escape') {
+                            cancelRename();
+                          }
+                        }}
+                        className="admin-rename-input"
+                        placeholder="Enter new filename"
+                        disabled={isRenaming}
+                        autoFocus
+                      />
+                      <div className="admin-rename-buttons">
+                        <button
+                          onClick={() => handleRename(image.key)}
+                          disabled={isRenaming || !newFileName.trim()}
+                          className="admin-rename-save"
+                          title="Save rename (Enter)"
+                        >
+                          {isRenaming ? '...' : '✓'}
+                        </button>
+                        <button
+                          onClick={cancelRename}
+                          disabled={isRenaming}
+                          className="admin-rename-cancel"
+                          title="Cancel rename (Escape)"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Normal mode
+                  <div 
+                    className="admin-image-normal-mode"
+                    onClick={() => toggleImageSelection(image.key)}
+                  >
+                    <div className="admin-image-selection">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedImages.has(image.key)} 
+                        onChange={() => toggleImageSelection(image.key)}
+                        onClick={(e) => e.stopPropagation()}
+                        title={`Select ${image.id}`}
+                        aria-label={`Select ${image.id}`}
+                      />
+                    </div>
+                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
+                    <div className="admin-image-info">
+                      <div className="admin-image-name-row">
+                        <p className="admin-image-name" title={image.key}>{image.id}</p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startRename(image.key);
+                          }}
+                          className="admin-rename-button"
+                          title="Rename file"
+                          aria-label={`Rename ${image.id}`}
+                        >
+                          ✏️
+                        </button>
+                      </div>
+                      <p className="admin-image-date">
+                        {new Date(image.created).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

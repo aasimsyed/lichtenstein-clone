@@ -400,4 +400,160 @@
   margin: 0;
   font-size: 0.75rem;
   color: #666;
+}
+
+/* Rename functionality styles */
+.admin-image-card.renaming {
+  border-color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.admin-image-card.renaming:hover {
+  transform: none;
+}
+
+.admin-image-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-rename-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+}
+
+.admin-rename-button:hover {
+  opacity: 1;
+  background-color: #f3f4f6;
+}
+
+.admin-image-rename-controls {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-rename-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-rename-input:focus {
+  outline: none;
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.admin-rename-input:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}
+
+.admin-rename-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.admin-rename-save,
+.admin-rename-cancel {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-rename-save {
+  background-color: #10b981;
+  color: white;
+}
+
+.admin-rename-save:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.admin-rename-save:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.admin-rename-cancel {
+  background-color: #ef4444;
+  color: white;
+}
+
+.admin-rename-cancel:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.admin-rename-cancel:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Rename success/error messages */
+.rename-success {
+  padding: 0.75rem;
+  background-color: #dcfce7;
+  color: #166534;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.rename-error {
+  padding: 0.75rem;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments for rename functionality */
+@media (max-width: 640px) {
+  .admin-image-name-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .admin-rename-button {
+    align-self: flex-end;
+  }
+  
+  .admin-rename-buttons {
+    justify-content: center;
+  }
+  
+  .admin-rename-input {
+    font-size: 0.9rem;
+  }
 } 

@@ -61,7 +61,15 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       console.log('Number of objects in response:', data.objects?.length || 0);
 
       // Process worker response with memoization
-      const formattedImages = (data.objects || []).map((obj: any) => {
+      // Filter out non-image files first
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+      const imageObjects = (data.objects || []).filter((obj: any) => {
+        const key = obj.key || obj.name || '';
+        const extension = key.split('.').pop()?.toLowerCase() || '';
+        return imageExtensions.includes(extension);
+      });
+
+      const formattedImages = imageObjects.map((obj: any) => {
          const key = obj.key || obj.name || '';
          const encodedKey = encodeURIComponent(key);
          const format = key.split('.').pop() || 'jpg';
@@ -80,7 +88,8 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       });
 
       // Use the formatted images directly from the worker
-      console.log('Setting images, count:', formattedImages?.length || 0);
+      console.log('Total objects received:', data.objects?.length || 0);
+      console.log('Image objects after filtering:', formattedImages?.length || 0);
       console.log('Sample image keys (first 10):', formattedImages?.slice(0, 10).map(img => img.key));
       console.log('Sample image IDs (first 10):', formattedImages?.slice(0, 10).map(img => img.id));
       setImages(formattedImages || []);

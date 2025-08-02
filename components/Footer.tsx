@@ -26,6 +26,7 @@ export default function Footer() {
             <li><Link href="/section/?id=Rights+Reproductions">Rights & Reproductions</Link></li>
             <li><Link href="/section/?id=Archives">Archives</Link></li>
             <li><Link href="/resources/?Other+Resources">Other Resources</Link></li>
+            <li><Link href="/admin">Admin</Link></li>
           </ul>
         </div>
       </div>

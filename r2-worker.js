@@ -24,6 +24,11 @@ export default {
       return await handleDelete(request, env);
     }
     
+    // Handle file renames
+    if (url.pathname === '/rename' && request.method === 'POST') {
+      return await handleRename(request, env);
+    }
+    
     // Decode the pathname to handle encoded URLs
     const encodedObjectKey = url.pathname.slice(1); // Remove the leading slash
     const objectKey = decodeURIComponent(encodedObjectKey);
@@ -337,6 +342,146 @@ async function handleDelete(request, env) {
     console.error("Delete error:", error.stack || error);
     return new Response(
       JSON.stringify({ error: error.message || 'Delete operation failed' }), 
+      { 
+        status: 500, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  }
+}
+
+// Handle file renaming from R2
+async function handleRename(request, env) {
+  // Extract the origin from the request for CORS
+  const origin = request.headers.get('Origin') || '*';
+  
+  // Common headers for all responses
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+  
+  try {
+    console.log("Processing rename request");
+    
+    // Get the rename parameters from the request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error("Error parsing request body:", error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    const { oldKey, newKey } = body;
+    
+    if (!oldKey || !newKey) {
+      return new Response(
+        JSON.stringify({ error: 'Both oldKey and newKey are required' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    if (oldKey === newKey) {
+      return new Response(
+        JSON.stringify({ error: 'Old key and new key cannot be the same' }), 
+        { 
+          status: 400, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    // Check if the new key already exists
+    const existingObject = await env.MY_BUCKET.get(newKey);
+    if (existingObject) {
+      return new Response(
+        JSON.stringify({ error: 'A file with the new name already exists' }), 
+        { 
+          status: 409, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    // Get the original object
+    const originalObject = await env.MY_BUCKET.get(oldKey);
+    if (!originalObject) {
+      return new Response(
+        JSON.stringify({ error: 'Original file not found' }), 
+        { 
+          status: 404, 
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          } 
+        }
+      );
+    }
+    
+    // Copy the object to the new key with all its metadata
+    await env.MY_BUCKET.put(newKey, originalObject.body, {
+      httpMetadata: originalObject.httpMetadata,
+      customMetadata: originalObject.customMetadata
+    });
+    
+    // Verify the copy was successful
+    const copiedObject = await env.MY_BUCKET.get(newKey);
+    if (!copiedObject) {
+      throw new Error('Failed to copy object to new location');
+    }
+    
+    // Delete the original object
+    await env.MY_BUCKET.delete(oldKey);
+    
+    console.log(`Successfully renamed ${oldKey} to ${newKey}`);
+    
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        oldKey,
+        newKey,
+        message: `File renamed from ${oldKey} to ${newKey}`
+      }), 
+      { 
+        status: 200, 
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        } 
+      }
+    );
+  } catch (error) {
+    console.error("Rename error:", error.stack || error);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Rename operation failed' }), 
       { 
         status: 500, 
         headers: {
