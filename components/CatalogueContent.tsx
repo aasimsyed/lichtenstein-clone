@@ -142,14 +142,12 @@ export default function CatalogueContent() {
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
-  const [filterAAA, setFilterAAA] = useState(false);
   const [seriesB, setSeriesB] = useState(false);
   
   // New filename prefix filter states
   const [filterBBB, setFilterBBB] = useState(false);
   const [filterBBC, setFilterBBC] = useState(false);
   const [filterBBA, setFilterBBA] = useState(false);
-  const [filterC, setFilterC] = useState(false);
   const [filterD, setFilterD] = useState(false);
   const [filterRGG, setFilterRGG] = useState(false);
   
@@ -243,20 +241,18 @@ export default function CatalogueContent() {
       }
 
       // --- Apply Checkbox Filters ---
-      const anyFilterActive = seriesA || filterAAA || seriesB || filterBBB || filterBBC || filterBBA || filterC || filterD || filterRGG ||
+      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterBBA || filterD || filterRGG ||
                               filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines;
 
       if (anyFilterActive) {
         let passesFilter = false;
         // Use simple startsWith checks based on catalogueNumber
-        if (seriesA && work.catalogueNumber.startsWith('A') && !work.catalogueNumber.startsWith('AAA')) passesFilter = true;
-        if (filterAAA && work.catalogueNumber.startsWith('AAA')) passesFilter = true;
+        if (seriesA && work.catalogueNumber.startsWith('A')) passesFilter = true;
         // Refined check for B series (starts with B, but not BBB, BBC, or BBA)
         if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC') && !work.catalogueNumber.startsWith('BBA')) passesFilter = true;
         if (filterBBB && work.catalogueNumber.startsWith('BBB')) passesFilter = true;
         if (filterBBC && work.catalogueNumber.startsWith('BBC')) passesFilter = true;
         if (filterBBA && work.catalogueNumber.startsWith('BBA')) passesFilter = true;
-        if (filterC && work.catalogueNumber.startsWith('C')) passesFilter = true;
         if (filterD && work.catalogueNumber.startsWith('D')) passesFilter = true;
         if (filterRGG && work.catalogueNumber.startsWith('RGG')) passesFilter = true;
         // Add specific checks if prefixes differ or exact match is needed
@@ -318,7 +314,7 @@ export default function CatalogueContent() {
 
   }, [
     r2Images, contextLoading, searchTerm,
-    seriesA, filterAAA, seriesB, filterBBB, filterBBC, filterBBA, filterC, filterD, filterRGG,
+    seriesA, seriesB, filterBBB, filterBBC, filterBBA, filterD, filterRGG,
     filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines,
     sortBy, resultsPerPage, currentPage
   ]);
@@ -364,12 +360,10 @@ export default function CatalogueContent() {
 
   // Series filter handlers
   const handleSeriesAChange = () => handleFilterChange(setSeriesA);
-  const handleAAAChange = () => handleFilterChange(setFilterAAA);
   const handleSeriesBChange = () => handleFilterChange(setSeriesB);
   const handleBBBChange = () => handleFilterChange(setFilterBBB);
   const handleBBCChange = () => handleFilterChange(setFilterBBC);
   const handleBBAChange = () => handleFilterChange(setFilterBBA);
-  const handleCChange = () => handleFilterChange(setFilterC);
   const handleDChange = () => handleFilterChange(setFilterD);
   const handleRGGChange = () => handleFilterChange(setFilterRGG);
   const handlePreBetterBadgesChange = () => handleFilterChange(setFilterPreBetterBadges);
@@ -570,15 +564,6 @@ export default function CatalogueContent() {
                     <label className="filter-label">
                       <input
                         type="checkbox"
-                        checked={filterAAA}
-                        onChange={handleAAAChange}
-                        className="filter-checkbox"
-                      />
-                      AAA
-                    </label>
-                    <label className="filter-label">
-                      <input
-                        type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
                         className="filter-checkbox"
@@ -612,15 +597,7 @@ export default function CatalogueContent() {
                       />
                       BBC
                     </label>
-                    <label className="filter-label">
-                      <input
-                        type="checkbox"
-                        checked={filterC}
-                        onChange={handleCChange}
-                        className="filter-checkbox"
-                      />
-                      C
-                    </label>
+
                     <label className="filter-label">
                       <input
                         type="checkbox"
@@ -765,15 +742,7 @@ export default function CatalogueContent() {
                       />
                       A
                     </label>
-                    <label className="filter-label">
-                      <input
-                        type="checkbox"
-                        checked={filterAAA}
-                        onChange={handleAAAChange}
-                        className="filter-checkbox"
-                      />
-                      AAA
-                    </label>
+
                     <label className="filter-label">
                       <input
                         type="checkbox"
@@ -810,15 +779,7 @@ export default function CatalogueContent() {
                       />
                       BBC
                     </label>
-                    <label className="filter-label">
-                      <input
-                        type="checkbox"
-                        checked={filterC}
-                        onChange={handleCChange}
-                        className="filter-checkbox"
-                      />
-                      C
-                    </label>
+
                     <label className="filter-label">
                       <input
                         type="checkbox"

@@ -57,7 +57,7 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      console.log('Raw R2 response:', data);
+      // Raw response logging removed to improve mobile performance
       console.log('Number of objects in response:', data.objects?.length || 0);
 
       // Process worker response with memoization
@@ -90,8 +90,7 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
       // Use the formatted images directly from the worker
       console.log('Total objects received:', data.objects?.length || 0);
       console.log('Image objects after filtering:', formattedImages?.length || 0);
-      console.log('Sample image keys (first 10):', formattedImages?.slice(0, 10).map(img => img.key));
-      console.log('Sample image IDs (first 10):', formattedImages?.slice(0, 10).map(img => img.id));
+      // Sample logging removed to improve mobile performance
       setImages(formattedImages || []);
       setError(null);
     } catch (err) {

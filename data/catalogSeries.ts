@@ -11,12 +11,7 @@ export const catalogSeries = [
     description: "Read about the B-series artwork entries.",
     link: "/b-series",
   },
-  {
-    id: "aaa-series",
-    title: "AAA-series",
-    description: "Read about the AAA-series artwork entries.",
-    link: "/aaa-series",
-  },
+
   {
     id: "bba-series",
     title: "BBA-series",
@@ -41,12 +36,7 @@ export const catalogSeries = [
     description: "Read about the Big-series artwork entries.",
     link: "/big-series",
   },
-  {
-    id: "c-series",
-    title: "C-series",
-    description: "Read about the C-series artwork entries.",
-    link: "/c-series",
-  },
+
   {
     id: "d-series",
     title: "D-series",

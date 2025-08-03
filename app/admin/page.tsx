@@ -39,9 +39,8 @@ export default function AdminPage() {
     );
   }, [images, searchKeyword]);
 
-  // Debug: Log current state after filteredImages is computed
-  console.log('AdminPage render - Images count:', images.length);
-  console.log('AdminPage render - Filtered images count:', filteredImages.length);
+  // Debug: Log current state after filteredImages is computed (only when changed)
+  // Removed excessive logging to prevent mobile performance issues
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -575,7 +574,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
+                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
                     <div className="admin-image-rename-controls">
                       <input
                         type="text"
@@ -629,7 +628,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" />
+                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
                     <div className="admin-image-info">
                       <div className="admin-image-name-row">
                         <p className="admin-image-name" title={image.key}>{image.id}</p>

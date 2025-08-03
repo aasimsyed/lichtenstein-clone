@@ -380,6 +380,10 @@
   width: 100%;
   height: 150px;
   object-fit: cover;
+  /* Mobile performance optimizations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: auto;
 }
 
 .admin-image-info {
