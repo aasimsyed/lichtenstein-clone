@@ -5,18 +5,26 @@ const nextConfig = {
   // Only enable static export for production
   ...(process.env.NODE_ENV !== 'development' && { output: 'export' }),
   
-  // Images configuration
+  // Images configuration with custom loader
   images: {
-    unoptimized: true,
+    // Enable optimization with custom loader
+    unoptimized: false,
+    // Custom loader for image optimization
+    loader: 'custom',
+    loaderFile: './app/utils/image-optimization.ts',
+    // Supported formats
+    formats: ['image/webp', 'image/avif'],
+    // Device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Image sizes for different breakpoints  
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     domains: [
-      // 'res.cloudinary.com' - Removed as we're not using Cloudinary anymore
       'cdn.panopticoncr.com', 
       'via.placeholder.com',
       'r2-image-worker.aasim-ss.workers.dev',
       'images.better-badges.com'
     ],
     remotePatterns: [
-      // Removed Cloudinary pattern as we're not using it anymore
       {
         protocol: 'https',
         hostname: 'cdn.panopticoncr.com',

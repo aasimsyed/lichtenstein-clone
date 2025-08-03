@@ -1,4 +1,4 @@
-// Image optimization utility for Cloudflare Images transformations
+// Image optimization utility for Next.js custom loader
 // This enables dynamic resizing and optimization of R2 images
 
 export interface ImageSizeConfig {
@@ -39,10 +39,6 @@ export function getOptimizedImageUrl(
   // Handle both predefined sizes and custom configs
   const config = typeof size === 'string' ? IMAGE_SIZES[size] : size;
   
-  // Extract the image path from the R2 worker URL
-  const urlObj = new URL(originalUrl);
-  const imagePath = urlObj.pathname;
-  
   // Build transformation parameters
   const params: string[] = [];
   
@@ -52,9 +48,13 @@ export function getOptimizedImageUrl(
   if (config.format) params.push(`f=${config.format}`);
   if (config.fit) params.push(`fit=${config.fit}`);
   
-  // Use Cloudflare's image transformation endpoint
-  // This works with any publicly accessible image, including R2
-  const transformationUrl = `/cdn-cgi/image/${params.join(',')}${originalUrl}`;
+  // Use R2 worker's image transformation endpoint as fallback
+  // Extract the image key from the R2 URL
+  const imageUrlObj = new URL(originalUrl);
+  const imageKey = imageUrlObj.pathname.slice(1); // Remove leading slash
+  
+  // Build transformation URL using R2 worker
+  const transformationUrl = `https://r2-image-worker.aasim-ss.workers.dev/${imageKey}?${params.join('&')}`;
   
   return transformationUrl;
 }
@@ -76,19 +76,39 @@ export function getResponsiveImageUrls(originalUrl: string) {
 /**
  * Get the appropriate image size based on context
  */
+/**
+ * Next.js Image Custom Loader
+ * This function is called by Next.js Image component for optimization
+ */
+export function nextImageLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
+  // For R2 images, extract the image key and build optimized URL
+  if (src.includes('r2-image-worker.aasim-ss.workers.dev')) {
+    const urlObj = new URL(src);
+    const imageKey = urlObj.pathname.slice(1);
+    
+    // Build query params for optimization
+    const params = new URLSearchParams();
+    params.set('w', width.toString());
+    params.set('q', (quality || 85).toString());
+    params.set('f', 'webp'); // Use WebP for better compression
+    
+    return `https://r2-image-worker.aasim-ss.workers.dev/${imageKey}?${params.toString()}`;
+  }
+  
+  // For external images or fallback, return original
+  return src;
+}
+
+// Default export for Next.js custom loader
+export default nextImageLoader;
+
 export function getImageUrlForContext(
   originalUrl: string, 
   context: 'admin-thumbnail' | 'series-grid' | 'catalogue-grid' | 'modal' | 'full'
 ): string {
-  const contextSizeMap: Record<typeof context, ImageSize> = {
-    'admin-thumbnail': 'thumbnail',
-    'series-grid': 'small', 
-    'catalogue-grid': 'medium',
-    'modal': 'large',
-    'full': 'full',
-  };
-  
-  return getOptimizedImageUrl(originalUrl, contextSizeMap[context]);
+  // For Next.js Image component usage, return original URL
+  // The optimization will be handled by the custom loader
+  return originalUrl;
 }
 
 /**

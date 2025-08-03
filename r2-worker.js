@@ -19,6 +19,9 @@ export default {
       return await handleUpload(request, env);
     }
     
+    // Image transformations removed due to compatibility issues
+    // TODO: Implement image optimization via separate service
+    
     // Handle file deletions
     if (url.pathname === '/delete' && request.method === 'DELETE') {
       return await handleDelete(request, env);
@@ -254,7 +257,8 @@ function inferContentType(filename) {
   return typeMap[extension] || 'application/octet-stream';
 }
 
-// Handle file deletions from R2
+// Image transformation function removed due to compatibility issues
+
 async function handleDelete(request, env) {
   // Extract the origin from the request for CORS
   const origin = request.headers.get('Origin') || '*';
