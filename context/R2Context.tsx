@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { R2Image } from '../app/utils/r2-client';
+import { getResponsiveImageUrls, getImageUrlForContext, type ImageSize } from '../app/utils/image-optimization';
 
 // Define the context type
 interface R2ContextType {
@@ -11,6 +12,8 @@ interface R2ContextType {
   refreshImages: () => Promise<void>;
   preloadNextImages: (currentIndex: number, count: number) => void;
   isImageReady: (imageUrl: string) => boolean;
+  getOptimizedUrl: (originalUrl: string, context: 'admin-thumbnail' | 'series-grid' | 'catalogue-grid' | 'modal' | 'full') => string;
+  getResponsiveUrls: (originalUrl: string) => Record<string, string>;
 }
 
 // Create the context with default values
@@ -20,7 +23,9 @@ const R2Context = createContext<R2ContextType>({
   error: null,
   refreshImages: async () => {},
   preloadNextImages: () => {},
-  isImageReady: () => false
+  isImageReady: () => false,
+  getOptimizedUrl: () => '',
+  getResponsiveUrls: () => ({})
 });
 
 // Base URL for the R2 Worker - Define it here for direct fetching
@@ -147,6 +152,15 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
     return preloadedImages.has(imageUrl);
   }, []);
 
+  // Image optimization functions
+  const getOptimizedUrl = useCallback((originalUrl: string, context: 'admin-thumbnail' | 'series-grid' | 'catalogue-grid' | 'modal' | 'full') => {
+    return getImageUrlForContext(originalUrl, context);
+  }, []);
+
+  const getResponsiveUrls = useCallback((originalUrl: string) => {
+    return getResponsiveImageUrls(originalUrl);
+  }, []);
+
   // Memoize the context value to avoid unnecessary re-renders
   const contextValue = useMemo(() => ({
     images,
@@ -154,8 +168,10 @@ export function R2Provider({ children }: { children: React.ReactNode }) {
     error,
     refreshImages,
     preloadNextImages,
-    isImageReady
-  }), [images, loading, error, refreshImages, preloadNextImages, isImageReady]);
+    isImageReady,
+    getOptimizedUrl,
+    getResponsiveUrls
+  }), [images, loading, error, refreshImages, preloadNextImages, isImageReady, getOptimizedUrl, getResponsiveUrls]);
 
   return (
     <R2Context.Provider value={contextValue}>

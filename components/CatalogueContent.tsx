@@ -117,7 +117,7 @@ interface ProcessedArtwork extends R2ContextImage {
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages } = useR2Images();
+  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages, getOptimizedUrl } = useR2Images();
   
   // Add refresh button loading state
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -435,10 +435,10 @@ export default function CatalogueContent() {
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
               <div className="image">
                 <SmoothImage
-                  src={artwork.imageUrl}
+                  src={getOptimizedUrl(artwork.imageUrl, 'catalogue-grid')}
                   alt={artwork.title}
-                  width={500}
-                  height={600}
+                  width={400}
+                  height={480}
                   quality={85}
                   cacheKey={artwork.artworkId}
                   preload={index < 9} // Preload first 9 images immediately

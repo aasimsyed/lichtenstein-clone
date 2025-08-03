@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import "@/app/styles/components.css";
 
 export default function HomeSeriesGridClient() {
-  const { images: r2Images } = useR2Images();
+  const { images: r2Images, getOptimizedUrl } = useR2Images();
   const [timestamp, setTimestamp] = useState(Date.now());
 
   // Force rerender on component mount
@@ -33,7 +33,7 @@ export default function HomeSeriesGridClient() {
 
     return {
       ...series,
-      imageUrl: found ? found.url : defaultPlaceholder,
+      imageUrl: found ? getOptimizedUrl(found.url, 'series-grid') : defaultPlaceholder,
     };
   });
 

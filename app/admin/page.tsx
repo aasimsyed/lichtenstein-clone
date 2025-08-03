@@ -13,7 +13,7 @@ export default function AdminPage() {
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const { images, refreshImages } = useR2Images();
+  const { images, refreshImages, getOptimizedUrl } = useR2Images();
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
@@ -574,7 +574,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
+                    <img src={getOptimizedUrl(image.url, 'admin-thumbnail')} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
                     <div className="admin-image-rename-controls">
                       <input
                         type="text"
@@ -628,7 +628,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <img src={image.url} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
+                    <img src={getOptimizedUrl(image.url, 'admin-thumbnail')} alt={image.id} className="admin-image-thumbnail" loading="lazy" decoding="async" />
                     <div className="admin-image-info">
                       <div className="admin-image-name-row">
                         <p className="admin-image-name" title={image.key}>{image.id}</p>
