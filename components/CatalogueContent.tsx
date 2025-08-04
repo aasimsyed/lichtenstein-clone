@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SmoothImage from '../app/components/SmoothImage';
+import SmartImage from './SmartImage';
 import { useR2Images } from '../context/R2Context';
 import { R2Image as R2ContextImage } from '../app/utils/r2-client';
 import { parseFilename } from '../app/utils/filename-utils';
@@ -434,18 +435,17 @@ export default function CatalogueContent() {
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
               <div className="image">
-                <SmoothImage
-                  src={getOptimizedUrl(artwork.imageUrl, 'catalogue-grid')}
+                <SmartImage
+                  src={artwork.imageUrl}
                   alt={artwork.title}
                   width={400}
                   height={480}
                   quality={85}
-                  cacheKey={artwork.artworkId}
-                  preload={index < 9} // Preload first 9 images immediately
+                  priority={index < 9} // Prioritize first 9 images
                   fadeIn={true}
-                  preventRerender={true}
-                  unoptimized={true}
-                  lazyBoundary="500px"
+                  useWebWorker={true}
+                  showCompressionStats={false}
+                  placeholder="blur"
                   onLoad={() => {
                     // Preload next batch when current image loads
                     if (index % 3 === 0) {

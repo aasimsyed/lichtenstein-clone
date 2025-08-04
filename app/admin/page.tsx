@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useR2Images } from '../../context/R2Context';
 import Link from 'next/link';
 import Image from 'next/image';
+import SmartImage from '../../components/SmartImage';
 import '../styles/admin.css';
 import { useAuth } from '../auth/useAuth';
 
@@ -575,7 +576,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <Image 
+                    <SmartImage 
                       src={image.url} 
                       alt={image.id} 
                       width={150} 
@@ -585,6 +586,9 @@ export default function AdminPage() {
                       sizes="(max-width: 768px) 100vw, 150px"
                       placeholder="blur"
                       blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                      showCompressionStats={true}
+                      useWebWorker={true}
+                      fadeIn={true}
                     />
                     <div className="admin-image-rename-controls">
                       <input
@@ -639,7 +643,7 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <Image 
+                    <SmartImage 
                       src={image.url} 
                       alt={image.id} 
                       width={150} 
@@ -649,6 +653,9 @@ export default function AdminPage() {
                       sizes="(max-width: 768px) 100vw, 150px"
                       placeholder="blur"
                       blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                      showCompressionStats={true}
+                      useWebWorker={true}
+                      fadeIn={true}
                     />
                     <div className="admin-image-info">
                       <div className="admin-image-name-row">

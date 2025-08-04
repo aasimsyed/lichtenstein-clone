@@ -4,6 +4,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import Link from 'next/link';
 import SmoothImage from '../app/components/SmoothImage';
+import SmartImage from './SmartImage';
 import { useR2Images } from '../context/R2Context';
 import { parseFilename } from '../app/utils/filename-utils';
 import '../app/styles/carousel.css';
@@ -140,21 +141,19 @@ export default function SelectionsCarousel() {
                           />
                         </div>
                       )}
-                      <SmoothImage 
+                      <SmartImage 
                         src={image.url} 
                         alt={cleanTitle(title)} 
                         width={150}
                         height={150}
                         className={`carousel-image ${imagePreloaded ? 'loaded' : 'loading'}`}
                         quality={70}
-                        loadingColor="#f0f0f0"
-                        unoptimized={true}
-                        lazyBoundary="500px"
                         placeholder="blur"
                         blurDataURL="/placeholder.svg"
-                        preload={index < 6} // Preload first 6 images
+                        priority={index < 6} // Prioritize first 6 images
                         fadeIn={true}
-                        preventRerender={true}
+                        useWebWorker={true}
+                        showCompressionStats={false}
                       />
                     </div>
                     <div className="info">

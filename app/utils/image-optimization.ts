@@ -79,18 +79,25 @@ export function getResponsiveImageUrls(originalUrl: string) {
 /**
  * Next.js Image Custom Loader
  * This function is called by Next.js Image component for optimization
+ * Works with our client-side optimization system
  */
-export function nextImageLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
-  // For R2 images, extract the image key and build optimized URL
+export function nextImageLoader({ src, width, quality }: { src: string; width?: number; quality?: number }) {
+  // Handle cases where width is not provided (for unoptimized images)
+  if (!width) {
+    return src;
+  }
+  
+  // For R2 images, add optimization parameters that our worker will understand
   if (src.includes('r2-image-worker.aasim-ss.workers.dev')) {
     const urlObj = new URL(src);
     const imageKey = urlObj.pathname.slice(1);
     
-    // Build query params for optimization
+    // Build query params for server-side optimization hints
     const params = new URLSearchParams();
     params.set('w', width.toString());
     params.set('q', (quality || 85).toString());
-    params.set('f', 'webp'); // Use WebP for better compression
+    params.set('f', 'webp'); // Request WebP format
+    params.set('opt', 'next'); // Indicate this is from Next.js loader
     
     return `https://r2-image-worker.aasim-ss.workers.dev/${imageKey}?${params.toString()}`;
   }

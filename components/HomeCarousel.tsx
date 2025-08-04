@@ -130,6 +130,7 @@ export default function HomeCarousel() {
                   onLoad={() => handleImageLoad(index)}
                   className={`carousel-image ${loadedImages.includes(index) ? 'loaded' : ''}`}
                   priority={index === 0}
+                  unoptimized={true}
                 />
               </div>
               {/* Caption moved outside the image-wrapper to be below the image */}
