@@ -370,7 +370,7 @@ async function handleImageTransformation(request, env, url) {
           ...getCORSHeaders()
         }
       });
-    } catch (fallbackError) {
+    } catch {
       return new Response('Image processing failed', { 
         status: 500,
         headers: getCORSHeaders()
