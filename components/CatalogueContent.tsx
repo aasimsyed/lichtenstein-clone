@@ -2,8 +2,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import SmoothImage from '../app/components/SmoothImage';
-import SmartImage from './SmartImage';
 import { useR2Images } from '../context/R2Context';
 import { R2Image as R2ContextImage } from '../app/utils/r2-client';
 import { parseFilename } from '../app/utils/filename-utils';
@@ -118,7 +116,7 @@ interface ProcessedArtwork extends R2ContextImage {
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages, getOptimizedUrl } = useR2Images();
+  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages } = useR2Images();
   
   // Add refresh button loading state
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -435,17 +433,14 @@ export default function CatalogueContent() {
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
               <div className="image">
-                <SmartImage
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={artwork.imageUrl}
                   alt={artwork.title}
                   width={400}
                   height={480}
-                  quality={85}
-                  priority={index < 9} // Prioritize first 9 images
-                  fadeIn={true}
-                  useWebWorker={true}
-                  showCompressionStats={false}
-                  placeholder="blur"
+                  loading={index < 9 ? 'eager' : 'lazy'}
+                  decoding="async"
                   onLoad={() => {
                     // Preload next batch when current image loads
                     if (index % 3 === 0) {

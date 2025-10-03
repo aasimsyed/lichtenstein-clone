@@ -3,8 +3,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import Link from 'next/link';
-import SmoothImage from '../app/components/SmoothImage';
-import SmartImage from './SmartImage';
 import { useR2Images } from '../context/R2Context';
 import { parseFilename } from '../app/utils/filename-utils';
 import '../app/styles/carousel.css';
@@ -132,6 +130,7 @@ export default function SelectionsCarousel() {
                     <div className="image-container">
                       {!imagePreloaded && (
                         <div className="placeholder-container">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
                             src="/placeholder.svg" 
                             alt="Loading" 
@@ -141,19 +140,15 @@ export default function SelectionsCarousel() {
                           />
                         </div>
                       )}
-                      <SmartImage 
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
                         src={image.url} 
                         alt={cleanTitle(title)} 
                         width={150}
                         height={150}
                         className={`carousel-image ${imagePreloaded ? 'loaded' : 'loading'}`}
-                        quality={70}
-                        placeholder="blur"
-                        blurDataURL="/placeholder.svg"
-                        priority={index < 6} // Prioritize first 6 images
-                        fadeIn={true}
-                        useWebWorker={true}
-                        showCompressionStats={false}
+                        loading={index < 6 ? 'eager' : 'lazy'}
+                        decoding="async"
                       />
                     </div>
                     <div className="info">
