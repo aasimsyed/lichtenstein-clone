@@ -138,6 +138,7 @@ export default function CatalogueContent() {
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
@@ -155,6 +156,24 @@ export default function CatalogueContent() {
   const [filterPopArtKoop, setFilterPopArtKoop] = useState(false);
   const [filterCatalogs, setFilterCatalogs] = useState(false);
   const [filterZines, setFilterZines] = useState(false);
+
+  // Add loading animations CSS
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // Fix touch interaction to prevent unwanted window movement
   useEffect(() => {
@@ -318,10 +337,11 @@ export default function CatalogueContent() {
     sortBy, resultsPerPage, currentPage
   ]);
 
-  // Effect for scrolling - Keep this
+  // Effect for scrolling and clearing loaded images - Keep this
   useEffect(() => {
     if (r2Images.length > 0 && !contextLoading) {
       window.scrollTo(0, 0); // Scroll back to top when page changes
+      setLoadedImages(new Set()); // Clear loaded images for fresh fade-in on new page
     }
   }, [currentPage, r2Images, contextLoading]);
 
@@ -432,7 +452,27 @@ export default function CatalogueContent() {
             className="item"
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
-              <div className="image">
+              <div className="image" style={{ position: 'relative', backgroundColor: '#f0f0f0' }}>
+                {!loadedImages.has(artwork.imageUrl) && (
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f0f0f0',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '3px solid #e0e0e0',
+                      borderTopColor: '#999',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  </div>
+                )}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={artwork.imageUrl}
@@ -441,7 +481,15 @@ export default function CatalogueContent() {
                   height={480}
                   loading={index < 9 ? 'eager' : 'lazy'}
                   decoding="async"
+                  style={{
+                    opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
+                    transition: 'opacity 0.4s ease-in-out',
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto'
+                  }}
                   onLoad={() => {
+                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
                     // Preload next batch when current image loads
                     if (index % 3 === 0) {
                       const startIdx = Math.min(displayedArtworks.length - 1, index + 9);
@@ -450,6 +498,10 @@ export default function CatalogueContent() {
                         preloadNextImages(startIdx, count);
                       }
                     }
+                  }}
+                  onError={() => {
+                    console.error(`Failed to load image: ${artwork.imageUrl}`);
+                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
                   }}
                 />
               </div>
