@@ -4,7 +4,6 @@ import React, { useState, useMemo } from 'react';
 import { useR2Images } from '../../context/R2Context';
 import Link from 'next/link';
 import Image from 'next/image';
-import SmartImage from '../../components/SmartImage';
 import '../styles/admin.css';
 import { useAuth } from '../auth/useAuth';
 
@@ -576,19 +575,15 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <SmartImage 
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
                       src={image.url} 
                       alt={image.id} 
                       width={150} 
                       height={180} 
                       className="admin-image-thumbnail" 
-                      quality={80}
-                      sizes="(max-width: 768px) 100vw, 150px"
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                      showCompressionStats={true}
-                      useWebWorker={true}
-                      fadeIn={true}
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="admin-image-rename-controls">
                       <input
@@ -643,19 +638,15 @@ export default function AdminPage() {
                         aria-label={`Select ${image.id}`}
                       />
                     </div>
-                    <SmartImage 
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
                       src={image.url} 
                       alt={image.id} 
                       width={150} 
                       height={180} 
                       className="admin-image-thumbnail" 
-                      quality={80}
-                      sizes="(max-width: 768px) 100vw, 150px"
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                      showCompressionStats={true}
-                      useWebWorker={true}
-                      fadeIn={true}
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="admin-image-info">
                       <div className="admin-image-name-row">
