@@ -1,0 +1,14 @@
+name = "r2-image-worker"
+main = "r2-worker.js"
+compatibility_date = "2024-01-01"
+
+# Bind the R2 bucket
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "better-badges"
+preview_bucket_name = "better-badges"
+
+# Set environment variables
+[vars]
+R2_ENDPOINT = "https://950035267d1186d83269e8b8eb50e572.r2.cloudflarestorage.com"
+

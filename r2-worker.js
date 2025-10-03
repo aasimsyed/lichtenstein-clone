@@ -1,5 +1,5 @@
 // r2-worker.js
-export default {
+const worker = {
   async fetch(request, env) {
     // Get the request URL
     const url = new URL(request.url);
@@ -73,6 +73,8 @@ export default {
   }
 };
 
+export default worker;
+
 // Handle CORS preflight requests
 function handleCORS(request) {
   // Extract the origin from the request
@@ -92,6 +94,16 @@ function handleCORS(request) {
       'Access-Control-Allow-Credentials': 'false'
     }
   });
+}
+
+// Get CORS headers for all responses
+function getCORSHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, HEAD, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  };
 }
 
 // List all objects in the bucket
