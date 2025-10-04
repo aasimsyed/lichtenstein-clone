@@ -481,8 +481,6 @@ export default function CatalogueContent() {
                   height={480}
                   loading={index < 9 ? 'eager' : 'lazy'}
                   decoding="async"
-                  referrerPolicy="no-referrer"
-                  crossOrigin="anonymous"
                   style={{
                     opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
                     transition: 'opacity 0.4s ease-in-out',
@@ -492,6 +490,7 @@ export default function CatalogueContent() {
                     objectFit: 'cover'
                   }}
                   onLoad={(e) => {
+                    console.log(`Image loaded successfully: ${artwork.imageUrl}`);
                     setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
                     // Preload next batch when current image loads
                     if (index % 3 === 0) {
@@ -504,18 +503,12 @@ export default function CatalogueContent() {
                   }}
                   onError={(e) => {
                     const img = e.currentTarget;
-                    console.error(`Failed to load: ${artwork.imageUrl}`);
+                    console.error(`Failed to load: ${artwork.imageUrl}`, e);
                     
-                    // Try reloading without query parameters
-                    if (img.src.includes('?')) {
-                      const baseUrl = img.src.split('?')[0];
-                      img.src = baseUrl;
-                    } else {
-                      // Mark as loaded to remove spinner
-                      setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
-                      // Show broken image state
-                      img.style.opacity = '0.3';
-                    }
+                    // Mark as loaded to remove spinner and make visible
+                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
+                    // Show at full opacity even if broken
+                    img.style.opacity = '1';
                   }}
                 />
               </div>
