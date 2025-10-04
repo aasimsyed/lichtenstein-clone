@@ -452,7 +452,7 @@ export default function CatalogueContent() {
             className="item"
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
-              <div className="image" style={{ position: 'relative', backgroundColor: '#f0f0f0' }}>
+              <div className="image" style={{ position: 'relative', backgroundColor: '#f0f0f0', minHeight: '200px' }}>
                 {!loadedImages.has(artwork.imageUrl) && (
                   <div style={{
                     position: 'absolute',
@@ -481,14 +481,17 @@ export default function CatalogueContent() {
                   height={480}
                   loading={index < 9 ? 'eager' : 'lazy'}
                   decoding="async"
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
                   style={{
                     opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
                     transition: 'opacity 0.4s ease-in-out',
                     display: 'block',
                     width: '100%',
-                    height: 'auto'
+                    height: 'auto',
+                    objectFit: 'cover'
                   }}
-                  onLoad={() => {
+                  onLoad={(e) => {
                     setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
                     // Preload next batch when current image loads
                     if (index % 3 === 0) {
@@ -499,9 +502,20 @@ export default function CatalogueContent() {
                       }
                     }
                   }}
-                  onError={() => {
-                    console.error(`Failed to load image: ${artwork.imageUrl}`);
-                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    console.error(`Failed to load: ${artwork.imageUrl}`);
+                    
+                    // Try reloading without query parameters
+                    if (img.src.includes('?')) {
+                      const baseUrl = img.src.split('?')[0];
+                      img.src = baseUrl;
+                    } else {
+                      // Mark as loaded to remove spinner
+                      setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
+                      // Show broken image state
+                      img.style.opacity = '0.3';
+                    }
                   }}
                 />
               </div>
