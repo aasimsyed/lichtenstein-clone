@@ -139,6 +139,7 @@ export default function CatalogueContent() {
   const [totalPages, setTotalPages] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [visibleImages, setVisibleImages] = useState<Set<string>>(new Set());
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
@@ -337,11 +338,42 @@ export default function CatalogueContent() {
     sortBy, resultsPerPage, currentPage
   ]);
 
+  // Intersection Observer for loading images as they scroll into view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const imageUrl = entry.target.getAttribute('data-image-url');
+            if (imageUrl) {
+              setVisibleImages(prev => {
+                const newSet = new Set(prev);
+                newSet.add(imageUrl);
+                return newSet;
+              });
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '100px', // Start loading 100px before image comes into view
+        threshold: 0.01
+      }
+    );
+
+    // Observe all image containers
+    const imageContainers = document.querySelectorAll('.catalogue-image-container');
+    imageContainers.forEach(container => observer.observe(container));
+
+    return () => observer.disconnect();
+  }, [displayedArtworks]);
+
   // Effect for scrolling and clearing loaded images - Keep this
   useEffect(() => {
     if (r2Images.length > 0 && !contextLoading) {
       window.scrollTo(0, 0); // Scroll back to top when page changes
       setLoadedImages(new Set()); // Clear loaded images for fresh fade-in on new page
+      setVisibleImages(new Set()); // Clear visible images too
     }
   }, [currentPage, r2Images, contextLoading]);
 
@@ -452,7 +484,11 @@ export default function CatalogueContent() {
             className="item"
           >
             <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
-              <div className="image" style={{ position: 'relative', backgroundColor: '#f0f0f0', minHeight: '200px' }}>
+              <div 
+                className="image catalogue-image-container" 
+                data-image-url={artwork.imageUrl}
+                style={{ position: 'relative', backgroundColor: '#f0f0f0', minHeight: '200px' }}
+              >
                 {!loadedImages.has(artwork.imageUrl) && (
                   <div style={{
                     position: 'absolute',
@@ -473,39 +509,40 @@ export default function CatalogueContent() {
                     }} />
                   </div>
                 )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={artwork.imageUrl}
-                  alt={artwork.title}
-                  width={400}
-                  height={480}
-                  loading={index < 20 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  fetchPriority={index < 9 ? 'high' : 'auto'}
-                  style={{
-                    opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
-                    transition: 'opacity 0.4s ease-in-out',
-                    display: 'block',
-                    width: '100%',
-                    height: 'auto',
-                    objectFit: 'cover'
-                  }}
-                  onLoad={() => {
-                    setLoadedImages(prev => {
-                      const newSet = new Set(prev);
-                      newSet.add(artwork.imageUrl);
-                      return newSet;
-                    });
-                  }}
-                  onError={() => {
-                    // Mark as loaded to remove spinner
-                    setLoadedImages(prev => {
-                      const newSet = new Set(prev);
-                      newSet.add(artwork.imageUrl);
-                      return newSet;
-                    });
-                  }}
-                />
+                {visibleImages.has(artwork.imageUrl) && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={artwork.imageUrl}
+                      alt={artwork.title}
+                      width={400}
+                      height={480}
+                      decoding="async"
+                      style={{
+                        opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
+                        transition: 'opacity 0.4s ease-in-out',
+                        display: 'block',
+                        width: '100%',
+                        height: 'auto',
+                        objectFit: 'cover'
+                      }}
+                      onLoad={() => {
+                        setLoadedImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.add(artwork.imageUrl);
+                          return newSet;
+                        });
+                      }}
+                      onError={() => {
+                        setLoadedImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.add(artwork.imageUrl);
+                          return newSet;
+                        });
+                      }}
+                    />
+                  </>
+                )}
               </div>
               <div className="item_catDetails">
                 <div className="item_title">{artwork.title}</div>
