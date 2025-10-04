@@ -479,8 +479,9 @@ export default function CatalogueContent() {
                   alt={artwork.title}
                   width={400}
                   height={480}
-                  loading={index < 9 ? 'eager' : 'lazy'}
+                  loading={index < 20 ? 'eager' : 'lazy'}
                   decoding="async"
+                  fetchPriority={index < 9 ? 'high' : 'auto'}
                   style={{
                     opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
                     transition: 'opacity 0.4s ease-in-out',
@@ -489,26 +490,20 @@ export default function CatalogueContent() {
                     height: 'auto',
                     objectFit: 'cover'
                   }}
-                  onLoad={(e) => {
-                    console.log(`Image loaded successfully: ${artwork.imageUrl}`);
-                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
-                    // Preload next batch when current image loads
-                    if (index % 3 === 0) {
-                      const startIdx = Math.min(displayedArtworks.length - 1, index + 9);
-                      const count = Math.min(5, displayedArtworks.length - startIdx);
-                      if (count > 0) {
-                        preloadNextImages(startIdx, count);
-                      }
-                    }
+                  onLoad={() => {
+                    setLoadedImages(prev => {
+                      const newSet = new Set(prev);
+                      newSet.add(artwork.imageUrl);
+                      return newSet;
+                    });
                   }}
-                  onError={(e) => {
-                    const img = e.currentTarget;
-                    console.error(`Failed to load: ${artwork.imageUrl}`, e);
-                    
-                    // Mark as loaded to remove spinner and make visible
-                    setLoadedImages(prev => new Set(prev).add(artwork.imageUrl));
-                    // Show at full opacity even if broken
-                    img.style.opacity = '1';
+                  onError={() => {
+                    // Mark as loaded to remove spinner
+                    setLoadedImages(prev => {
+                      const newSet = new Set(prev);
+                      newSet.add(artwork.imageUrl);
+                      return newSet;
+                    });
                   }}
                 />
               </div>
