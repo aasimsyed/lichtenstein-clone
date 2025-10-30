@@ -4,9 +4,9 @@ import SeriesPageClient from "./SeriesPageClient";
 
 // Define the page props to include params with the id
 interface SeriesPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // This generates static pages at build time for all series
@@ -17,8 +17,9 @@ export function generateStaticParams() {
 }
 
 // Add metadata export for better SEO
-export function generateMetadata({ params }: SeriesPageProps) {
-  const series = catalogSeries.find((s) => s.id === params.id);
+export async function generateMetadata({ params }: SeriesPageProps) {
+  const { id } = await params;
+  const series = catalogSeries.find((s) => s.id === id);
   
   if (!series) {
     return {
@@ -33,9 +34,10 @@ export function generateMetadata({ params }: SeriesPageProps) {
   };
 }
 
-export default function SeriesPage({ params }: SeriesPageProps) {
+export default async function SeriesPage({ params }: SeriesPageProps) {
   // Find the series data based on the URL parameter
-  const series = catalogSeries.find((series) => series.id === params.id);
+  const { id } = await params;
+  const series = catalogSeries.find((series) => series.id === id);
 
   // If series not found, return 404
   if (!series) {
