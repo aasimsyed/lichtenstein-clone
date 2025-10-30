@@ -545,7 +545,8 @@ export default function CatalogueContent() {
                 )}
               </div>
               <div className="item_catDetails">
-                <div className="item_title">{artwork.title}</div>
+                <div className="item_artist" style={{ fontWeight: 700 }}>{artwork.artist}</div>
+                <div className="item_title"><em>{artwork.title}</em></div>
                 <div className="item_catnum">{artwork.catalogueNumber}, {artwork.size}</div>
               </div>
             </a>
