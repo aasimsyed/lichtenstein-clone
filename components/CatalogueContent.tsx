@@ -487,7 +487,7 @@ export default function CatalogueContent() {
               <div 
                 className="image catalogue-image-container" 
                 data-image-url={artwork.imageUrl}
-                style={{ position: 'relative', backgroundColor: '#f0f0f0', minHeight: '200px' }}
+                style={{ position: 'relative', backgroundColor: 'transparent', minHeight: '200px' }}
               >
                 {!loadedImages.has(artwork.imageUrl) && (
                   <div style={{
@@ -496,7 +496,7 @@ export default function CatalogueContent() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: '#f0f0f0',
+                    backgroundColor: 'transparent',
                     animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                   }}>
                     <div style={{
