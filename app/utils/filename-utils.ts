@@ -10,6 +10,16 @@
  * - "BBC20_32_Fare.Fight.jpg" -> catalogNumber: "BBC20", size: "32mm", artist: "Fare Fight", title: "Untitled"
  * - "FZ_Punk.Zine_2.jpg" -> catalogNumber: "FZ", size: "Flyer/Zine", artist: "Flyer/Zine", title: "Punk Zine #2"
  */
+const stripCatalogDecimal = (catalogNumber: string): string => {
+  const decimalMatch = catalogNumber.match(/^([A-Za-z]+)(\d+)\.(\d+)$/);
+  if (decimalMatch) {
+    const prefix = decimalMatch[1];
+    const integerPart = decimalMatch[2];
+    return `${prefix}${integerPart}`;
+  }
+  return catalogNumber;
+};
+
 export const parseFilename = (url: string): { 
   catalogNumber: string; 
   size: string;
@@ -61,7 +71,7 @@ export const parseFilename = (url: string): {
   }
   
   // Parse catalog number (first part)
-  const catalogNumber = parts[0];
+  const catalogNumber = stripCatalogDecimal(parts[0]);
   
   // Different parsing logic based on number of parts
   if (parts.length === 2) {
