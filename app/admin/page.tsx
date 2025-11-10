@@ -14,7 +14,7 @@ export default function AdminPage() {
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const { images, refreshImages, getOptimizedUrl } = useR2Images();
+  const { images, refreshImages } = useR2Images();
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
@@ -394,12 +394,11 @@ export default function AdminPage() {
     <div className="admin-container">
       <div className="admin-header">
         <h1>Admin Dashboard</h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="admin-header-actions">
           <Link href="/" className="admin-home-link">Back to Home</Link>
           <button
             type="button"
-            className="admin-home-link"
-            style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer' }}
+            className="admin-home-link admin-logout-button"
             onClick={logout}
             aria-label="Logout"
           >
@@ -429,10 +428,13 @@ export default function AdminPage() {
                 <div className="file-previews">
                   {Array.from(files).map((file, index) => (
                     <div key={index} className="file-preview-item">
-                      <img 
+                      <Image 
                         src={URL.createObjectURL(file)} 
                         alt={file.name} 
                         className="file-preview-image" 
+                        width={150}
+                        height={180}
+                        unoptimized
                       />
                       <div className="file-preview-info">
                         <span className="file-preview-name">{file.name}</span>
