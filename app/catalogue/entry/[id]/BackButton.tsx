@@ -19,7 +19,7 @@ export default function BackButton() {
         display: 'inline-block',
         padding: '8px 16px',
         marginBottom: '20px',
-        marginTop: '90px',
+        marginTop: '0',
         marginLeft: '10px',
         color: '#333333',
         backgroundColor: '#f0f0f0',
@@ -28,7 +28,9 @@ export default function BackButton() {
         cursor: 'pointer',
         textDecoration: 'none',
         borderRadius: '3px',
-        position: 'relative',
+        position: 'absolute',
+        top: '120px',
+        left: '10px',
         zIndex: 10
       }}
     >

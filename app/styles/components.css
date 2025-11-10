@@ -600,15 +600,17 @@ div:not(.btn), span:not(.btn), p, a:not(.btn-primary), h1, h2, h3, h4, h5, h6, l
 
 /* Entry page layout fixes - position metadata beside/over image instead of above */
 html body .entry-page-container {
-  padding-top: 10px !important;
-  margin-top: 0 !important;
+  padding-top: 70px !important;
+  margin-top: -20px !important;
+  padding-left: 70px !important;
+  position: relative !important;
 }
 
 html body .entry-page-content {
   display: flex !important;
   flex-direction: row !important;
   gap: 20px !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
@@ -639,9 +641,10 @@ html body .entry-page-content .zoomable-image-container {
 /* Mobile-specific: stack vertically on small screens */
 @media (max-width: 768px) {
   html body .entry-page-container {
-    padding-top: 5px !important;
+    padding-top: 100px !important;
     padding-left: 10px !important;
     padding-right: 10px !important;
+    margin-top: 0 !important;
   }
   
   html body .entry-page-content {
@@ -664,6 +667,12 @@ html body .entry-page-content .zoomable-image-container {
   
   html body .entry-page-content .metadata {
     margin-bottom: 8px !important;
+  }
+  html body .entry-page-container .backToWorks-custom {
+    position: static !important;
+    margin-left: 0 !important;
+    margin-top: 24px !important;
+    margin-bottom: 16px !important;
   }
 }
 
