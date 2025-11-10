@@ -1,20 +1,14 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // Client component for navigation
 export default function BackButton() {
-  const router = useRouter();
-  
   return (
-    <a 
+    <Link 
       href="/catalogue"
       className="backToWorks-custom"
-      onClick={(e) => {
-        e.preventDefault();
-        router.push('/catalogue');
-      }}
       style={{
         display: 'inline-block',
         padding: '8px 16px',
@@ -35,6 +29,6 @@ export default function BackButton() {
       }}
     >
       <span>← Back to Works</span>
-    </a>
+    </Link>
   );
 } 
