@@ -650,7 +650,7 @@ export default function AdminPage() {
                     />
                     <div className="admin-image-info">
                       <div className="admin-image-name-row">
-                        <p className="admin-image-name" title={image.key}>{image.id}</p>
+                        <p className="admin-image-name" title={image.key}>{image.key}</p>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
