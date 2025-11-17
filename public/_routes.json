@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/api/*",
+    "/_next/*",
+    "/static/*"
+  ],
+  "routes": [
+    {
+      "src": "/(a-series|b-series|aaa-series|bba-series|bbb-series|bbc-series|big-series|d-series|ff-series|jah-series|fz-series|ad-series)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+} 

@@ -1,0 +1,34 @@
+name = "lichtenstein-clone"
+compatibility_date = "2022-11-30"
+
+# Specify Node.js compatibility version for Pages
+# [build]
+# node_version = "20"
+# command = "./cloudflare-build.sh"
+# output_directory = "out"
+
+# For Cloudflare Pages integration
+# [site]
+# bucket = "out"
+pages_build_output_dir = "out"
+
+# Triggers are for Workers, not needed for Pages
+# [triggers]
+# crons = []
+
+# Bind the R2 bucket
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "better-badges"
+preview_bucket_name = "better-badges"
+
+# Set environment variables that will be available to the Worker
+[vars]
+# This will be available as env.R2_ENDPOINT in the Worker
+R2_ENDPOINT = "https://950035267d1186d83269e8b8eb50e572.r2.cloudflarestorage.com"
+
+# Optional: Configure the worker to be a custom domain
+# Uncomment and replace with your domain when ready
+# [[routes]]
+# pattern = "images.better-badges.com/*"
+# zone_name = "better-badges.com"

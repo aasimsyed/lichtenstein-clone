@@ -1,0 +1,640 @@
+/* Responsive Styles */
+
+@media (min-width: 768px) {
+  #homepage #homepageCarouselWrapper #homepageCarouselCallout a,
+  #homepageCarouselCallout a {
+    /* max-width already set in main style */
+  }
+}
+
+@media (max-width: 1024px) {
+  #homepageBottomGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Styles (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Basic layout changes */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .show-mobile {
+    display: block !important;
+  }
+  
+  /* Header changes for mobile */
+  #headerMain {
+    display: none;
+  }
+  
+  #headerMoble {
+    display: flex;
+  }
+  
+  #mainBody {
+    padding: 0 15px;
+    margin-top: 20px;
+  }
+  
+  #pageTopMatter {
+    padding-top: 70px;
+  }
+  
+  #browseMobileControls {
+    display: flex !important;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  #browseMobileControls a {
+    padding: 8px 15px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9rem;
+    flex: 1;
+    text-align: center;
+    margin: 0 5px;
+  }
+  
+  /* Home carousel mobile styles */
+  #homepage {
+    margin-top: 70px;
+    padding-bottom: 0;
+  }
+  
+  /* Home carousel container adjustments */
+  .home-carousel-container {
+    margin-bottom: 0 !important;
+    max-height: calc(var(--carousel-mobile-height) + 150px) !important;
+    padding-top: 10px;
+    position: relative;
+    overflow: visible !important;
+    margin-top: 20px;
+    overflow: visible !important;
+    margin-bottom: 80px !important; /* Reduced from 110px to decrease spacing */
+    padding-bottom: 20px !important;
+  }
+  
+  /* Mobile-specific carousel styles from HomeCarousel.tsx */
+  /* Fixed caption display */
+  .homepageCarouselCaption {
+    position: relative !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    min-height: 20px !important; /* Reduced height for single line */
+    overflow: visible !important;
+    text-overflow: initial !important;
+    white-space: normal !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    background: rgba(240,240,240,0.9) !important;
+    z-index: 50 !important;
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure callout stays below the fixed dots with consistent spacing */
+  .callout-container {
+    position: absolute !important;
+    bottom: auto !important; /* Remove bottom positioning */
+    top: calc(var(--carousel-mobile-height) + 100px) !important; /* Position based on dot navigation location plus spacing */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 12px 15px !important;
+    transform: none !important;
+    z-index: 20 !important;
+    display: block !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Fixed positioning for dot navigation */
+  .carousel-dots {
+    position: absolute !important;
+    top: calc(var(--carousel-mobile-height) + 50px) !important; /* Fixed position from top of carousel */
+    left: 0 !important;
+    right: 0 !important;
+    margin-top: 0 !important; /* Remove margin that causes position shifts */
+    padding: 8px 0 !important;
+    z-index: 99 !important;
+    max-width: 95% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Highly specific selector to override desktop styles */
+  #homepage .home-carousel-container .carousel-dots,
+  html body #homepage #homepageCarouselWrapper .carousel-dots,
+  .home-carousel-container .slick-slider .carousel-dots {
+    margin-top: 15px !important;
+    transform: none !important; /* Override any transform that might add spacing */
+    position: absolute !important;
+    top: calc(var(--carousel-mobile-height) + 50px) !important;
+  }
+  
+  /* Show carousel arrows on mobile */
+  .slick-prev, .slick-next {
+    display: flex !important; /* Show arrows on mobile */
+  }
+  
+  .slick-prev {
+    left: 10px !important;
+  }
+  
+  .slick-next {
+    right: 10px !important;
+  }
+  
+  /* Ensure link is styled properly */
+  .callout-link {
+    font-size: 0.9em;
+    line-height: 1.3;
+  }
+  
+  /* Center justify all text in the info box on mobile */
+  .jsx-2d2c4b6ccf985683.info,
+  div.jsx-2d2c4b6ccf985683.info,
+  .jsx-2d2c4b6ccf985683 .info {
+    text-align: center !important;
+  }
+  
+  .jsx-2d2c4b6ccf985683.info h3,
+  .jsx-2d2c4b6ccf985683.info p,
+  div.jsx-2d2c4b6ccf985683.info h3, 
+  div.jsx-2d2c4b6ccf985683.info p,
+  .jsx-2d2c4b6ccf985683 .info h3,
+  .jsx-2d2c4b6ccf985683 .info p,
+  .jsx-2d2c4b6ccf985683 .artwork-artist {
+    text-align: center !important;
+  }
+  
+  /* Styling for artwork artist text */
+  .jsx-2d2c4b6ccf985683 .artwork-artist {
+    font-style: italic !important;
+    color: #555 !important;
+    margin: 4px 0 !important;
+  }
+  
+  /* Home carousel div adjustments */
+  .homepageCarouselDiv {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 60px !important; /* Increased padding to accommodate fixed dot position */
+    margin-bottom: 0 !important;
+    position: relative !important; /* Ensure this is a positioning context */
+  }
+  
+  /* Image wrapper height adjustment for mobile */
+  .image-wrapper {
+    height: 234px !important; /* Match mobile image height */
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+    position: relative !important;
+  }
+  
+  /* Reorganize dots into 3 rows of 6 dots */
+  .jsx-2d2c4b6ccf985683 .slick-dots {
+    bottom: -35px !important; /* Position lower */
+    margin-top: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 216px !important; /* Exact width for 6 dots per row */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 5px 0 !important;
+    margin-bottom: 15px !important; /* Additional spacing below */
+  }
+  
+  .jsx-2d2c4b6ccf985683 .slick-dots li {
+    width: 36px !important; /* Exact 1/6 of container width */
+    height: 36px !important;
+    margin: 0 !important; /* Remove margins to ensure 6 per row */
+    flex: 0 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  .jsx-2d2c4b6ccf985683 .slick-dots li button {
+    width: 14px !important; /* Larger dot size */
+    height: 14px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background: #999 !important; /* More visible color */
+    border: none !important;
+  }
+  
+  .jsx-2d2c4b6ccf985683 .slick-dots li.slick-active button {
+    transform: scale(1.3) !important;
+    background-color: #333 !important;
+  }
+
+  #homepage #homepageCarouselWrapper.home-carousel-container {
+    margin-bottom: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: relative !important;
+    padding-bottom: 75px !important; /* Increased to ensure enough space for the callout at its new position */
+  }
+  
+  /* Selections carousel adjustments */
+  .selections-carousel-container {
+    padding: 0 10px;
+    margin-top: 5px !important;
+    margin-bottom: 40px !important;
+    padding-bottom: 25px !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+    clear: both !important;
+  }
+  
+  /* Fix for dot navigation overlapping with info */
+  .selections-carousel .slick-list {
+    padding-bottom: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  /* Info text container needs spacing and z-index */
+  .selections-carousel .info {
+    margin-bottom: 10px !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Push dots down */
+  .selections-carousel .slick-dots {
+    bottom: -20px !important;
+    position: absolute !important;
+  }
+  
+  /* Add background to ensure dots are more visible */
+  .selections-carousel .slick-dots li button {
+    background: #888 !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Ensure selections title is visible above the carousel */
+  .selections-title {
+    display: block !important;
+    position: relative !important;
+    z-index: 5 !important;
+    padding-top: 10px !important;
+    margin-top: 0 !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    font-size: 22px !important;
+    clear: both !important;
+    width: 100% !important;
+  }
+  
+  /* Force the callout to be properly positioned */
+  .callout-container {
+    margin-bottom: 50px !important;
+    position: relative !important;
+    display: block !important;
+    clear: both !important;
+    width: 100% !important;
+    float: none !important;
+  }
+  
+  .selections-carousel .slide-inner {
+    margin-bottom: 15px !important;
+  }
+  
+  .artwork-title {
+    font-size: 14px;
+  }
+  
+  .artwork-artist, .artwork-rlcr {
+    font-size: 12px;
+  }
+  
+  /* Selections carousel dot positioning */
+  .selections-carousel .slick-dots {
+    bottom: -35px !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+  
+  /* Selections image spacing */
+  .selections-carousel .image-container {
+    margin-bottom: 20px !important;
+  }
+  
+  .selections-carousel .artwork-link {
+    margin-bottom: 20px !important;
+    display: block !important;
+  }
+  
+  /* Hide arrow navigation on mobile */
+  .selections-carousel .slick-slider .slick-prev,
+  .selections-carousel .slick-slider .slick-next,
+  .selections-carousel-container .slick-prev,
+  .selections-carousel-container .slick-next {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  
+  /* Additional selections carousel spacing */
+  .selections-carousel .slick-slider {
+    margin-bottom: 45px !important;
+    padding-bottom: 10px !important;
+  }
+  
+  .selections-carousel .slick-track {
+    padding-bottom: 30px !important;
+  }
+  
+  .selections-carousel .artwork-rlcr {
+    margin-bottom: 30px !important;
+    display: inline-block !important;
+  }
+  
+  /* Homepage component ordering */
+  html body #homepage #mainBody.homepage {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  html body #homepage #mainBody.homepage > .home-carousel-container {
+    order: 1 !important;
+    width: 100% !important;
+    float: none !important;
+  }
+  
+  html body #homepage #mainBody.homepage > .selections-carousel-container {
+    order: 2 !important;
+    margin-top: 30px !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
+    padding-top: 20px !important;
+    border-top: 1px solid #eee !important;
+    position: relative !important;
+    display: block !important;
+  }
+  
+  html body #homepage #mainBody.homepage > .series-grid-wrapper {
+    order: 3 !important;
+    margin-top: 20px !important;
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
+    padding-top: 20px !important;
+    margin-top: -60px !important;
+    border-top: 1px solid #eee !important;
+    position: relative !important;
+    display: block !important;
+  }
+  
+  /* Search and filter adjustments */
+  #searchFilterWrapper {
+    flex-direction: column;
+  }
+  
+  #searchBoxesWrapper {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  #filterAccordion {
+    max-height: none;
+    display: none;
+  }
+  
+  #filterAccordion.mobile-visible {
+    display: block;
+  }
+  
+  #selectMenus {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  #selectMenus.mobile-visible {
+    display: flex;
+  }
+  
+  /* Grid adjustments */
+  .catWorksCont {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+  
+  #pagiContentTop {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  #homepageBottomGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Footer adjustments */
+  .footer-content {
+    flex-direction: column;
+  }
+  
+  .footer-section {
+    margin-bottom: 20px;
+  }
+  
+  /* Desktop elements hide */
+  .desktopOnly {
+    display: none !important;
+  }
+  
+  /* Show mobile filters panel */
+  #mobileFiltersPanel {
+    display: none; /* Hidden by default */
+  }
+  
+  /* Define styling for mobile panels */
+  .mobilePanel {
+    display: block !important; /* Force display when class is added */
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+  
+  #mobileFiltersPanel.mobilePanel,
+  #mobileOptionsPanel.mobilePanel {
+    display: block; /* Displayed when class is added */
+  }
+  
+  .mobilePanel {
+    display: block;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+  
+  /* Entry page mobile fixes */
+  #entryContainer {
+    padding-top: 90px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-top: 0 !important;
+  }
+  
+  .backToWorks-custom, 
+  a.backToWorks-custom {
+    margin-top: 40px !important;
+    margin-bottom: 25px !important;
+    margin-left: 5px !important;
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  .entryImageContainer {
+    margin-top: 30px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+  
+  .zoomable-image-container {
+    margin-top: 0 !important;
+    padding-top: 10px !important;
+  }
+  
+  .artwork-caption {
+    margin-top: 20px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+    position: relative !important;
+    z-index: 5 !important;
+    padding: 10px !important;
+    background-color: #f5f5f5 !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    max-width: 100% !important;
+  }
+  
+  #mainBody > #entryContainer {
+    margin-top: 0 !important;
+    padding-top: 80px !important;
+  }
+  
+  #mainBody > #pageTopMatter {
+    padding-top: 30px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  
+  #pageTopMatter h1 {
+    margin-top: 40px !important;
+    margin-left: 5px !important;
+    margin-bottom: 15px !important;
+  }
+  
+  /* High specificity fixes for catalog entry page */
+  html body #mainBody[id="mainBody"]:not(.homepage) {
+    padding-top: 70px !important;
+    margin-top: 75px !important;
+  }
+  
+  html body #entryContainer {
+    padding-top: 140px !important;
+    margin-top: 50px !important;
+  }
+  
+  html body .entryNavigation {
+    position: relative !important;
+    z-index: 100 !important;
+    padding-top: 70px !important;
+    margin-top: 30px !important;
+  }
+  
+  html body a.backToWorks-custom,
+  html body .backToWorks-custom {
+    position: relative !important;
+    z-index: 999 !important;
+    margin-top: 80px !important;
+    margin-left: 10px !important;
+    margin-bottom: 30px !important;
+    display: block !important;
+    width: max-content !important;
+  }
+  
+  html body #pageTopMatter {
+    margin-top: -140px !important;
+    padding-top: 40px !important;
+  }
+  
+  /* Metadata spacing */
+  html body .entrySideInfo {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-top: 20px !important;
+  }
+  
+  html body .entryMetadata {
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+    border-radius: 4px !important;
+  }
+  
+  html body .metadata {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-bottom: 5px !important;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+  
+  html body h1.artwork-title {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  html body .entryContent {
+    gap: 10px !important;
+  }
+  
+  html body .entry-page-content .metadata {
+    margin-bottom: 10px !important;
+  }
+  
+  html body .entry-page-content .zoomable-image-container {
+    margin-top: -25px !important;
+  }
+  
+  /* Remove padding for carousel outer container on mobile */
+  .carousel-outer-container {
+    padding-bottom: 0px !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+} 

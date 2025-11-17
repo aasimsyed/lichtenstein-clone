@@ -1,0 +1,15 @@
+/* 
+ * Main CSS Import File
+ * This file imports all modular CSS files in the correct order
+ */
+
+/* Third-party CSS */
+@import "tailwindcss/preflight";
+
+/* Core CSS modules */
+@import "./main.css";
+@import "./header.css";
+@import "./carousel.css";
+@import "./components.css";
+@import "./responsive.css";
+@import "./slick-custom.css"; 

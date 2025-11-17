@@ -1,0 +1,20 @@
+# r2-worker-wrangler.toml
+name = "images-worker"
+main = "r2-worker.js"
+compatibility_date = "2023-10-30"
+
+[[r2_buckets]]
+binding = "IMAGES_BUCKET" 
+bucket_name = "better-badges-images"
+
+[triggers]
+crons = []
+
+# Optional: Configure Image Resizing
+[env.production]
+workers_dev = false
+route = "images.better-badges.com/*"
+
+# If you have an Image Resizing subscription:
+[env.production.options]
+image_resizing = true 

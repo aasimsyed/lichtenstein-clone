@@ -1,40 +1,126 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import SmoothImage from '../app/components/SmoothImage';
-import { useCloudinaryImages } from '../context/CloudinaryContext';
+import { useR2Images } from '../context/R2Context';
+import { R2Image as R2ContextImage } from '../app/utils/r2-client';
+import { parseFilename } from '../app/utils/filename-utils';
+import '../app/styles/components.css';
 
-// Define the Artwork interface
-interface Artwork {
-  id: number;
+// Custom dropdown component for mobile view
+interface DropdownOption {
+  value: string;
+  label: string;
+}
+
+interface CustomDropdownProps {
+  options: DropdownOption[];
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  id: string;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChange, label, id }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Find the currently selected option
+  const selectedOption = options.find(option => option.value === value) || options[0];
+
+  // Toggle dropdown
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+
+
+  // Handle option selection
+  const handleSelect = (optionValue: string) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
+
+  // Create button props to satisfy strict linters
+  const buttonProps = {
+    type: "button" as const,
+    id,
+    className: "custom-dropdown-button",
+    onClick: toggleDropdown,
+    "aria-haspopup": "listbox" as const,
+    "aria-expanded": isOpen,
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="custom-dropdown-container" ref={dropdownRef}>
+      <label htmlFor={id} className="custom-dropdown-label">{label}</label>
+      <div className="custom-dropdown">
+        <button {...buttonProps}>
+          <span className="selected-value">{selectedOption.label}</span>
+          <span className="dropdown-arrow">▼</span>
+        </button>
+        
+        {isOpen && (
+          <div 
+            className="custom-dropdown-menu" 
+            aria-labelledby={id}
+            aria-label={`${label} options`}
+          >
+            {options.map(option => {
+              const optionProps = {
+                className: `dropdown-item ${option.value === value ? 'selected' : ''}`,
+                onClick: () => handleSelect(option.value),
+                role: "option" as const,
+                "aria-selected": option.value === value,
+              };
+              return (
+                <div key={option.value} {...optionProps}>
+                  {option.label}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Extend the R2 image type from context with parsed metadata for easier handling
+interface ProcessedArtwork extends R2ContextImage {
+  artworkId: string;
   title: string;
-  date: string;
-  medium: string;
-  dimensions: string;
-  location: string;
   catalogueNumber: string;
   artist: string;
   size: string;
   imageUrl: string;
 }
 
-// API response interface
-interface SearchResponse {
-  works: Artwork[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }
-}
-
 // Define the component
 export default function CatalogueContent() {
   const searchParams = useSearchParams();
-  // Get Cloudinary images from context instead of local state
-  const { images: cloudinaryImages, loading, error, refreshImages } = useCloudinaryImages();
+  const { images: r2Images, loading: contextLoading, error: contextError, refreshImages, preloadNextImages } = useR2Images();
+  
+  // Add refresh button loading state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
   
   // View and sort states
   const [viewType, setViewType] = useState('gridA');
@@ -47,12 +133,13 @@ export default function CatalogueContent() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(0);
   
-  // State for search results
-  const [filteredWorks, setFilteredWorks] = useState<Artwork[]>([]);
+  // State for displayed artworks
+  const [displayedArtworks, setDisplayedArtworks] = useState<ProcessedArtwork[]>([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [visibleImages, setVisibleImages] = useState<Set<string>>(new Set());
 
   // Series filter states
   const [seriesA, setSeriesA] = useState(false);
@@ -61,6 +148,7 @@ export default function CatalogueContent() {
   // New filename prefix filter states
   const [filterBBB, setFilterBBB] = useState(false);
   const [filterBBC, setFilterBBC] = useState(false);
+  const [filterBBA, setFilterBBA] = useState(false);
   const [filterD, setFilterD] = useState(false);
   const [filterRGG, setFilterRGG] = useState(false);
   
@@ -69,6 +157,24 @@ export default function CatalogueContent() {
   const [filterPopArtKoop, setFilterPopArtKoop] = useState(false);
   const [filterCatalogs, setFilterCatalogs] = useState(false);
   const [filterZines, setFilterZines] = useState(false);
+
+  // Add loading animations CSS
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // Fix touch interaction to prevent unwanted window movement
   useEffect(() => {
@@ -112,156 +218,216 @@ export default function CatalogueContent() {
     };
   }, [viewType]); // Only re-apply when the view type changes
 
-  // Function to fetch search results from API
-  const fetchSearchResults = useCallback(async (page = 0) => {
-    try {
-      setIsLoadingResults(true);
-      
-      // Build query parameters
-      const params = new URLSearchParams();
-      
-      // Add search term if present
-      if (searchTerm.trim()) {
-        params.set('query', searchTerm.trim());
+  // --- Client-Side Filtering, Sorting, and Pagination Logic ---
+  useEffect(() => {
+    if (contextLoading || !r2Images || r2Images.length === 0) {
+        // If context is loading or no images, clear results
+        setDisplayedArtworks([]);
+        setTotalResults(0);
+        setTotalPages(0);
+        return;
+    }
+
+    // 1. Process R2 images to include parsed metadata
+    const processed = r2Images.map(img => {
+        // Use img.id primarily, fallback to an empty string if needed
+        const filenameSource = img.id || '';
+        const metadata = parseFilename(filenameSource);
+        return {
+            ...img,
+            artworkId: img.id,
+            imageUrl: img.url, // Ensure this is mapped
+            title: metadata.title || 'Untitled',
+            catalogueNumber: metadata.catalogNumber || 'N/A',
+            artist: metadata.artist || 'Unknown',
+            size: metadata.size || 'Unknown'
+        };
+    });
+
+    // 2. Filter based on active filters
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    setIsSearching(!!lowerSearchTerm);
+
+    const filtered = processed.filter(work => {
+      // Keyword Search (across multiple fields)
+      if (lowerSearchTerm && !(
+          work.title.toLowerCase().includes(lowerSearchTerm) ||
+          work.catalogueNumber.toLowerCase().includes(lowerSearchTerm) ||
+          work.artist.toLowerCase().includes(lowerSearchTerm) ||
+          work.id.toLowerCase().includes(lowerSearchTerm) // Search original ID too
+      )) {
+        return false;
       }
-      
-      // Add filter parameters
-      params.set('seriesA', seriesA.toString());
-      params.set('seriesB', seriesB.toString());
-      params.set('filterBBB', filterBBB.toString());
-      params.set('filterBBC', filterBBC.toString());
-      params.set('filterD', filterD.toString());
-      params.set('filterRGG', filterRGG.toString());
-      params.set('filterPreBetterBadges', filterPreBetterBadges.toString());
-      params.set('filterPopArtKoop', filterPopArtKoop.toString());
-      params.set('filterCatalogs', filterCatalogs.toString());
-      params.set('filterZines', filterZines.toString());
-      
-      // Add sorting and pagination
-      params.set('sortBy', sortBy);
-      params.set('page', page.toString());
-      params.set('limit', resultsPerPage.toString());
-      
-      // Make the API request
-      const response = await fetch(`/api/search?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch search results');
+
+      // --- Apply Checkbox Filters ---
+      const anyFilterActive = seriesA || seriesB || filterBBB || filterBBC || filterBBA || filterD || filterRGG ||
+                              filterPreBetterBadges || filterPopArtKoop || filterCatalogs || filterZines;
+
+      if (anyFilterActive) {
+        let passesFilter = false;
+        // Use simple startsWith checks based on catalogueNumber
+        if (seriesA && work.catalogueNumber.startsWith('A')) passesFilter = true;
+        // Refined check for B series (starts with B, but not BBB, BBC, or BBA)
+        if (seriesB && work.catalogueNumber.startsWith('B') && !work.catalogueNumber.startsWith('BBB') && !work.catalogueNumber.startsWith('BBC') && !work.catalogueNumber.startsWith('BBA')) passesFilter = true;
+        if (filterBBB && work.catalogueNumber.startsWith('BBB')) passesFilter = true;
+        if (filterBBC && work.catalogueNumber.startsWith('BBC')) passesFilter = true;
+        if (filterBBA && work.catalogueNumber.startsWith('BBA')) passesFilter = true;
+        if (filterD && work.catalogueNumber.startsWith('D')) passesFilter = true;
+        if (filterRGG && work.catalogueNumber.startsWith('RGG')) passesFilter = true;
+        // Add specific checks if prefixes differ or exact match is needed
+        if (filterPreBetterBadges && work.catalogueNumber.startsWith('PRE')) passesFilter = true; // Example prefix
+        if (filterPopArtKoop && work.catalogueNumber.startsWith('PAK')) passesFilter = true; // Example prefix
+        if (filterCatalogs && work.catalogueNumber === 'AD') passesFilter = true;
+        if (filterZines && work.catalogueNumber.startsWith('FZ')) passesFilter = true;
+
+        if (!passesFilter) return false;
       }
-      
-      const data: SearchResponse = await response.json();
-      
-      // Update state with results
-      setFilteredWorks(data.works);
-      setTotalResults(data.pagination.total);
-      setTotalPages(data.pagination.totalPages);
-      setIsLoadingResults(false);
-      
-      // Set isSearching based on whether we have a search term
-      setIsSearching(!!searchTerm.trim());
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-      setIsLoadingResults(false);
-    }
-  }, [searchTerm, seriesA, seriesB, filterBBB, filterBBC, filterD, filterRGG, 
-       filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines, 
-       sortBy, resultsPerPage]);
 
-  // Fetch initial data when component mounts
-  useEffect(() => {
-    // Only fetch if we have cloudinary images
-    if (cloudinaryImages.length > 0 && !loading) {
-      fetchSearchResults(currentPage);
-    }
-  }, [cloudinaryImages, loading, fetchSearchResults, currentPage]);
+      // If it passed all filters, include it
+      return true;
+    });
 
-  // Fetch new results when filters change
-  useEffect(() => {
-    if (cloudinaryImages.length > 0 && !loading) {
-      setCurrentPage(0); // Reset to first page when filters change
-      fetchSearchResults(0);
-    }
-  }, [cloudinaryImages, loading, fetchSearchResults]);
+    // 3. Sort based on sortBy state
+    const sorted = [...filtered].sort((a, b) => {
+      const [field, direction] = sortBy.split('_');
+      const valA = field === 'catno' ? a.catalogueNumber : a.title;
+      const valB = field === 'catno' ? b.catalogueNumber : b.title;
 
-  // Effect for handling pagination changes
+      const numA = parseInt(valA.match(/\d+/)?.[0] || '0', 10);
+      const numB = parseInt(valB.match(/\d+/)?.[0] || '0', 10);
+      const prefixA = valA.replace(/\d+.*/, '') || valA;
+      const prefixB = valB.replace(/\d+.*/, '') || valB;
+
+      let comparison = 0;
+      if (field === 'catno') {
+         if (prefixA < prefixB) comparison = -1;
+         else if (prefixA > prefixB) comparison = 1;
+         else if (numA < numB) comparison = -1;
+         else if (numA > numB) comparison = 1;
+      } else {
+          if (valA.toLowerCase() < valB.toLowerCase()) comparison = -1;
+          else if (valA.toLowerCase() > valB.toLowerCase()) comparison = 1;
+      }
+      return direction === 'ASC' ? comparison : -comparison;
+    });
+
+    // 4. Apply Pagination
+    const totalFilteredResults = sorted.length;
+    const calculatedTotalPages = Math.ceil(totalFilteredResults / resultsPerPage);
+    // Ensure currentPage is valid after filtering - use let now
+    let adjustedCurrentPage = Math.min(currentPage, Math.max(0, calculatedTotalPages - 1));
+    // If adjustedCurrentPage becomes NaN (e.g., totalPages is 0), default to 0
+    if(isNaN(adjustedCurrentPage)) adjustedCurrentPage = 0;
+
+    const startIndex = adjustedCurrentPage * resultsPerPage;
+    const endIndex = startIndex + resultsPerPage;
+    const paginatedResults = sorted.slice(startIndex, endIndex);
+
+    // 5. Update state
+    setDisplayedArtworks(paginatedResults);
+    setTotalResults(totalFilteredResults);
+    setTotalPages(calculatedTotalPages);
+    if(currentPage !== adjustedCurrentPage) {
+        setCurrentPage(adjustedCurrentPage); // Adjust current page if it became invalid
+    }
+
+  }, [
+    r2Images, contextLoading, searchTerm,
+    seriesA, seriesB, filterBBB, filterBBC, filterBBA, filterD, filterRGG,
+    filterPreBetterBadges, filterPopArtKoop, filterCatalogs, filterZines,
+    sortBy, resultsPerPage, currentPage
+  ]);
+
+  // Intersection Observer for loading images as they scroll into view
   useEffect(() => {
-    if (cloudinaryImages.length > 0 && !loading) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const imageUrl = entry.target.getAttribute('data-image-url');
+            if (imageUrl) {
+              setVisibleImages(prev => {
+                const newSet = new Set(prev);
+                newSet.add(imageUrl);
+                return newSet;
+              });
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '100px', // Start loading 100px before image comes into view
+        threshold: 0.01
+      }
+    );
+
+    // Observe all image containers
+    const imageContainers = document.querySelectorAll('.catalogue-image-container');
+    imageContainers.forEach(container => observer.observe(container));
+
+    return () => observer.disconnect();
+  }, [displayedArtworks]);
+
+  // Effect for scrolling and clearing loaded images - Keep this
+  useEffect(() => {
+    if (r2Images.length > 0 && !contextLoading) {
       window.scrollTo(0, 0); // Scroll back to top when page changes
+      setLoadedImages(new Set()); // Clear loaded images for fresh fade-in on new page
+      setVisibleImages(new Set()); // Clear visible images too
     }
-  }, [currentPage, cloudinaryImages, loading]);
+  }, [currentPage, r2Images, contextLoading]);
 
-  // Process search query from URL on load (just to initialize the search term)
+  // Process search query from URL on load - Keep this
   useEffect(() => {
-    const query = searchParams.get('search');
+    const query = searchParams?.get('search');
     if (query && query !== searchTerm) {
       setSearchTerm(query);
+      // No need to fetch, the main useEffect will handle the filtering
     }
-  }, [searchParams, searchTerm]);
+     // Only run on initial mount based on searchParams
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
-  // Handle search submission
+  // Handle search submission - Update to only set state
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCurrentPage(0); // Reset to first page on new search
-    fetchSearchResults(0);
+    // Filtering is handled by the main useEffect
   };
 
-  // Clear search and reset to show all results
+  // Clear search and reset to show all results - Update to only set state
   const clearSearch = () => {
     setSearchTerm('');
     setIsSearching(false);
     setCurrentPage(0);
-    fetchSearchResults(0);
+     // Filtering is handled by the main useEffect
+  };
+
+  // Filter change handlers - Update to only set state
+  const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+      setter(prev => !prev);
+      setCurrentPage(0); // Reset page when filters change
   };
 
   // Series filter handlers
-  const handleSeriesAChange = () => {
-    setSeriesA(!seriesA);
-  };
+  const handleSeriesAChange = () => handleFilterChange(setSeriesA);
+  const handleSeriesBChange = () => handleFilterChange(setSeriesB);
+  const handleBBBChange = () => handleFilterChange(setFilterBBB);
+  const handleBBCChange = () => handleFilterChange(setFilterBBC);
+  const handleBBAChange = () => handleFilterChange(setFilterBBA);
+  const handleDChange = () => handleFilterChange(setFilterD);
+  const handleRGGChange = () => handleFilterChange(setFilterRGG);
+  const handlePreBetterBadgesChange = () => handleFilterChange(setFilterPreBetterBadges);
+  const handlePopArtKoopChange = () => handleFilterChange(setFilterPopArtKoop);
+  const handleCatalogsChange = () => handleFilterChange(setFilterCatalogs);
+  const handleZinesChange = () => handleFilterChange(setFilterZines);
 
-  const handleSeriesBChange = () => {
-    setSeriesB(!seriesB);
-  };
-
-  // Handle the new filename filters
-  const handleBBBChange = () => {
-    setFilterBBB(!filterBBB);
-  };
-
-  const handleBBCChange = () => {
-    setFilterBBC(!filterBBC);
-  };
-
-  const handleDChange = () => {
-    setFilterD(!filterD);
-  };
-
-  const handleRGGChange = () => {
-    setFilterRGG(!filterRGG);
-  };
-
-  // Add handlers for new filter options
-  const handlePreBetterBadgesChange = () => {
-    setFilterPreBetterBadges(!filterPreBetterBadges);
-  };
-
-  const handlePopArtKoopChange = () => {
-    setFilterPopArtKoop(!filterPopArtKoop);
-  };
-
-  const handleCatalogsChange = () => {
-    setFilterCatalogs(!filterCatalogs);
-  };
-
-  const handleZinesChange = () => {
-    setFilterZines(!filterZines);
-  };
-
-  // Calculate dynamic pagination values based on API response
+  // Calculate dynamic pagination values based on state
   const dynamicTotalResults = totalResults;
   const dynamicStartResult = dynamicTotalResults === 0 ? 0 : currentPage * resultsPerPage + 1;
   const dynamicEndResult = Math.min((currentPage + 1) * resultsPerPage, dynamicTotalResults);
 
-  // Generate page numbers for pagination
+  // Generate page numbers for pagination - Keep this
   const generatePageNumbers = useCallback(() => {
     const maxVisiblePages = 10;
     
@@ -281,7 +447,7 @@ export default function CatalogueContent() {
     return [...Array(endPage - startPage + 1).keys()].map(i => i + startPage);
   }, [currentPage, totalPages]);
 
-  // Mobile controls toggle handlers
+  // Mobile controls toggle handlers - Keep these
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
 
@@ -297,35 +463,144 @@ export default function CatalogueContent() {
     setShowMobileFilters(false);
   };
 
+  const renderGridAView = () => {
+    if (contextLoading && !displayedArtworks.length) {
+      return <div className="loading-indicator">Loading catalogue...</div>;
+    }
+
+    if (contextError) {
+      return <div className="error-message">Error loading catalogue: {contextError}</div>;
+    }
+
+    if (displayedArtworks.length === 0) {
+      return <div className="no-results">No artwork found matching your criteria.</div>;
+    }
+
+    return (
+      <div id="catWorks" className="catWorksCont">
+        {displayedArtworks.map((artwork, index) => (
+          <article
+            key={`${artwork.artworkId}-${index}`}
+            className="item"
+          >
+            <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.artworkId)}`} title={artwork.title}>
+              <div 
+                className="image catalogue-image-container" 
+                data-image-url={artwork.imageUrl}
+                style={{ position: 'relative', backgroundColor: 'transparent', minHeight: '200px' }}
+              >
+                {!loadedImages.has(artwork.imageUrl) && (
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'transparent',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '3px solid #e0e0e0',
+                      borderTopColor: '#999',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  </div>
+                )}
+                {visibleImages.has(artwork.imageUrl) && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={artwork.imageUrl}
+                      alt={artwork.title}
+                      width={400}
+                      height={480}
+                      decoding="async"
+                      style={{
+                        opacity: loadedImages.has(artwork.imageUrl) ? 1 : 0,
+                        transition: 'opacity 0.4s ease-in-out',
+                        display: 'block',
+                        width: '100%',
+                        height: 'auto',
+                        objectFit: 'cover'
+                      }}
+                      onLoad={() => {
+                        setLoadedImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.add(artwork.imageUrl);
+                          return newSet;
+                        });
+                      }}
+                      onError={() => {
+                        setLoadedImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.add(artwork.imageUrl);
+                          return newSet;
+                        });
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+              <div className="item_catDetails">
+                <div className="item_artist" style={{ fontWeight: 700 }}>{artwork.artist}</div>
+                <div className="item_title"><em>{artwork.title}</em></div>
+                <div className="item_catnum">{artwork.catalogueNumber}, {artwork.size}</div>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    );
+  };
+
+  // Add a function to handle the refresh with visual feedback
+  const handleRefreshImages = async () => {
+    try {
+      // Reset success state if it was showing
+      setRefreshSuccess(false);
+      setIsRefreshing(true);
+      await refreshImages();
+      // Show success message and hide after a delay
+      setIsRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => {
+        setRefreshSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error refreshing images:', error);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Render the appropriate view based on viewType
   return (
     <div id="mainBody">
       <div id="pageTopMatter">
         <h1>Browse the Works</h1>
       </div>
 
-      {loading ? (
+      {contextLoading ? (
         // Center loading indicator while waiting for images
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          padding: '50px 0',
-          fontSize: '16px'
-        }}>
+        <div className="catalogue-loading-container">
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+            <div className="catalogue-loading-text">
               Loading catalogue...
             </div>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              border: '4px solid #f3f3f3', 
-              borderTop: '4px solid #333', 
-              borderRadius: '50%',
-              margin: '0 auto',
-              animation: 'spin 1s linear infinite'
-            }}></div>
+            <div className="catalogue-loading-spinner"></div>
           </div>
+        </div>
+      ) : contextError ? (
+        <div className="error-message">
+          Error loading image data: {contextError}
+          <button
+            onClick={() => refreshImages()}
+            className="clear-search-button"
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <>
@@ -341,22 +616,20 @@ export default function CatalogueContent() {
               <div id="mobileFiltersPanel" className="mobilePanel">
                 <div id="searchBoxesWrapper">
                   <div id="searcWrapper">
-                    <form action="" method="post" id="minisearchForm" autoComplete="off" onSubmit={handleSearch}>
+                    <form action="" method="post" id="minisearchForm_mobile" autoComplete="off" onSubmit={handleSearch}>
                       <input
                         type="text"
                         name="searchbox" 
-                        id="searchbox" 
+                        id="searchbox_mobile" 
                         placeholder="Search by keyword" 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ paddingRight: "40px" }}
                       />
                       <input 
                         name="seachBoxButton" 
                         type="submit" 
-                        id="seachBoxButton" 
+                        id="seachBoxButton_mobile" 
                         value="search" 
-                        style={{ right: "5px" }}
                       />
                     </form>
                   </div>
@@ -364,95 +637,105 @@ export default function CatalogueContent() {
                 
                 {/* Series Filter */}
                 <div className="filter-section">
-                  <h3 style={{ fontSize: '16px', margin: '15px 0 10px 0' }}>Series</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                  <h3 className="mobile-filter-title">Series</h3>
+                  <div className="mobile-filter-grid">
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       A
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       B
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
+                        checked={filterBBA}
+                        onChange={handleBBAChange}
+                        className="filter-checkbox"
+                      />
+                      BBA
+                    </label>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBB}
                         onChange={handleBBBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBB
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBC}
                         onChange={handleBBCChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBC
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterD}
                         onChange={handleDChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       D
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterRGG}
                         onChange={handleRGGChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       RGG
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPreBetterBadges}
                         onChange={handlePreBetterBadgesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pre Better Badges
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPopArtKoop}
                         onChange={handlePopArtKoopChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pop Art Koop
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterCatalogs}
                         onChange={handleCatalogsChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Catalogs
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterZines}
                         onChange={handleZinesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Zines
                     </label>
@@ -465,69 +748,48 @@ export default function CatalogueContent() {
             {showMobileOptions && (
               <div id="mobileOptionsPanel" className="mobilePanel">
                 <div className="option-group">
-                  <label htmlFor="sortSelect">Sort by:</label>
-                  <select 
+                  <CustomDropdown
                     id="sortSelect"
-                    aria-label="Sort results by"
-                    value={sortBy} 
-                    onChange={(e) => setSortBy(e.target.value)}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="catno_ASC">Catalogue number (ascending)</option>
-                    <option value="catno_DESC">Catalogue number (descending)</option>
-                    <option value="cattitle_ASC">Title (A to Z)</option>
-                    <option value="cattitle_DESC">Title (Z to A)</option>
-                  </select>
+                    label="Sort by:"
+                    options={[
+                      { value: 'catno_ASC', label: 'Catalogue number (ascending)' },
+                      { value: 'catno_DESC', label: 'Catalogue number (descending)' },
+                      { value: 'cattitle_ASC', label: 'Title (A to Z)' },
+                      { value: 'cattitle_DESC', label: 'Title (Z to A)' }
+                    ]}
+                    value={sortBy}
+                    onChange={(value) => { setSortBy(value); setCurrentPage(0); }}
+                  />
                 </div>
 
                 <div className="option-group">
-                  <label htmlFor="viewSelect">View as:</label>
-                  <select 
+                  <CustomDropdown
                     id="viewSelect"
-                    aria-label="Change view type"
+                    label="View as:"
+                    options={[
+                      { value: 'gridA', label: 'Grid' },
+                      { value: 'list', label: 'List' }
+                    ]}
                     value={viewType}
-                    onChange={(e) => setViewType(e.target.value)}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="gridA">Grid</option>
-                    <option value="list">List</option>
-                  </select>
+                    onChange={(value) => setViewType(value)}
+                  />
                 </div>
 
                 <div className="option-group">
-                  <label htmlFor="numDisplaySelect">Results per page:</label>
-                  <select 
+                  <CustomDropdown
                     id="numDisplaySelect"
-                    aria-label="Number of results per page"
-                    value={resultsPerPage} 
-                    onChange={(e) => {
-                      setResultsPerPage(Number(e.target.value));
-                      setCurrentPage(0); // Reset to first page when changing results per page
+                    label="Results per page:"
+                    options={[
+                      { value: '50', label: '50 per page' },
+                      { value: '75', label: '75 per page' },
+                      { value: '100', label: '100 per page' }
+                    ]}
+                    value={resultsPerPage.toString()}
+                    onChange={(value) => {
+                      setResultsPerPage(Number(value));
+                      setCurrentPage(0);
                     }}
-                    style={{ 
-                      width: "100%",
-                      height: "40px",
-                      padding: "8px 25px 8px 8px",
-                      fontSize: "14px",
-                      lineHeight: "24px"
-                    }}
-                  >
-                    <option value="50">50 per page</option>
-                    <option value="75">75 per page</option>
-                    <option value="100">100 per page</option>
-                  </select>
+                  />
                 </div>
               </div>
             )}
@@ -544,114 +806,118 @@ export default function CatalogueContent() {
                       placeholder="Search by keyword" 
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{ paddingRight: "40px" }}
                     />
                     <input 
                       name="seachBoxButton" 
                       type="submit" 
                       id="seachBoxButton" 
                       value="search" 
-                      style={{ right: "5px" }}
                     />
                   </form>
                 </div>
                 
                 {/* Desktop Series Filter */}
-                <div className="filter-section" style={{ marginTop: '20px', marginBottom: '10px', width: '100%' }}>
-                  <h3 style={{ fontSize: '16px', margin: '0 0 10px 0' }}>Series</h3>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(6, 1fr)',
-                    gap: '10px', 
-                    width: '100%'
-                  }}>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                <div className="filter-section">
+                  <h3>Series</h3>
+                  <div className="filter-grid">
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesA}
                         onChange={handleSeriesAChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       A
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={seriesB}
                         onChange={handleSeriesBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       B
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
+                      <input
+                        type="checkbox"
+                        checked={filterBBA}
+                        onChange={handleBBAChange}
+                        className="filter-checkbox"
+                      />
+                      BBA
+                    </label>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBB}
                         onChange={handleBBBChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBB
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterBBC}
                         onChange={handleBBCChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       BBC
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterD}
                         onChange={handleDChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       D
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterRGG}
                         onChange={handleRGGChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       RGG
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPreBetterBadges}
                         onChange={handlePreBetterBadgesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pre Better Badges
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterPopArtKoop}
                         onChange={handlePopArtKoopChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Pop Art Koop
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterCatalogs}
                         onChange={handleCatalogsChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Catalogs
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                    <label className="filter-label">
                       <input
                         type="checkbox"
                         checked={filterZines}
                         onChange={handleZinesChange}
-                        style={{ marginRight: '8px' }}
+                        className="filter-checkbox"
                       />
                       Flyers & Zines
                     </label>
@@ -668,13 +934,8 @@ export default function CatalogueContent() {
                   id="sortSelect"
                   aria-label="Sort results by"
                   value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
-                  style={{ 
-                    minWidth: "280px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5"
-                  }}
+                  onChange={(e) => { setSortBy(e.target.value); setCurrentPage(0); }}
+                  className="sort-select"
                 >
                   <option value="catno_ASC">Catalogue number (ascending)</option>
                   <option value="catno_DESC">Catalogue number (descending)</option>
@@ -690,13 +951,7 @@ export default function CatalogueContent() {
                   aria-label="Change view type"
                   value={viewType}
                   onChange={(e) => setViewType(e.target.value)}
-                  style={{ 
-                    minWidth: "150px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5",
-                    verticalAlign: "middle"
-                  }}
+                  className="view-select"
                 >
                   <option value="gridA">Grid</option>
                   <option value="list">List</option>
@@ -713,13 +968,7 @@ export default function CatalogueContent() {
                     setResultsPerPage(Number(e.target.value));
                     setCurrentPage(0); // Reset to first page when changing results per page
                   }}
-                  style={{ 
-                    minWidth: "150px", 
-                    height: "auto", 
-                    padding: "4px 8px",
-                    lineHeight: "1.5",
-                    verticalAlign: "middle"
-                  }}
+                  className="results-per-page-select"
                 >
                   <option value="50">50 per page</option>
                   <option value="75">75 per page</option>
@@ -731,160 +980,87 @@ export default function CatalogueContent() {
 
           <div id="restulsFiltersWrapper">
             <div id="restulsCont">
-              RESULTS {dynamicStartResult} TO {dynamicEndResult} OF {dynamicTotalResults}
+              RESULTS {dynamicStartResult} TO {dynamicEndResult} OF {totalResults}
               {isSearching && (
                 <>
-                  <span> (Filtered by: &ldquo;{searchTerm}&rdquo;)</span>
+                  <span className="search-term">(Filtered by: &ldquo;{searchTerm}&rdquo;)</span>
                   <button 
                     onClick={clearSearch} 
-                    style={{ 
-                      marginLeft: '10px', 
-                      background: 'none', 
-                      border: '1px solid #ccc',
-                      borderRadius: '3px',
-                      padding: '2px 5px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
+                    className="clear-search-button"
                   >
                     Clear Search
                   </button>
                 </>
               )}
               <button 
-                onClick={() => {
-                  refreshImages();
-                }} 
-                style={{ 
-                  marginLeft: '15px', 
-                  background: '#f0f0f0', 
-                  border: '1px solid #ccc',
-                  borderRadius: '3px',
-                  padding: '2px 8px',
-                  fontSize: '12px',
-                  cursor: 'pointer'
-                }}
+                onClick={handleRefreshImages} 
+                className={`refresh-button ${isRefreshing ? 'refreshing' : ''} ${refreshSuccess ? 'success' : ''}`}
+                disabled={isRefreshing}
               >
-                ↻ Refresh Images
+                {refreshSuccess ? (
+                  <React.Fragment>
+                    <span className="success-checkmark">✓</span>
+                    Updated!
+                  </React.Fragment>
+                ) : isRefreshing ? (
+                  <React.Fragment>
+                    <span className="refresh-spinner"></span>
+                    Refreshing...
+                  </React.Fragment>
+                ) : (
+                  '↻ Refresh Images'
+                )}
               </button>
             </div>
-            {error && <div className="error-message">{error}</div>}
           </div>
 
           <div id="indexContainer" className={viewType}>
-            {isLoadingResults ? (
-              // Show loading indicator
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  border: '4px solid #f3f3f3', 
-                  borderTop: '4px solid #333', 
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
-              </div>
-            ) : (
-              <>
-                {viewType === 'list' ? (
-                  <table className="list-view-table">
-                    <thead>
-                      <tr>
-                        <th>Catalogue No.</th>
-                        <th>Artist</th>
-                        <th>Title</th>
-                        <th>Size</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredWorks.map(work => (
-                        <tr 
-                          key={work.id} 
-                          onClick={() => window.location.href = `/catalogue/entry/${work.id}`}
-                          style={{ cursor: 'pointer' }}
-                          className="clickable-row"
-                        >
-                          <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
-                              work.catalogueNumber.startsWith('FZ') ? 'Flyer/Zine' : 
-                              work.catalogueNumber}</td>
-                          <td>{work.catalogueNumber === 'AD' ? '' : 
-                              work.catalogueNumber.startsWith('FZ') ? '' : 
-                              work.artist}</td>
-                          <td>
-                            {work.catalogueNumber === 'AD' ? (
-                              <>Catalog</>
-                            ) : work.catalogueNumber.startsWith('FZ') ? (
-                              <>
-                                {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
-                              </>
-                            ) : (
-                              work.title
-                            )}
-                            {work.catalogueNumber.startsWith('FZ') && (
-                              <div style={{ fontSize: '0.85em', color: '#666' }}>Flyer/Zine</div>
-                            )}
-                          </td>
-                          <td>{work.catalogueNumber === 'AD' ? '' : 
-                              work.catalogueNumber.startsWith('FZ') ? '' : 
-                              work.size}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div id="catWorks" className="catWorksCont customCatWorks">
-                    {filteredWorks.map(work => (
-                      <div className="item" key={work.id}>
-                        <div id={`work-${work.id}`}></div>
-                        <a href={`/catalogue/entry/${work.id}`} className="image">
-                          <SmoothImage
-                            src={work.imageUrl}
-                            alt={work.title}
-                            width={170}
-                            height={170}
-                            style={{
-                              objectFit: 'cover',
-                              width: '100%',
-                              height: 'auto',
-                              aspectRatio: '1',
-                              display: 'block'
-                            }}
-                          />
-                        </a>
-                        {viewType === 'gridA' && (
-                          <div className="item_catDetails">
-                            <a href={`/catalogue/entry/${work.id}`}>
-                              <div className="item_title">
-                                <em>
-                                  {work.catalogueNumber === 'AD' ? (
-                                    <>Catalog</>
-                                  ) : work.catalogueNumber.startsWith('FZ') ? (
-                                    <>
-                                      {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
-                                    </>
-                                  ) : (
-                                    work.title
-                                  )}
-                                </em>
-                              </div>
-                              {work.catalogueNumber === 'AD' ? (
-                                <div className="item_catnum">Catalog</div>
-                              ) : work.catalogueNumber.startsWith('FZ') ? (
-                                <div className="item_catnum">Flyer/Zine</div>
-                              ) : (
-                                <>
-                                  <div className="item_date">{work.artist}</div>
-                                  <div className="item_catnum">{work.catalogueNumber}, {work.size}</div>
-                                </>
-                              )}
-                            </a>
-                          </div>
+            {viewType === 'list' ? (
+              <table className="list-view-table">
+                <thead>
+                  <tr>
+                    <th>Catalogue No.</th>
+                    <th>Artist</th>
+                    <th>Title</th>
+                    <th>Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedArtworks.map(work => (
+                    <tr 
+                      key={work.artworkId} 
+                      onClick={() => window.location.href = `/catalogue/artwork?id=${encodeURIComponent(work.artworkId)}`}
+                      className="clickable-row"
+                    >
+                      <td>{work.catalogueNumber === 'AD' ? 'Catalog' : 
+                          work.catalogueNumber.startsWith('FZ') ? 'Flyer/Zine' : 
+                          work.catalogueNumber}</td>
+                      <td>{work.catalogueNumber === 'AD' ? '' : 
+                          work.catalogueNumber.startsWith('FZ') ? '' : 
+                          work.artist}</td>
+                      <td>
+                        {work.catalogueNumber === 'AD' ? (
+                          <>Catalog</>
+                        ) : work.catalogueNumber.startsWith('FZ') ? (
+                          <>
+                            {work.title.replace(/_/g, ' ')} #{work.catalogueNumber.split('_')[2]}
+                          </>
+                        ) : (
+                          work.title
                         )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+                        {work.catalogueNumber.startsWith('FZ') && (
+                          <div className="flyer-zine-note">Flyer/Zine</div>
+                        )}
+                      </td>
+                      <td>{work.catalogueNumber === 'AD' ? '' : 
+                          work.catalogueNumber.startsWith('FZ') ? '' : 
+                          work.size}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              renderGridAView()
             )}
             
             {/* Pagination */}
@@ -900,10 +1076,7 @@ export default function CatalogueContent() {
                         {/* First/Previous buttons */}
                         <div className="pagination-nav">
                           <button 
-                            onClick={() => { 
-                              setCurrentPage(0);
-                              fetchSearchResults(0);
-                            }} 
+                            onClick={() => setCurrentPage(0)}
                             className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
                             disabled={isFirstPage}
                             aria-label="First page"
@@ -912,11 +1085,7 @@ export default function CatalogueContent() {
                           </button>
                           
                           <button 
-                            onClick={() => { 
-                              const newPage = currentPage - 1;
-                              setCurrentPage(newPage);
-                              fetchSearchResults(newPage);
-                            }} 
+                            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                             className={`pagination-button ${isFirstPage ? 'disabled' : ''}`}
                             disabled={isFirstPage}
                             aria-label="Previous page"
@@ -930,10 +1099,7 @@ export default function CatalogueContent() {
                           {generatePageNumbers().map((pageNum) => (
                             <button 
                               key={pageNum}
-                              onClick={() => { 
-                                setCurrentPage(pageNum);
-                                fetchSearchResults(pageNum);
-                              }} 
+                              onClick={() => setCurrentPage(pageNum)}
                               className={`pagination-number ${pageNum === currentPage ? 'active' : ''}`}
                               aria-label={`Page ${pageNum + 1}`}
                               aria-current={pageNum === currentPage ? 'page' : undefined}
@@ -942,7 +1108,7 @@ export default function CatalogueContent() {
                             </button>
                           ))}
                           
-                          {totalPages > 10 && (
+                          {totalPages > 10 && currentPage < totalPages - Math.floor(10 / 2) -1 && (
                             <span className="pagination-ellipsis">…</span>
                           )}
                         </div>
@@ -950,13 +1116,7 @@ export default function CatalogueContent() {
                         {/* Next/Last buttons */}
                         <div className="pagination-nav">
                           <button 
-                            onClick={() => { 
-                              const newPage = currentPage + 1;
-                              if (newPage < totalPages) {
-                                setCurrentPage(newPage);
-                                fetchSearchResults(newPage);
-                              }
-                            }} 
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                             className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
                             disabled={isLastPage}
                             aria-label="Next page"
@@ -965,11 +1125,7 @@ export default function CatalogueContent() {
                           </button>
                           
                           <button 
-                            onClick={() => { 
-                              const lastPage = totalPages - 1;
-                              setCurrentPage(lastPage);
-                              fetchSearchResults(lastPage);
-                            }} 
+                            onClick={() => setCurrentPage(totalPages - 1)}
                             className={`pagination-button ${isLastPage ? 'disabled' : ''}`}
                             disabled={isLastPage}
                             aria-label="Last page"
@@ -986,94 +1142,6 @@ export default function CatalogueContent() {
                 <div className="pagination-summary">
                   Page {currentPage + 1} of {totalPages}
                 </div>
-
-                {/* Add inline styles for pagination */}
-                <style jsx global>{`
-                  .pagination-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 2rem 0;
-                    gap: 8px;
-                  }
-                  
-                  .pagination-nav {
-                    display: flex;
-                    gap: 4px;
-                  }
-                  
-                  .pagination-pages {
-                    display: flex;
-                    gap: 4px;
-                    align-items: center;
-                  }
-                  
-                  .pagination-button, .pagination-number {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 36px;
-                    height: 36px;
-                    padding: 0 8px;
-                    border: 1px solid #ddd;
-                    background: white;
-                    border-radius: 4px;
-                    font-size: 14px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    color: #333;
-                  }
-                  
-                  .pagination-button:hover, .pagination-number:hover {
-                    background-color: #f5f5f5;
-                    border-color: #ccc;
-                  }
-                  
-                  .pagination-number.active {
-                    background-color: #ededed;
-                    color: #333;
-                    border-color: #333;
-                    font-weight: 500;
-                  }
-                  
-                  .pagination-button.disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                    pointer-events: none;
-                  }
-                  
-                  .pagination-ellipsis {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 36px;
-                    height: 36px;
-                    color: #666;
-                  }
-                  
-                  .pagination-summary {
-                    text-align: center;
-                    color: #666;
-                    font-size: 14px;
-                    margin-bottom: 1rem;
-                  }
-                  
-                  .clickable-row:hover {
-                    background-color: #f5f5f5;
-                  }
-                  
-                  @media (max-width: 768px) {
-                    .pagination-container {
-                      flex-wrap: wrap;
-                    }
-                    
-                    .pagination-button, .pagination-number {
-                      min-width: 32px;
-                      height: 32px;
-                      font-size: 13px;
-                    }
-                  }
-                `}</style>
               </div>
             )}
           </div>
