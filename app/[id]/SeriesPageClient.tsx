@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useR2Images } from "@/context/R2Context";
 import { parseFilename } from "@/app/utils/filename-utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import "../../app/styles/components.css";
 
 // Define the SeriesPageClient props interface
 interface SeriesPageClientProps {
@@ -16,31 +17,60 @@ interface SeriesPageClientProps {
   };
 }
 
+interface ProcessedArtwork {
+  id: string;
+  url: string;
+  title: string;
+  catalogueNumber: string;
+  artist: string;
+  size: string;
+}
+
 export default function SeriesPageClient({ series }: SeriesPageClientProps) {
   const { images: r2Images } = useR2Images();
   const [imageUrl, setImageUrl] = useState<string>("/placeholder.svg");
   const [timestamp, setTimestamp] = useState(Date.now());
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [visibleImages, setVisibleImages] = useState<Set<string>>(new Set());
+
+  // Get the exact prefix to match for this series
+  const seriesPrefix = series.title.split('-')[0].trim();
+
+  // Filter and process images for this series
+  const seriesArtworks = useMemo(() => {
+    return r2Images
+      .map(img => {
+        const metadata = parseFilename(img.id);
+        return {
+          id: img.id,
+          url: img.url,
+          title: metadata.title || 'Untitled',
+          catalogueNumber: metadata.catalogNumber || 'N/A',
+          artist: metadata.artist || 'Unknown',
+          size: metadata.size || 'Unknown'
+        };
+      })
+      .filter(artwork => {
+        // Match the catalog prefix exactly
+        return artwork.catalogueNumber.startsWith(seriesPrefix);
+      })
+      .sort((a, b) => {
+        // Sort by catalog number
+        const numA = parseInt(a.catalogueNumber.match(/\d+/)?.[0] || '0', 10);
+        const numB = parseInt(b.catalogueNumber.match(/\d+/)?.[0] || '0', 10);
+        return numA - numB;
+      });
+  }, [r2Images, seriesPrefix]);
 
   // Force rerender on component mount and when r2Images changes
   useEffect(() => {
-    // Get the exact prefix to match for this series
-    // For example: A-series -> A, AAA-series -> AAA, B-series -> B, BBA-series -> BBA
-    const seriesPrefix = series.title.split('-')[0].trim();
-    
-    // Find the first matching image for this series
-    const found = r2Images.find(img => {
-      const { catalogNumber } = parseFilename(img.url);
-      // Match the catalog prefix exactly
-      return catalogNumber.startsWith(seriesPrefix);
-    });
-
-    // Update image URL if found
-    if (found) {
-      setImageUrl(found.url);
+    // Find the first matching image for hero
+    if (seriesArtworks.length > 0) {
+      setImageUrl(seriesArtworks[0].url);
     }
 
     setTimestamp(Date.now());
-  }, [r2Images, series.title]);
+  }, [seriesArtworks]);
 
   return (
     <div className="series-page-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -104,10 +134,93 @@ export default function SeriesPageClient({ series }: SeriesPageClientProps) {
             Browse through the catalog entries below to learn more about each piece.
           </p>
           
-          {/* Placeholder for future catalog entries or other content */}
+          {/* Series badges grid */}
           <div style={{ marginTop: '30px' }}>
-            <h3 style={{ marginBottom: '15px' }}>Catalog Entries</h3>
-            <p>The catalog entries for this series will be displayed here.</p>
+            <h3 style={{ marginBottom: '15px' }}>
+              Catalog Entries ({seriesArtworks.length})
+            </h3>
+            
+            {seriesArtworks.length === 0 ? (
+              <p>No badges found for this series.</p>
+            ) : (
+              <div className="catWorksCont" style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '20px',
+                marginTop: '20px'
+              }}>
+                {seriesArtworks.map((artwork, index) => (
+                  <article
+                    key={`${artwork.id}-${index}`}
+                    className="item"
+                  >
+                    <a href={`/catalogue/artwork?id=${encodeURIComponent(artwork.id)}`} title={artwork.title}>
+                      <div 
+                        className="image catalogue-image-container" 
+                        data-image-url={artwork.url}
+                        style={{ position: 'relative', backgroundColor: 'transparent', minHeight: '200px' }}
+                      >
+                        {!loadedImages.has(artwork.url) && (
+                          <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'transparent',
+                            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                          }}>
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              border: '3px solid #e0e0e0',
+                              borderTopColor: '#999',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite'
+                            }} />
+                          </div>
+                        )}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={artwork.url}
+                          alt={artwork.title}
+                          width={400}
+                          height={480}
+                          decoding="async"
+                          style={{
+                            opacity: loadedImages.has(artwork.url) ? 1 : 0,
+                            transition: 'opacity 0.4s ease-in-out',
+                            display: 'block',
+                            width: '100%',
+                            height: 'auto',
+                            objectFit: 'cover'
+                          }}
+                          onLoad={() => {
+                            setLoadedImages(prev => {
+                              const newSet = new Set(prev);
+                              newSet.add(artwork.url);
+                              return newSet;
+                            });
+                          }}
+                          onError={() => {
+                            setLoadedImages(prev => {
+                              const newSet = new Set(prev);
+                              newSet.add(artwork.url);
+                              return newSet;
+                            });
+                          }}
+                        />
+                      </div>
+                      <div className="item_catDetails">
+                        <div className="item_artist" style={{ fontWeight: 700 }}>{artwork.artist}</div>
+                        <div className="item_title"><em>{artwork.title}</em></div>
+                        <div className="item_catnum">{artwork.catalogueNumber}, {artwork.size}</div>
+                      </div>
+                    </a>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
